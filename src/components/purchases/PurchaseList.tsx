@@ -1,35 +1,34 @@
-import React from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
-type PurchaseListProps = {
+type Props = {
   purchases: any[];
   onEdit: (purchase: any) => void;
   onDelete: (id: number) => void;
 };
 
-const PurchaseList: React.FC<PurchaseListProps> = ({
-  purchases,
-  onEdit,
-  onDelete,
-}) => {
+const PurchaseList: React.FC<Props> = ({ purchases, onEdit, onDelete }) => {
   return (
-    <div className="grid gap-3">
+    <div className="space-y-3">
       {purchases.map((p) => (
         <div
           key={p.id}
-          className="bg-surface-dark p-4 rounded border border-[#12202a]
-                     flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
+          className="bg-surface-dark border border-[#12202a] rounded-lg p-4
+                     flex justify-between items-center"
         >
-          <div className="flex-1">
-            <div className="font-medium text-white">
-              Compra #{p.id}
+          <div>
+            <div className="text-white font-medium">
+              {p.locationName ?? "—"}
             </div>
             <div className="text-sm text-gray-400">
-              {p.date} • {p.locationName ?? "—"}
+              {new Date(p.date).toLocaleDateString("pt-BR")}
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
+            <span className="text-primary-light font-semibold">
+              R$ {p.amount?.toFixed(2)}
+            </span>
+
             <button
               onClick={() => onEdit(p)}
               className="text-blue-400 hover:text-blue-300"
