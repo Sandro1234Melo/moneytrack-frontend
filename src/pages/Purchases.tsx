@@ -87,12 +87,6 @@ const Purchases = () => {
         Compras
       </h1>
 
-      <PurchaseList
-        purchases={purchases}
-        onEdit={setEditingPurchase}
-        onDelete={handleDelete}
-      />
-
       <PurchaseForm
         purchase={editingPurchase}
         categories={categories}
@@ -100,6 +94,13 @@ const Purchases = () => {
         onCancel={() => setEditingPurchase(null)}
         onSave={handleSave}
       />
+
+      <PurchaseList
+        purchases={purchases}
+        onEdit={setEditingPurchase}
+        onDelete={handleDelete}
+      />
+
     </div>
   );
 };

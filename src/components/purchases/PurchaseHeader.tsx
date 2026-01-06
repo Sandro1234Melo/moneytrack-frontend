@@ -19,11 +19,14 @@ const PurchaseHeader: React.FC<Props> = ({
       <div>
         <label className="text-sm text-blue-100">Local</label>
         <select
+          className=" input-primary w-full bg-gray-900 text-white border border-gray-700 rounded px-2 py-1 focus:outline-none focus:ring-2  focus:ring-blue-500 "
           value={locationId}
           onChange={e => setLocationId(Number(e.target.value))}
-          className="input-primary w-full"
+          //className="input-primary w-full"
         >
-          <option value="">Selecione o local</option>
+          <option value="" className="bg-gray-900 text-white">
+            Selecione o local
+            </option>
           {locations.map(loc => (
             <option key={loc.id} value={loc.id}>
               {loc.name}

@@ -1,3 +1,5 @@
+import { Trash2 } from "lucide-react";
+
 const PurchaseItemRow = ({ item, categories, onChange, onRemove }: any) => {
   return (
     <div className="grid grid-cols-5 gap-2 px-4 py-2 items-center">
@@ -10,11 +12,13 @@ const PurchaseItemRow = ({ item, categories, onChange, onRemove }: any) => {
       />
 
       <select
+      className=" bg-gray-900 text-white border border-gray-700 rounded px-2 py-1 focus:outline-none focus:ring-2  focus:ring-blue-500 "
         value={item.categoryId ?? ""}
         onChange={e => onChange("categoryId", Number(e.target.value))}
-        //className="input-primary"
       >
-        <option value="">Categoria</option>
+        <option value="" className="bg-gray-900 text-white">
+          Categoria
+          </option>
 
         {categories.map((cat: any) => (
           <option key={cat.id} value={cat.id}>
@@ -43,7 +47,7 @@ const PurchaseItemRow = ({ item, categories, onChange, onRemove }: any) => {
         onClick={onRemove}
         className="text-red-500 hover:text-red-400"
       >
-        🗑
+        <Trash2 size={18} />
       </button>
 
     </div>
