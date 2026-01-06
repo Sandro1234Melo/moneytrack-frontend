@@ -4,6 +4,7 @@ import ExpenseCard from "../components/ExpenseCard";
 
 type ExpenseItem = {
   id: number;
+  quantity?: number;
   description: string;
   amount: number;
   categoryName?: string;
