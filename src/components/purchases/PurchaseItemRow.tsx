@@ -1,54 +1,62 @@
 import { Trash2 } from "lucide-react";
+import FormSelect from "../FormSelect";
 
 const PurchaseItemRow = ({ item, categories, onChange, onRemove }: any) => {
   return (
-    <div className="grid grid-cols-5 gap-2 px-4 py-2 items-center">
+    <div className="grid grid-cols-12 gap-2 px-4 py-2 items-center">
 
-      <input
-        value={item.description}
-        onChange={e => onChange("description", e.target.value)}
-        className="input-primary"
-        placeholder="Produto"
-      />
+      <div className="col-span-4">
+        <input
+          value={item.description}
+          onChange={e => onChange("description", e.target.value)}
+          className="input-primary w-full"
+          placeholder="Produto"
+        />
+      </div>
 
-      <select
-      className=" bg-gray-900 text-white border border-gray-700 rounded px-2 py-1 focus:outline-none focus:ring-2  focus:ring-blue-500 "
-        value={item.categoryId ?? ""}
-        onChange={e => onChange("categoryId", Number(e.target.value))}
-      >
-        <option value="" className="bg-gray-900 text-white">
-          Categoria
-          </option>
+      <div className="col-span-3">
+        <FormSelect
+          label=""
+          value={item.categoryId ?? ""}
+          placeholder="Categoria"
+          onChange={(v) =>
+            onChange("categoryId", v === "" ? "" : Number(v))
+          }
+          options={categories.map((cat: any) => ({
+            value: cat.id,
+            label: cat.name
+          }))}
+        />
+      </div>
 
-        {categories.map((cat: any) => (
-          <option key={cat.id} value={cat.id}>
-            {cat.name}
-          </option>
-        ))}
-      </select>
+      <div className="col-span-2">
+        <input
+          type="number"
+          min={1}
+          value={item.quantity}
+          onChange={e => onChange("quantity", Number(e.target.value))}
+          className="input-primary w-full"
+        />
+      </div>
 
-      <input
-        type="number"
-        min={1}
-        value={item.quantity}
-        onChange={e => onChange("quantity", Number(e.target.value))}
-        className="input-primary"
-      />
+      <div className="col-span-2">
+        <input
+          type="number"
+          step="0.01"
+          value={item.price}
+          onChange={e => onChange("price", Number(e.target.value))}
+          className="input-primary w-full "
+        />
+      </div>
 
-      <input
-        type="number"
-        step="0.01"
-        value={item.price}
-        onChange={e => onChange("price", Number(e.target.value))}
-        className="input-primary"
-      />
-
-      <button
-        onClick={onRemove}
-        className="text-red-500 hover:text-red-400"
-      >
-        <Trash2 size={18} />
-      </button>
+      <div className="col-span-1">
+        <button
+          onClick={onRemove}
+          className="text-red-500 hover:text-red-400"
+        >
+          <Trash2 size={18} />
+        </button>
+      </div>
 
     </div>
   );

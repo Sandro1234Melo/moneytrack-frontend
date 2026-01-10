@@ -1,3 +1,5 @@
+import FormSelect from "../FormSelect";
+
 type Props = {
   date: string;
   setDate: (v: string) => void;
@@ -17,22 +19,18 @@ const PurchaseHeader: React.FC<Props> = ({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 
       <div>
-        <label className="text-sm text-blue-100">Local</label>
-        <select
-          className=" input-primary w-full bg-gray-900 text-white border border-gray-700 rounded px-2 py-1 focus:outline-none focus:ring-2  focus:ring-blue-500 "
-          value={locationId}
-          onChange={e => setLocationId(Number(e.target.value))}
-          //className="input-primary w-full"
-        >
-          <option value="" className="bg-gray-900 text-white">
-            Selecione o local
-            </option>
-          {locations.map(loc => (
-            <option key={loc.id} value={loc.id}>
-              {loc.name}
-            </option>
-          ))}
-        </select>
+        <FormSelect
+        label="Local"
+        value={locationId}
+        placeholder="Selecione o local"
+        onChange={v =>
+          setLocationId(v ? Number(v) : "")
+        }
+        options={locations.map(loc => ({
+          value: loc.id,
+          label: loc.name
+        }))}
+      />
       </div>
 
       <div>
