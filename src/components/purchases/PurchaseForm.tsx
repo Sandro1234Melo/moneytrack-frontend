@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PurchaseItemsTable from "./PurchaseItemsTable";
 import PurchaseHeader from "./PurchaseHeader";
 import PurchaseActions from "./PurchaseActions";
@@ -18,6 +18,9 @@ const PurchaseForm: React.FC<Props> = ({
   onSave,
   onCancel
 }) => {
+
+  const formRef = useRef<HTMLDivElement>(null);
+
   const [date, setDate] = useState(
     purchase?.date ?? new Date().toISOString().substring(0, 10)
   );
@@ -47,16 +50,25 @@ const PurchaseForm: React.FC<Props> = ({
   };
 
   useEffect(() => {
-  if (purchase) {
-    setDate(purchase.date);
-    setLocationId(purchase.locationId ?? "");
-    setItems(purchase.items ?? []);
-  } else {
-    setDate(new Date().toISOString().substring(0, 10));
-    setLocationId("");
-    setItems([]);
-  }
-}, [purchase]);
+    if (purchase) {
+      setDate(purchase.date);
+      setLocationId(purchase.locationId ?? "");
+      setItems(purchase.items ?? []);
+    } else {
+      setDate(new Date().toISOString().substring(0, 10));
+      setLocationId("");
+      setItems([]);
+    }
+  }, [purchase]);
+
+  useEffect(() => {
+    if (purchase && formRef.current) {
+      formRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+  }, [purchase]);
 
   const handleAddItem = () => {
     setItems([
@@ -71,7 +83,10 @@ const PurchaseForm: React.FC<Props> = ({
   };
 
   return (
-    <div className="bg-surface-dark border border-[#12202a] rounded-lg p-6">
+    <div 
+      ref={formRef}
+      className="bg-surface-dark border border-[#12202a] rounded-lg p-6"
+    >
       
       <h2 className="text-lg font-semibold mb-4">
       {purchase ? "Editar Compra" : "Nova Compra"}
