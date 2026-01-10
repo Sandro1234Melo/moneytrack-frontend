@@ -12,9 +12,10 @@ import Purchases from "./pages/Purchases";
 function App() {
   return (
     <Router>
-      <div className="flex min-h-screen bg-[#000010] text-white">
+      <div className="flex h-screen bg-[#000010] text-white">
         <Sidebar />
-        <main className="flex-1 p-6">
+
+        <main className="flex-1 p-6 overflow-y-auto">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/expenses" element={<Expenses />} />
@@ -23,10 +24,10 @@ function App() {
             <Route path="/categories" element={<Categories />} />
             <Route path="/locations" element={<Locations />} />
             <Route path="/purchases" element={<Purchases />} />
-
           </Routes>
         </main>
       </div>
+
     </Router>
   );
 }
