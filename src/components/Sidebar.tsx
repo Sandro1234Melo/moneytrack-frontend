@@ -8,8 +8,8 @@ const Sidebar = () => {
   const navItems = [
     { name: "Dashboard", path: "/", icon: LayoutDashboard },
     { name: "Análises", path: "/reports", icon: BarChart3 },
-    { name: "Meus Gastos", path: "/expenses", icon: Wallet },
     { name: "Listas de Compras", path: "/shopping-lists", icon: ShoppingCart },
+    { name: "Meus Gastos", path: "/expenses", icon: Wallet },
     { name: "Compras", path: "/purchases", icon: ShoppingCart },
     { name: "Locais", path: "/locations", icon: MapPin },
     { name: "Categorias", path: "/categories", icon: Tags }
