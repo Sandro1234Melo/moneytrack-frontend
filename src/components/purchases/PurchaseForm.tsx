@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PurchaseItemsTable from "./PurchaseItemsTable";
 import PurchaseHeader from "./PurchaseHeader";
 import PurchaseActions from "./PurchaseActions";
@@ -46,6 +46,18 @@ const PurchaseForm: React.FC<Props> = ({
     });
   };
 
+  useEffect(() => {
+  if (purchase) {
+    setDate(purchase.date);
+    setLocationId(purchase.locationId ?? "");
+    setItems(purchase.items ?? []);
+  } else {
+    setDate(new Date().toISOString().substring(0, 10));
+    setLocationId("");
+    setItems([]);
+  }
+}, [purchase]);
+
   const handleAddItem = () => {
     setItems([
       ...items,
@@ -60,6 +72,10 @@ const PurchaseForm: React.FC<Props> = ({
 
   return (
     <div className="bg-surface-dark border border-[#12202a] rounded-lg p-6">
+      
+      <h2 className="text-lg font-semibold mb-4">
+      {purchase ? "Editar Compra" : "Nova Compra"}
+      </h2>
       
       <PurchaseHeader
         date={date}

@@ -29,12 +29,12 @@ const ExpenseCard: React.FC<Props> = ({ expense, className }) => {
     <div className={cn("bg-[#071122] rounded-xl border border-[#12202a] p-5", className)}>
       {/* HEADER */}
       <div className="flex flex-wrap justify-between text-sm text-gray-300 mb-4">
-        <div>Nota : <span className="text-white">{expense.id ?? "—"}</span></div>
-        <div>Local : <span className="text-white">{expense.locationName ?? "—"}</span></div>
-        <div>Data : <span className="text-white">{formatDateBR(expense.date)}</span></div>
-        <div>Quantidade Total : <span className="text-white">{quantity}</span></div>
+        <div>Nota :  <span className="text-white">{expense.id ?? "—"}</span></div>
+        <div>Local :  <span className="text-white">{expense.locationName ?? "—"}</span></div>
+        <div>Data :  <span className="text-white">{formatDateBR(expense.date)}</span></div>
+        <div>Qtd Total :  <span className="text-white">{quantity}</span></div>
         <div className="font-semibold text-primary-light">
-          Valor : € {total.toFixed(2)}
+          Valor :  € {total.toFixed(2)}
         </div>
       </div>
 

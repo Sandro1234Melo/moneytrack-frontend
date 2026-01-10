@@ -14,12 +14,13 @@ const PurchaseItemsTable = ({ items, setItems, categories }: any) => {
   return (
     <div className="border border-[#12202a] rounded">
 
-      <div className="grid grid-cols-5 text-sm text-blue-100 px-4 py-2">
-        <span>Produto</span>
-        <span>Categoria</span>
-        <span>Qtd</span>
-        <span>Preço</span>
-        <span></span>
+      <div className="grid grid-cols-12 text-sm text-blue-100 px-4 py-2">
+        
+        <div className="col-span-4"><span>Produto</span></div>
+        <div className="col-span-3"><span>Categoria</span></div>
+        <div className="col-span-2"><span>Qtd</span></div>
+        <div className="col-span-2"><span>Preço</span></div>
+        <div className="col-span-1"></div>
       </div>
 
       {items.map((item: any, index: number) => (

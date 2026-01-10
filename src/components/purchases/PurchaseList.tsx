@@ -8,44 +8,53 @@ type Props = {
 
 const PurchaseList: React.FC<Props> = ({ purchases, onEdit, onDelete }) => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {purchases.map((p) => (
         <div
           key={p.id}
-          className="bg-surface-dark border border-[#12202a] rounded-lg p-4
-                     flex justify-between items-center"
+          className=" bg-white/5 border border-white/10 rounded-lg p-4"
         >
-          <div>
-            <div className="text-white font-medium">
-              {p.locationName ?? "—"}
+          <div
+            className="grid gap-y-2"
+            style={{
+              gridTemplateColumns: "120px 1fr 160px 40px 40px"
+            }}
+          >
+
+            <div className="text-sm text-gray-400">
+              Nota {p.id}
             </div>
+
             <div className="text-sm text-gray-400">
               {new Date(p.date).toLocaleDateString("pt-BR")}
             </div>
-          </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-primary-light font-semibold">
-              R$ {p.amount?.toFixed(2)}
-            </span>
+            <div className="text-primary-light font-semibold text-right">
+              € {p.amount?.toFixed(2)}
+            </div>
 
             <button
               onClick={() => onEdit(p)}
-              className="text-blue-400 hover:text-blue-300"
+              className="text-blue-400 hover:text-blue-300 justify-self-center"
             >
               <Pencil size={18} />
             </button>
 
             <button
               onClick={() => onDelete(p.id)}
-              className="text-red-400 hover:text-red-300"
+              className="text-red-400 hover:text-red-300 justify-self-center"
             >
               <Trash2 size={18} />
             </button>
+
+            <div className="col-span-5 text-white font-medium">
+              {p.locationName ?? "—"}
+            </div>
           </div>
         </div>
       ))}
     </div>
+
   );
 };
 

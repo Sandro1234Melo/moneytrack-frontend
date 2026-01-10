@@ -13,10 +13,11 @@ const PurchaseActions: React.FC<Props> = ({
   onAddItem
 }) => {
   return (
-    <>
-      <GradientButton label="Adicionar Item" icon={Plus} onClick={onAddItem} />
-
+    <div className="flex flex-col gap-6 mt-8">
+      <div><GradientButton label="Adicionar Item" icon={Plus} onClick={onAddItem} /></div>
+      
       <div className="flex justify-end gap-4 mt-8">
+        
         <button
           onClick={onCancel}
           className="px-6 py-2 border border-gray-600 text-gray-300 rounded"
@@ -26,12 +27,13 @@ const PurchaseActions: React.FC<Props> = ({
 
         <button
           onClick={onSave}
-          className="px-6 py-2 bg-primary text-white rounded"
+          className="px-6 py-2 border border-gray-600 bg-primary text-white rounded"
         >
           Salvar
         </button>
       </div>
-    </>
+
+    </div>
   );
 };
 
