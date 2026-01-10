@@ -1,21 +1,41 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
+
 import PurchaseForm from "../components/purchases/PurchaseForm";
 import PurchaseList from "../components/purchases/PurchaseList";
+import type { Filters } from "../components/purchases/PurchaseFilters";
+import PurchaseFilters from "../components/purchases/PurchaseFilters";
+
 
 const Purchases = () => {
   const [purchases, setPurchases] = useState<any[]>([]);
   const [editingPurchase, setEditingPurchase] = useState<any | null>(null);
   const [locations, setLocations] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [filters, setFilters] = useState<Filters>({
+    fromDate: "",
+    toDate: "",
+    locationId: "",
+    minValue: "",
+    maxValue: ""
+  });
 
+  const userId = 1;
 
-  const userId = 1; // depois vem do login
-
-  // 🔹 BUSCAR COMPRAS
-  const loadPurchases = async () => {
+  // 🔹 CARREGAR COMPRAS (COM FILTROS)
+  const loadPurchases = async (customFilters = filters) => {
     try {
-      const response = await api.get(`/expenses/user/${userId}`);
+      const response = await api.get("/expenses", {
+        params: {
+          userId,
+          from: customFilters.fromDate || undefined,
+          to: customFilters.toDate || undefined,
+          locationId: customFilters.locationId || undefined,
+          min: customFilters.minValue || undefined,
+          max: customFilters.maxValue || undefined
+        }
+      });
+
       setPurchases(response.data);
     } catch (error) {
       console.error("Erro ao carregar compras", error);
@@ -40,15 +60,19 @@ const Purchases = () => {
     }
   };
 
-  
-
+  // 🔹 LOAD INICIAL
   useEffect(() => {
     loadPurchases();
-    loadCategories(); 
-    loadLocations();  
+    loadCategories();
+    loadLocations();
   }, []);
 
-  // CRIAR / EDITAR
+  // 🔹 RECARREGAR QUANDO FILTROS MUDAREM
+  useEffect(() => {
+    loadPurchases(filters);
+  }, [filters]);
+
+  // 🔹 CRIAR / EDITAR
   const handleSave = async (data: any) => {
     try {
       if (editingPurchase) {
@@ -56,25 +80,25 @@ const Purchases = () => {
       } else {
         await api.post("/expenses", {
           ...data,
-          userId,
+          userId
         });
       }
 
       setEditingPurchase(null);
-      loadPurchases();
+      loadPurchases(filters);
     } catch (error) {
       console.error("Erro ao salvar compra", error);
       alert("Erro ao salvar a compra");
     }
   };
 
-  // EXCLUIR
+  // 🔹 EXCLUIR
   const handleDelete = async (id: number) => {
     if (!confirm("Deseja excluir esta compra?")) return;
 
     try {
       await api.delete(`/expenses/${id}`);
-      loadPurchases();
+      loadPurchases(filters);
     } catch (error) {
       console.error("Erro ao excluir compra", error);
     }
@@ -87,19 +111,40 @@ const Purchases = () => {
         Compras
       </h1>
 
-      <PurchaseForm
-        purchase={editingPurchase}
-        categories={categories}
+      {/* 🔍 FILTROS */}
+      <PurchaseFilters
+        filters={filters}
         locations={locations}
-        onCancel={() => setEditingPurchase(null)}
-        onSave={handleSave}
+        onChange={setFilters}
+        onClear={() =>
+          setFilters({
+            fromDate: "",
+            toDate: "",
+            locationId: "",
+            minValue: "",
+            maxValue: ""
+          })
+        }
       />
 
-      <PurchaseList
-        purchases={purchases}
-        onEdit={setEditingPurchase}
-        onDelete={handleDelete}
-      />
+      {/* FORMULÁRIO + LISTA */}
+      <div className="flex flex-col gap-8 mt-8">
+
+        <PurchaseForm
+          purchase={editingPurchase}
+          categories={categories}
+          locations={locations}
+          onCancel={() => setEditingPurchase(null)}
+          onSave={handleSave}
+        />
+
+        <PurchaseList
+          purchases={purchases}
+          onEdit={setEditingPurchase}
+          onDelete={handleDelete}
+        />
+
+      </div>
 
     </div>
   );
