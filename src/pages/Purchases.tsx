@@ -3,9 +3,8 @@ import api from "../api/axios";
 
 import PurchaseForm from "../components/purchases/PurchaseForm";
 import PurchaseList from "../components/purchases/PurchaseList";
-import type { Filters } from "../components/purchases/PurchaseFilters";
-import PurchaseFilters from "../components/purchases/PurchaseFilters";
-
+import PurchaseFilters, { type Filters } from "../components/purchases/PurchaseFilters";
+import Alert from "../components/ui/Alert";
 
 const Purchases = () => {
   const [purchases, setPurchases] = useState<any[]>([]);
@@ -14,18 +13,21 @@ const Purchases = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [formKey, setFormKey] = useState(0);
   const [successMessage, setSuccessMessage] = useState("");
+
   const [filters, setFilters] = useState<Filters>({
     fromDate: "",
     toDate: "",
     locationId: "",
+    categoryId: "",
+    noteId: "",
+    description: "",
     minValue: "",
     maxValue: ""
   });
 
   const userId = 1;
 
-  // CARREGAR COMPRAS (COM FILTROS)
-  const loadPurchases = async (customFilters = filters) => {
+  const loadPurchases = async (customFilters: Filters = filters) => {
     try {
       const response = await api.get("/expenses", {
         params: {
@@ -33,6 +35,9 @@ const Purchases = () => {
           from: customFilters.fromDate || undefined,
           to: customFilters.toDate || undefined,
           locationId: customFilters.locationId || undefined,
+          categoryId: customFilters.categoryId || undefined,
+          noteId: customFilters.noteId || undefined,
+          description: customFilters.description || undefined,
           min: customFilters.minValue || undefined,
           max: customFilters.maxValue || undefined
         }
@@ -42,6 +47,26 @@ const Purchases = () => {
     } catch (error) {
       console.error("Erro ao carregar compras", error);
     }
+  };
+  
+  const handleSearch = () => {
+    loadPurchases(filters);
+  };
+  
+  const handleClearFilters = () => {
+    const emptyFilters: Filters = {
+      fromDate: "",
+      toDate: "",
+      locationId: "",
+      categoryId: "",
+      noteId: "",
+      description: "",
+      minValue: "",
+      maxValue: ""
+    };
+
+    setFilters(emptyFilters);
+    loadPurchases(emptyFilters);
   };
 
   const loadCategories = async () => {
@@ -62,19 +87,12 @@ const Purchases = () => {
     }
   };
 
-  // LOAD INICIAL
   useEffect(() => {
     loadPurchases();
     loadCategories();
     loadLocations();
   }, []);
 
-  // RECARREGAR QUANDO FILTROS MUDAREM
-  useEffect(() => {
-    loadPurchases(filters);
-  }, [filters]);
-
-  // CRIAR / EDITAR
   const handleSave = async (data: any) => {
     try {
       if (editingPurchase) {
@@ -87,25 +105,18 @@ const Purchases = () => {
         });
         setSuccessMessage("Compra registrada com sucesso!");
       }
+
       setEditingPurchase(null);
-
-      // 🔄 força reset do formulário
       setFormKey(prev => prev + 1);
-
-      // 🔄 recarrega lista mantendo filtros
       loadPurchases(filters);
 
-      // ⏱️ remove mensagem após 3s
       setTimeout(() => setSuccessMessage(""), 3000);
-
     } catch (error) {
       console.error("Erro ao salvar compra", error);
       alert("Erro ao salvar a compra");
     }
   };
 
-
-  // EXCLUIR
   const handleDelete = async (id: number) => {
     if (!confirm("Deseja excluir esta compra?")) return;
 
@@ -119,23 +130,16 @@ const Purchases = () => {
 
   return (
     <div className="px-6 max-w-7xl mx-auto">
-
       <h1 className="text-2xl font-semibold text-brand-light mb-6">
         Compras
-      </h1>   
+      </h1>
 
       <div className="flex flex-col gap-8 mt-8">
+
         {successMessage && (
-          <div className="
-            p-3 rounded-lg
-            bg-green-600/10
-            border border-green-600
-            text-green-400
-          ">
-            {successMessage}
-          </div>
+          <Alert message={successMessage} variant="success" />
         )}
-        
+
         <PurchaseForm
           key={formKey}
           purchase={editingPurchase}
@@ -148,17 +152,12 @@ const Purchases = () => {
         <PurchaseFilters
           filters={filters}
           locations={locations}
+          categories={categories}
           onChange={setFilters}
-          onClear={() =>
-            setFilters({
-              fromDate: "",
-              toDate: "",
-              locationId: "",
-              minValue: "",
-              maxValue: ""
-            })
-          }
+          onSearch={handleSearch}
+          onClear={handleClearFilters}
         />
+
         <PurchaseList
           purchases={purchases}
           onEdit={setEditingPurchase}
