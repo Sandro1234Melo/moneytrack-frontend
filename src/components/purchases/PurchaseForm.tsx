@@ -51,7 +51,7 @@ const PurchaseForm: React.FC<Props> = ({
 
   useEffect(() => {
     if (purchase) {
-      setDate(purchase.date);
+      setDate(purchase.date?.substring(0, 10));
       setLocationId(purchase.locationId ?? "");
       setItems(purchase.items ?? []);
     } else {
@@ -75,7 +75,7 @@ const PurchaseForm: React.FC<Props> = ({
       ...items,
       {
         description: "",
-        categoryId: null,
+        categoryId: "",
         quantity: 1,
         price: 0
       }

@@ -12,6 +12,8 @@ const Purchases = () => {
   const [editingPurchase, setEditingPurchase] = useState<any | null>(null);
   const [locations, setLocations] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [formKey, setFormKey] = useState(0);
+  const [successMessage, setSuccessMessage] = useState("");
   const [filters, setFilters] = useState<Filters>({
     fromDate: "",
     toDate: "",
@@ -22,7 +24,7 @@ const Purchases = () => {
 
   const userId = 1;
 
-  // 🔹 CARREGAR COMPRAS (COM FILTROS)
+  // CARREGAR COMPRAS (COM FILTROS)
   const loadPurchases = async (customFilters = filters) => {
     try {
       const response = await api.get("/expenses", {
@@ -60,39 +62,50 @@ const Purchases = () => {
     }
   };
 
-  // 🔹 LOAD INICIAL
+  // LOAD INICIAL
   useEffect(() => {
     loadPurchases();
     loadCategories();
     loadLocations();
   }, []);
 
-  // 🔹 RECARREGAR QUANDO FILTROS MUDAREM
+  // RECARREGAR QUANDO FILTROS MUDAREM
   useEffect(() => {
     loadPurchases(filters);
   }, [filters]);
 
-  // 🔹 CRIAR / EDITAR
+  // CRIAR / EDITAR
   const handleSave = async (data: any) => {
     try {
       if (editingPurchase) {
         await api.put(`/expenses/${editingPurchase.id}`, data);
+        setSuccessMessage("Compra atualizada com sucesso!");
       } else {
         await api.post("/expenses", {
           ...data,
           userId
         });
+        setSuccessMessage("Compra registrada com sucesso!");
       }
-
       setEditingPurchase(null);
+
+      // 🔄 força reset do formulário
+      setFormKey(prev => prev + 1);
+
+      // 🔄 recarrega lista mantendo filtros
       loadPurchases(filters);
+
+      // ⏱️ remove mensagem após 3s
+      setTimeout(() => setSuccessMessage(""), 3000);
+
     } catch (error) {
       console.error("Erro ao salvar compra", error);
       alert("Erro ao salvar a compra");
     }
   };
 
-  // 🔹 EXCLUIR
+
+  // EXCLUIR
   const handleDelete = async (id: number) => {
     if (!confirm("Deseja excluir esta compra?")) return;
 
@@ -111,10 +124,20 @@ const Purchases = () => {
         Compras
       </h1>   
 
-      {/* FORMULÁRIO + LISTA */}
       <div className="flex flex-col gap-8 mt-8">
-
+        {successMessage && (
+          <div className="
+            p-3 rounded-lg
+            bg-green-600/10
+            border border-green-600
+            text-green-400
+          ">
+            {successMessage}
+          </div>
+        )}
+        
         <PurchaseForm
+          key={formKey}
           purchase={editingPurchase}
           categories={categories}
           locations={locations}
@@ -122,30 +145,26 @@ const Purchases = () => {
           onSave={handleSave}
         />
 
-        {/* 🔍 FILTROS */}
-      <PurchaseFilters
-        filters={filters}
-        locations={locations}
-        onChange={setFilters}
-        onClear={() =>
-          setFilters({
-            fromDate: "",
-            toDate: "",
-            locationId: "",
-            minValue: "",
-            maxValue: ""
-          })
-        }
-      />
-
+        <PurchaseFilters
+          filters={filters}
+          locations={locations}
+          onChange={setFilters}
+          onClear={() =>
+            setFilters({
+              fromDate: "",
+              toDate: "",
+              locationId: "",
+              minValue: "",
+              maxValue: ""
+            })
+          }
+        />
         <PurchaseList
           purchases={purchases}
           onEdit={setEditingPurchase}
           onDelete={handleDelete}
         />
-
       </div>
-
     </div>
   );
 };
