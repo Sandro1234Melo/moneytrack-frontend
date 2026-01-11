@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/axios";
 import ExpenseCard from "../components/ExpenseCard";
+import ExpenseFilters, { type Filters } from "../components/ui/ExpenseFilters";
 
 type ExpenseItem = {
   id: number;
@@ -21,9 +22,36 @@ const Expenses: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const userId = 1;
 
-  const fetchExpenses = async () => {
+  const [locations, setLocations] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+
+  const [filters, setFilters] = useState<Filters>({
+    fromDate: "",
+    toDate: "",
+    locationId: "",
+    categoryId: "",
+    noteId: "",
+    description: "",
+    minValue: "",
+    maxValue: ""
+  });
+
+  const fetchExpenses = async (customFilters: Filters = filters) => {
     try {
-      const response = await api.get(`/expenses/user/${userId}`);
+      const response = await api.get("/expenses", {
+        params: {
+          userId,
+          from: customFilters.fromDate || undefined,
+          to: customFilters.toDate || undefined,
+          locationId: customFilters.locationId || undefined,
+          categoryId: customFilters.categoryId || undefined,
+          noteId: customFilters.noteId || undefined,
+          description: customFilters.description || undefined,
+          min: customFilters.minValue || undefined,
+          max: customFilters.maxValue || undefined
+        }
+      });
+
       setExpenses(response.data);
     } catch (error) {
       console.error("Erro ao carregar despesas:", error);
@@ -32,7 +60,31 @@ const Expenses: React.FC = () => {
 
   useEffect(() => {
     fetchExpenses();
+
+    api.get("/locations").then(res => setLocations(res.data));
+    api.get(`/categories/${userId}`).then(res => setCategories(res.data));
   }, []);
+
+  const handleSearch = () => {
+  fetchExpenses(filters);
+};
+
+const handleClear = () => {
+  const emptyFilters: Filters = {
+    fromDate: "",
+    toDate: "",
+    locationId: "",
+    categoryId: "",
+    noteId: "",
+    description: "",
+    minValue: "",
+    maxValue: ""
+  };
+
+  setFilters(emptyFilters);
+  fetchExpenses(emptyFilters);
+};
+
 
   return (
     <div className="px-4 sm:px-8">
@@ -50,6 +102,16 @@ const Expenses: React.FC = () => {
           Nenhum gasto registrado até o momento.
         </div>
       )}
+      <div className="mb-6" >
+        <ExpenseFilters
+          filters={filters}
+          locations={locations}
+          categories={categories}
+          onChange={setFilters}
+          onSearch={handleSearch}
+          onClear={handleClear}
+        />
+      </div>
 
       {/* LIST */}
       <div className="flex flex-col gap-6">

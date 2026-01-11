@@ -3,7 +3,7 @@ import api from "../api/axios";
 
 import PurchaseForm from "../components/purchases/PurchaseForm";
 import PurchaseList from "../components/purchases/PurchaseList";
-import PurchaseFilters, { type Filters } from "../components/purchases/PurchaseFilters";
+import PurchaseFilters, { type Filters } from "../components/ui/ExpenseFilters";
 import Alert from "../components/ui/Alert";
 
 const Purchases = () => {
