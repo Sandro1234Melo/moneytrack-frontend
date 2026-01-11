@@ -109,9 +109,20 @@ const Purchases = () => {
 
       <h1 className="text-2xl font-semibold text-brand-light mb-6">
         Compras
-      </h1>
+      </h1>   
 
-      {/* 🔍 FILTROS */}
+      {/* FORMULÁRIO + LISTA */}
+      <div className="flex flex-col gap-8 mt-8">
+
+        <PurchaseForm
+          purchase={editingPurchase}
+          categories={categories}
+          locations={locations}
+          onCancel={() => setEditingPurchase(null)}
+          onSave={handleSave}
+        />
+
+        {/* 🔍 FILTROS */}
       <PurchaseFilters
         filters={filters}
         locations={locations}
@@ -126,17 +137,6 @@ const Purchases = () => {
           })
         }
       />
-
-      {/* FORMULÁRIO + LISTA */}
-      <div className="flex flex-col gap-8 mt-8">
-
-        <PurchaseForm
-          purchase={editingPurchase}
-          categories={categories}
-          locations={locations}
-          onCancel={() => setEditingPurchase(null)}
-          onSave={handleSave}
-        />
 
         <PurchaseList
           purchases={purchases}

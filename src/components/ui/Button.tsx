@@ -55,7 +55,7 @@ export const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       className={`
         flex items-center gap-2
-        px-5 py-2
+        px-5 py-1
         rounded-lg
         font-medium
         transition-all duration-300

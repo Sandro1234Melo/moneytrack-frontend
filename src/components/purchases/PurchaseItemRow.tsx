@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react";
-import FormSelect from "../FormSelect";
+import FormSelect from "../ui/FormSelect";
 
 const PurchaseItemRow = ({ item, categories, onChange, onRemove }: any) => {
   return (

@@ -1,3 +1,8 @@
+import FormSelect from "../ui/FormSelect";
+import FormDate from "../ui/FormDate";
+import FormValue from "../ui/FormValue";
+import { Button } from "../ui/Button";
+
 type Filters = {
   fromDate: string;
   toDate: string;
@@ -22,95 +27,75 @@ const PurchaseFilters: React.FC<Props> = ({
   return (
     <div className="bg-surface-dark border border-[#12202a] rounded-lg p-4">
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
 
         {/* Data início */}
-        <div>
-          <label className="text-sm text-gray-400">De</label>
-          <input
-            type="date"
+        <div className="flex flex-col gap-1">
+          <FormDate
+            label="De"
             value={filters.fromDate}
-            onChange={e =>
-              onChange({ ...filters, fromDate: e.target.value })
+            onChange={(value) =>
+              onChange({ ...filters, fromDate: value })
             }
-            className="input-primary w-full"
           />
         </div>
 
         {/* Data fim */}
-        <div>
-          <label className="text-sm text-gray-400">Até</label>
-          <input
-            type="date"
+        <div className="flex flex-col gap-1">
+          <FormDate
+            label="Até"
             value={filters.toDate}
-            onChange={e =>
-              onChange({ ...filters, toDate: e.target.value })
+            onChange={(value) =>
+              onChange({ ...filters, toDate: value })
             }
-            className="input-primary w-full"
           />
         </div>
 
         {/* Local */}
-        <div>
-          <label className="text-sm text-gray-400">Local</label>
-          <select
-            value={filters.locationId}
-            onChange={e =>
+        <div className="flex flex-col gap-1">
+          <FormSelect
+            label="Local"
+            placeholder="Todos"
+            value={filters.locationId ?? ""}
+            onChange={(value) =>
               onChange({
                 ...filters,
-                locationId: e.target.value
-                  ? Number(e.target.value)
-                  : ""
+                locationId: value ? Number(value) : ""
               })
             }
-            className="input-primary w-full"
-          >
-            <option value="">Todos</option>
-            {locations.map(loc => (
-              <option key={loc.id} value={loc.id}>
-                {loc.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Valor mínimo */}
-        <div>
-          <label className="text-sm text-gray-400">Valor mín.</label>
-          <input
-            type="number"
-            value={filters.minValue}
-            onChange={e =>
-              onChange({ ...filters, minValue: e.target.value })
-            }
-            className="input-primary w-full"
+            options={locations.map((loc: any) => ({
+              value: loc.id,
+              label: loc.name
+            }))}
           />
         </div>
 
-        {/* Valor máximo */}
-        <div>
-          <label className="text-sm text-gray-400">Valor máx.</label>
-          <input
-            type="number"
-            value={filters.maxValue}
-            onChange={e =>
-              onChange({ ...filters, maxValue: e.target.value })
-            }
-            className="input-primary w-full"
-          />
-        </div>
+        <FormValue
+          label="Valor mín."
+          value={filters.minValue}
+          onChange={(value) =>
+            onChange({ ...filters, minValue: value })
+          }
+        />
+
+        <FormValue
+          label="Valor máx."
+          value={filters.maxValue}
+          onChange={(value) =>
+            onChange({ ...filters, maxValue: value })
+          }
+        />
 
       </div>
 
-      <div className="flex justify-end mt-4">
-        <button
-          onClick={onClear}
-          className="text-sm text-gray-400 hover:text-gray-200"
-        >
-          Limpar filtros
-        </button>
-      </div>
-
+      {/* BOTÃO */}
+    <div className="flex justify-end">
+      <Button
+        label="Limpar"
+        variant="secondary"
+        onClick={onClear}
+      />
+    </div>
     </div>
   );
 };

@@ -1,4 +1,5 @@
-import FormSelect from "../FormSelect";
+import FormDate from "../ui/FormDate";
+import FormSelect from "../ui/FormSelect";
 
 type Props = {
   date: string;
@@ -16,32 +17,26 @@ const PurchaseHeader: React.FC<Props> = ({
   locations
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 items-end">
 
-      <div>
-        <FormSelect
+      {/* Local */}
+      <FormSelect
         label="Local"
         value={locationId}
         placeholder="Selecione o local"
-        onChange={v =>
-          setLocationId(v ? Number(v) : "")
-        }
+        onChange={(v) => setLocationId(v ? Number(v) : "")}
         options={locations.map(loc => ({
           value: loc.id,
           label: loc.name
         }))}
       />
-      </div>
 
-      <div>
-        <label className="text-sm text-blue-100">Data</label>
-        <input
-          type="date"
-          value={date}
-          onChange={e => setDate(e.target.value)}
-          className="input-primary w-full"
-        />
-      </div>
+      {/* Data */}
+      <FormDate
+        label="Data"
+        value={date}
+        onChange={setDate}
+      />
 
     </div>
   );
