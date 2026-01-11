@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { GradientButton } from "../GradientButton";
+import { Button } from "../ui/Button";
 
 type Props = {
   onSave: () => void;
@@ -13,26 +13,28 @@ const PurchaseActions: React.FC<Props> = ({
   onAddItem
 }) => {
   return (
-    <div className="flex flex-col gap-6 mt-8">
-      <div><GradientButton label="Adicionar Item" icon={Plus} onClick={onAddItem} /></div>
+    <div className="flex justify-between items-center mt-8">
       
-      <div className="flex justify-end gap-4 mt-8">
-        
-        <button
+      <Button
+        label="Adicionar Item"
+        variant="gradient"
+        onClick={onAddItem}
+        icon={Plus} 
+      />
+
+      <div className="flex gap-3">
+        <Button
+          label="Cancelar"
+          variant="secondary"
           onClick={onCancel}
-          className="px-6 py-2 border border-gray-600 text-gray-300 rounded"
-        >
-          Cancelar
-        </button>
+        />
 
-        <button
+        <Button
+          label="Salvar"
+          variant="primary"
           onClick={onSave}
-          className="px-6 py-2 border border-gray-600 bg-primary text-white rounded"
-        >
-          Salvar
-        </button>
+        />
       </div>
-
     </div>
   );
 };
