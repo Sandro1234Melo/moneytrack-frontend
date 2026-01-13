@@ -118,8 +118,6 @@ const Purchases = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Deseja excluir esta compra?")) return;
-
     try {
       await api.delete(`/expenses/${id}`);
       loadPurchases(filters);
