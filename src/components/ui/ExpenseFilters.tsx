@@ -2,6 +2,7 @@ import FormSelect from "./FormSelect";
 import FormDate from "./FormDate";
 import FormValue from "./FormValue";
 import { Button } from "./Button";
+import FormText from "./FormText";
 
 type Filters = {
   fromDate: string;
@@ -44,20 +45,14 @@ const ExpenseFilters: React.FC<Props> = ({
           }
         />
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm text-gray-400">
-            Produto
-          </label>
-          <input
-            type="text"
-            value={filters.description}
-            onChange={e =>
-              onChange({ ...filters, description: e.target.value })
-            }
-            placeholder="Descrição do produto"
-            className="input-primary w-full"
-          />
-        </div>
+        <FormText
+          label="Produto"
+          value={filters.description}
+          placeholder="Descrição do produto"
+          onChange={(value) =>
+            onChange({ ...filters, description: value })
+          }
+        />
 
         <FormSelect
           label="Categoria"
