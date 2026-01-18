@@ -19,14 +19,13 @@ const PurchaseItemRow = ({ item, categories, onChange, onRemove }: any) => {
           label=""
           value={item.categoryId ?? ""}
           placeholder="Categoria"
-          onChange={(v) =>
-            onChange("categoryId", v === "" ? "" : Number(v))
-          }
+          onChange={(v) => onChange("categoryId", v)}
           options={categories.map((cat: any) => ({
-            value: cat.id,
+            value: String(cat.id),
             label: cat.name
           }))}
         />
+
       </div>
 
       <div className="col-span-2">

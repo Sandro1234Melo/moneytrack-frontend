@@ -45,7 +45,12 @@ const PurchaseForm: React.FC<Props> = ({
     onSave({
       date,
       locationId,
-      items
+      items: items.map(item => ({
+        ...item,
+        categoryId: Number(item.categoryId), // 🔥 aqui sim converte
+        quantity: Number(item.quantity),
+        price: Number(item.price)
+      }))
     });
   };
 
@@ -53,13 +58,24 @@ const PurchaseForm: React.FC<Props> = ({
     if (purchase) {
       setDate(purchase.date?.substring(0, 10));
       setLocationId(purchase.locationId ?? "");
-      setItems(purchase.items ?? []);
+
+      setItems(
+        purchase.items.map((item: any) => ({
+        description: item.description ?? "",
+        categoryId: String(
+          item.categoryId ?? item.category?.id ?? ""
+        ),
+        quantity: item.quantity ?? 1,
+        price: item.price ?? item.unitPrice ?? 0
+        }))
+      );
     } else {
       setDate(new Date().toISOString().substring(0, 10));
       setLocationId("");
       setItems([]);
     }
   }, [purchase]);
+
 
   useEffect(() => {
     if (purchase && formRef.current) {
@@ -83,15 +99,15 @@ const PurchaseForm: React.FC<Props> = ({
   };
 
   return (
-    <div 
+    <div
       ref={formRef}
       className="bg-surface-dark border border-[#12202a] rounded-lg p-6"
     >
-      
+
       <h2 className="text-lg font-semibold mb-4">
-      {purchase ? "Editar Compra" : "Nova Compra"}
+        {purchase ? "Editar Compra" : "Nova Compra"}
       </h2>
-      
+
       <PurchaseHeader
         date={date}
         setDate={setDate}
