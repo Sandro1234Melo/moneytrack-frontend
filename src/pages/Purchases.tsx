@@ -3,8 +3,10 @@ import api from "../api/axios";
 
 import PurchaseForm from "../components/purchases/PurchaseForm";
 import PurchaseList from "../components/purchases/PurchaseList";
+import PurchaseCardList from "../components/purchases/PurchaseCardList";
 import PurchaseFilters, { type Filters } from "../components/ui/ExpenseFilters";
 import Alert from "../components/ui/Alert";
+import { Button } from "../components/ui/Button";
 
 const Purchases = () => {
   const [purchases, setPurchases] = useState<any[]>([]);
@@ -13,6 +15,7 @@ const Purchases = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [formKey, setFormKey] = useState(0);
   const [successMessage, setSuccessMessage] = useState("");
+  const [openFilters, setOpenFilters] = useState(false);
 
   const [filters, setFilters] = useState<Filters>({
     fromDate: "",
@@ -48,11 +51,11 @@ const Purchases = () => {
       console.error("Erro ao carregar compras", error);
     }
   };
-  
+
   const handleSearch = () => {
     loadPurchases(filters);
   };
-  
+
   const handleClearFilters = () => {
     const emptyFilters: Filters = {
       fromDate: "",
@@ -70,21 +73,13 @@ const Purchases = () => {
   };
 
   const loadCategories = async () => {
-    try {
-      const response = await api.get(`/categories/${userId}`);
-      setCategories(response.data);
-    } catch (error) {
-      console.error("Erro ao carregar categorias", error);
-    }
+    const response = await api.get(`/categories/${userId}`);
+    setCategories(response.data);
   };
 
   const loadLocations = async () => {
-    try {
-      const response = await api.get("/locations");
-      setLocations(response.data);
-    } catch (error) {
-      console.error("Erro ao carregar locais", error);
-    }
+    const response = await api.get("/locations");
+    setLocations(response.data);
   };
 
   useEffect(() => {
@@ -99,10 +94,7 @@ const Purchases = () => {
         await api.put(`/expenses/${editingPurchase.id}`, data);
         setSuccessMessage("Compra atualizada com sucesso!");
       } else {
-        await api.post("/expenses", {
-          ...data,
-          userId
-        });
+        await api.post("/expenses", { ...data, userId });
         setSuccessMessage("Compra registrada com sucesso!");
       }
 
@@ -112,27 +104,23 @@ const Purchases = () => {
 
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
-      console.error("Erro ao salvar compra", error);
       alert("Erro ao salvar a compra");
     }
   };
 
   const handleDelete = async (id: number) => {
-    try {
-      await api.delete(`/expenses/${id}`);
-      loadPurchases(filters);
-    } catch (error) {
-      console.error("Erro ao excluir compra", error);
-    }
+    await api.delete(`/expenses/${id}`);
+    loadPurchases(filters);
   };
 
   return (
-    <div className="px-6 max-w-7xl mx-auto">
+    <div className="px-4 sm:px-6 max-w-7xl mx-auto">
+
       <h1 className="text-2xl font-semibold text-brand-light mb-6">
         Compras
       </h1>
 
-      <div className="flex flex-col gap-8 mt-8">
+      <div className="flex flex-col gap-8">
 
         {successMessage && (
           <Alert message={successMessage} variant="success" />
@@ -147,21 +135,88 @@ const Purchases = () => {
           onSave={handleSave}
         />
 
-        <PurchaseFilters
-          filters={filters}
-          locations={locations}
-          categories={categories}
-          onChange={setFilters}
-          onSearch={handleSearch}
-          onClear={handleClearFilters}
-        />
+        {/* BOTÃO FILTRAR — MOBILE */}
+        <div className="flex justify-end lg:hidden">
+          <Button
+            label="Filtrar"
+            variant="secondary"
+            onClick={() => setOpenFilters(true)}
+          />
+        </div>
 
-        <PurchaseList
-          purchases={purchases}
-          onEdit={setEditingPurchase}
-          onDelete={handleDelete}
-        />
+        {/* FILTROS — DESKTOP */}
+        <div className="hidden lg:block">
+          <PurchaseFilters
+            filters={filters}
+            locations={locations}
+            categories={categories}
+            onChange={setFilters}
+            onSearch={handleSearch}
+            onClear={handleClearFilters}
+          />
+        </div>
+
+        {/* LISTA — DESKTOP */}
+        <div className="hidden lg:block">
+          <PurchaseList
+            purchases={purchases}
+            onEdit={setEditingPurchase}
+            onDelete={handleDelete}
+          />
+        </div>
+
+        {/* LISTA — MOBILE */}
+        <div className="lg:hidden">
+          <PurchaseCardList
+            purchases={purchases}
+            onEdit={setEditingPurchase}
+            onDelete={handleDelete}
+          />
+        </div>
       </div>
+
+      {/* DRAWER FILTROS — MOBILE */}
+      {openFilters && (
+        <div className="fixed inset-0 z-50 flex justify-center bg-black/60">
+
+          {/* Overlay */}
+          <div
+            className="absolute inset-0"
+            onClick={() => setOpenFilters(false)}
+          />
+
+          {/* Drawer */}
+          <div className="relative w-full max-w-md bg-surface-dark
+                          rounded-t-xl p-4 mt-auto">
+
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Filtros</h3>
+              <button
+                onClick={() => setOpenFilters(false)}
+                className="text-gray-400"
+              >
+                ✕
+              </button>
+            </div>
+
+            <PurchaseFilters
+              filters={filters}
+              locations={locations}
+              categories={categories}
+              onChange={setFilters}
+              onSearch={() => {
+                handleSearch();
+                setOpenFilters(false);
+              }}
+              onClear={() => {
+                handleClearFilters();
+                setOpenFilters(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

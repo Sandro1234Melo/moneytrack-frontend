@@ -16,7 +16,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="w-64 bg-[#14171f] p-5 flex flex-col justify-between">
+    <aside className="w-64 h-screen bg-[#14171f] p-5 flex flex-col justify-between sticky top-0">
       <div>
         <h1 className="text-xl font-semibold mb-8">MoneyTrack</h1>
         <nav className="flex flex-col gap-2">
