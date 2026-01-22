@@ -86,6 +86,7 @@ const handleClear = () => {
 };
 
 
+
   return (
     <div className="px-4 sm:px-8">
       {/* HEADER */}

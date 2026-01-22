@@ -10,11 +10,11 @@ import {
 
 const navItems = [
   { to: "/", label: "Home", icon: LayoutDashboard },
+  { to: "/shopping-lists", label: "Listas", icon: ListChecks },
   { to: "/expenses", label: "Gastos", icon: Wallet },
   { to: "/purchases", label: "Compras", icon: ShoppingCart },
-  { to: "/shopping-lists", label: "Listas", icon: ListChecks },
-  { to: "/categories", label: "Categorias", icon: Tags },
-  { to: "/locations", label: "Locais", icon: MapPin }
+  { to: "/locations", label: "Locais", icon: MapPin },
+  { to: "/categories", label: "Categorias", icon: Tags }
 ];
 
 const MobileBottomNav = () => {

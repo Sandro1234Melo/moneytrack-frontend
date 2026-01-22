@@ -21,6 +21,8 @@ const Categories: React.FC = () => {
 
   useEffect(() => {
     loadCategories();
+    console.log("API URL =>", import.meta.env.VITE_API_URL);
+    console.log("Teste");
   }, []);
 
   const handleCreate = async () => {

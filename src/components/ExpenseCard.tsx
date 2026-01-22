@@ -28,15 +28,30 @@ const ExpenseCard: React.FC<Props> = ({ expense, className }) => {
   return (
     <div className={cn("bg-[#071122] rounded-xl border border-[#12202a] p-5", className)}>
       {/* HEADER */}
-      <div className="flex flex-wrap justify-between text-sm text-gray-300 mb-4">
-        <div>Nota :  <span className="text-white">{expense.id ?? "—"}</span></div>
-        <div>Local :  <span className="text-white">{expense.locationName ?? "—"}</span></div>
-        <div>Data :  <span className="text-white">{formatDateBR(expense.date)}</span></div>
-        <div>Qtd Total :  <span className="text-white">{quantity}</span></div>
-        <div className="font-semibold text-primary-light">
-          Valor :  € {total.toFixed(2)}
+      <div className="space-y-3 text-sm mb-5">
+
+        {/* Linha 1 */}
+        <div className="flex justify-between">
+          <span className="text-gray-300">
+            Nota: <span className="text-white">{expense.id ?? "—"}</span>
+          </span>
+
+          <span className="text-gray-300 truncate max-w-[60%]">
+            Local: <span className="text-white">{expense.locationName ?? "—"}</span>
+          </span>
         </div>
+
+        {/* Linha 2 */}
+        <div className="flex justify-between text-gray-400">
+          <span>Data: {formatDateBR(expense.date)}</span>
+          <span>Qtd: {quantity}</span>
+          <span className="font-semibold text-primary-light">
+            € {total.toFixed(2)}
+          </span>
+        </div>
+
       </div>
+
 
       {/* TABLE HEADER */}
       <div className="grid grid-cols-12 text-xs uppercase text-gray-400 pb-2 border-b border-[#1f2a37]">
