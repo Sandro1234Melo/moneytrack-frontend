@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../api/axios";
 import { GradientButton } from "../components/GradientButton";
 import { Plus, Trash2 } from "lucide-react";
+import { getLoggedUser } from "../utils/auth";
 
 type Category = {
   id: number;
@@ -12,7 +13,8 @@ const Categories: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [name, setName] = useState("");
 
-  const userId = 1; // depois vem do login
+  const user = getLoggedUser();
+  const userId = user?.id;
 
   const loadCategories = async () => {
     const response = await api.get(`/categories/${userId}`);
@@ -20,8 +22,9 @@ const Categories: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!userId) return;
     loadCategories();
-  }, []);
+  }, [userId]);
 
   const handleCreate = async () => {
     if (!name.trim()) return;

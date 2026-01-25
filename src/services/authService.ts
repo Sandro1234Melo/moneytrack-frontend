@@ -1,6 +1,5 @@
 import api from "../api/axios";
 
-
 export interface RegisterDto {
   full_Name: string;
   email: string;

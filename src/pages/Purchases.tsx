@@ -7,6 +7,7 @@ import PurchaseCardList from "../components/purchases/PurchaseCardList";
 import PurchaseFilters, { type Filters } from "../components/ui/ExpenseFilters";
 import Alert from "../components/ui/Alert";
 import { Button } from "../components/ui/Button";
+import { getLoggedUser } from "../utils/auth";
 
 const Purchases = () => {
   const [purchases, setPurchases] = useState<any[]>([]);
@@ -28,11 +29,12 @@ const Purchases = () => {
     maxValue: ""
   });
 
-  const userId = 1;
+  const user = getLoggedUser();
+    const userId = user?.id;
 
   const loadPurchases = async (customFilters: Filters = filters) => {
     try {
-      const response = await api.get("/expenses", {
+      const response = await api.get(`/expenses/${userId}`, {
         params: {
           userId,
           from: customFilters.fromDate || undefined,
@@ -78,11 +80,12 @@ const Purchases = () => {
   };
 
   const loadLocations = async () => {
-    const response = await api.get("/locations");
+    const response = await api.get(`/locations/${userId}`);
     setLocations(response.data);
   };
 
   useEffect(() => {
+    if (!userId) return;
     loadPurchases();
     loadCategories();
     loadLocations();

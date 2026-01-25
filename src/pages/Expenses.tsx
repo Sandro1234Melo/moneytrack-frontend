@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../api/axios";
 import ExpenseCard from "../components/ExpenseCard";
 import ExpenseFilters, { type Filters } from "../components/ui/ExpenseFilters";
+import { getLoggedUser } from "../utils/auth";
 
 type ExpenseItem = {
   id: number;
@@ -20,7 +21,9 @@ type Expense = {
 
 const Expenses: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const userId = 1;
+
+  const user = getLoggedUser();
+  const userId = user?.id;
 
   const [locations, setLocations] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -38,7 +41,7 @@ const Expenses: React.FC = () => {
 
   const fetchExpenses = async (customFilters: Filters = filters) => {
     try {
-      const response = await api.get("/expenses", {
+      const response = await api.get(`/expenses/${userId}`, {
         params: {
           userId,
           from: customFilters.fromDate || undefined,
@@ -59,9 +62,10 @@ const Expenses: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchExpenses();
+    if (!userId) return;
 
-    api.get("/locations").then(res => setLocations(res.data));
+    fetchExpenses();
+    api.get(`/locations/${userId}`).then(res => setLocations(res.data));
     api.get(`/categories/${userId}`).then(res => setCategories(res.data));
   }, []);
 

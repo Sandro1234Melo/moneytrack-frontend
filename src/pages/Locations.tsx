@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../api/axios";
 import { GradientButton } from "../components/GradientButton";
 import { Plus, Trash2 } from "lucide-react";
+import { getLoggedUser } from "../utils/auth";
 
 type Location = {
   id: number;
@@ -12,11 +13,12 @@ const Locations: React.FC = () => {
   const [locations, setLocations] = useState<Location[]>([]);
   const [name, setName] = useState("");
 
-  const userId = 1; // depois vem do login
+  const user = getLoggedUser();
+  const userId = user?.id;
 
   const loadLocations = async () => {
     try {
-      const response = await api.get(`/locations`);
+      const response = await api.get(`/locations/${userId}`);
       setLocations(response.data);
     } catch (error) {
       console.error("Erro ao carregar locais", error);
