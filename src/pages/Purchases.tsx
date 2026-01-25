@@ -34,7 +34,7 @@ const Purchases = () => {
 
   const loadPurchases = async (customFilters: Filters = filters) => {
     try {
-      const response = await api.get(`/expenses/${userId}`, {
+      const response = await api.get(`/expenses/user/${userId}`, {
         params: {
           userId,
           from: customFilters.fromDate || undefined,
