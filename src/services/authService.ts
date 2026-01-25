@@ -1,22 +1,21 @@
 import api from "../api/axios";
 
-export interface RegisterDto {
+export async function registerUser(data: {
   full_Name: string;
   email: string;
   password: string;
+  country_Code: string;
+  currency_Code: string;
+  language: string;
+}) {
+  const response = await api.post("/auth/register", data);
+  return response.data;
 }
 
-export interface LoginDto {
+export async function loginUser(data: {
   email: string;
   password: string;
+}) {
+  const response = await api.post("/auth/login", data);
+  return response.data;
 }
-
-export const registerUser = async (data: RegisterDto) => {
-  const response = await api.post("/Auth/register", data);
-  return response.data;
-};
-
-export const loginUser = async (data: LoginDto) => {
-  const response = await api.post("/Auth/login", data);
-  return response.data;
-};

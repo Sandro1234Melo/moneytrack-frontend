@@ -16,7 +16,6 @@ export default function Login() {
 
     try {
       const user = await loginUser({ email, password });
-      //localStorage.setItem("user", JSON.stringify(user)); login de longa duração
       sessionStorage.setItem("user", JSON.stringify(user));
       navigate("/");
     } catch {

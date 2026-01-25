@@ -41,7 +41,7 @@ const Expenses: React.FC = () => {
 
   const fetchExpenses = async (customFilters: Filters = filters) => {
     try {
-      const response = await api.get(`/expenses/user/${userId}`, {
+      const response = await api.get(`/expenses`, {
         params: {
           userId,
           from: customFilters.fromDate || undefined,

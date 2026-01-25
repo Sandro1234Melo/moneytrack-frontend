@@ -4,12 +4,24 @@ import { registerUser } from "../services/authService";
 
 export default function Register() {
   const navigate = useNavigate();
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [country, setCountry] = useState("BR");
+  const [currency, setCurrency] = useState("BRL");
+  const language = "pt-BR";
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const countryCurrencyMap: Record<string, string> = {
+    BR: "BRL",
+    PT: "EUR",
+    US: "USD"
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +39,9 @@ export default function Register() {
         full_Name: fullName,
         email,
         password,
+        country_Code: country,
+        currency_Code: currency,
+        language
       });
 
       navigate("/login");
@@ -45,63 +60,105 @@ export default function Register() {
         </h1>
 
         <form onSubmit={handleRegister} className="space-y-4">
+
+          {/* Nome */}
           <div>
             <label className="block text-sm text-gray-400 mb-1">
               Nome completo
             </label>
             <input
-              type="text"
-              required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full px-4 py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg focus:ring-2 focus:ring-purple-600"
+              required
+              className="w-full px-4 py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg"
             />
           </div>
 
+          {/* Email */}
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Email</label>
+            <label className="block text-sm text-gray-400 mb-1">
+              Email
+            </label>
             <input
               type="email"
-              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg focus:ring-2 focus:ring-purple-600"
+              required
+              className="w-full px-4 py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg"
             />
           </div>
 
+          {/* País */}
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Senha</label>
+            <label className="block text-sm text-gray-400 mb-1">
+              País
+            </label>
+            <select
+              value={country}
+              onChange={(e) => {
+                const selected = e.target.value;
+                setCountry(selected);
+                setCurrency(countryCurrencyMap[selected]);
+              }}
+              className="w-full px-4 py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg"
+            >
+              <option value="BR">Brasil</option>
+              <option value="PT">Portugal</option>
+              <option value="US">Estados Unidos</option>
+            </select>
+          </div>
+
+          {/* Moeda */}
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">
+              Moeda
+            </label>
+            <input
+              value={currency}
+              disabled
+              className="w-full px-4 py-2 bg-[#000018] text-gray-400 border border-[#1f1f3a] rounded-lg"
+            />
+          </div>
+
+          {/* Senha */}
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">
+              Senha
+            </label>
             <input
               type="password"
-              required
-              minLength={6}
               value={password}
+              minLength={6}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg focus:ring-2 focus:ring-purple-600"
+              required
+              className="w-full px-4 py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg"
             />
           </div>
 
+          {/* Confirmar senha */}
           <div>
             <label className="block text-sm text-gray-400 mb-1">
               Confirmar senha
             </label>
             <input
               type="password"
-              required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg focus:ring-2 focus:ring-purple-600"
+              required
+              className="w-full px-4 py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-500 text-center">{error}</p>
+            <p className="text-sm text-red-500 text-center">
+              {error}
+            </p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition font-medium"
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-medium"
           >
             {loading ? "Criando..." : "Criar conta"}
           </button>
