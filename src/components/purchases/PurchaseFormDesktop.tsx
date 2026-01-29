@@ -11,7 +11,7 @@ type Props = {
   onCancel: () => void;
 };
 
-const PurchaseForm: React.FC<Props> = ({
+const PurchaseFormDesktop: React.FC<Props> = ({
   purchase,
   locations,
   categories,
@@ -131,4 +131,4 @@ const PurchaseForm: React.FC<Props> = ({
     </div>
   );
 };
-export default PurchaseForm;
+export default PurchaseFormDesktop;
