@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 
-import PurchaseForm from "../components/purchases/PurchaseForm";
+import PurchaseForm from "../components/purchases/PurchaseFormDesktop";
 import PurchaseList from "../components/purchases/PurchaseList";
 import PurchaseCardList from "../components/purchases/PurchaseCardList";
 import PurchaseFilters, { type Filters } from "../components/ui/ExpenseFilters";
 import Alert from "../components/ui/Alert";
 import { Button } from "../components/ui/Button";
 import { getLoggedUser } from "../utils/auth";
+import PurchaseFormMobile from "../components/purchases/PurchaseFormMobile";
+import PurchaseFormDesktop from "../components/purchases/PurchaseFormDesktop";
 
 const Purchases = () => {
   const [purchases, setPurchases] = useState<any[]>([]);
@@ -129,14 +131,30 @@ const Purchases = () => {
           <Alert message={successMessage} variant="success" />
         )}
 
-        <PurchaseForm
-          key={formKey}
-          purchase={editingPurchase}
-          categories={categories}
-          locations={locations}
-          onCancel={() => setEditingPurchase(null)}
-          onSave={handleSave}
-        />
+        {/* FORM — DESKTOP */}
+        <div className="hidden lg:block">
+          <PurchaseFormDesktop
+            key={formKey}
+            purchase={editingPurchase}
+            categories={categories}
+            locations={locations}
+            onCancel={() => setEditingPurchase(null)}
+            onSave={handleSave}
+          />
+        </div>
+
+        {/* FORM — MOBILE */}
+        <div className="lg:hidden">
+          <PurchaseFormMobile
+            key={formKey}
+            purchase={editingPurchase}
+            categories={categories}
+            locations={locations}
+            onCancel={() => setEditingPurchase(null)}
+            onSave={handleSave}
+          />
+        </div>
+
 
         {/* BOTÃO FILTRAR — MOBILE */}
         <div className="flex justify-end lg:hidden">
