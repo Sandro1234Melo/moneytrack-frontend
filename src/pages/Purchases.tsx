@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 
-import PurchaseForm from "../components/purchases/PurchaseFormDesktop";
 import PurchaseList from "../components/purchases/PurchaseList";
 import PurchaseCardList from "../components/purchases/PurchaseCardList";
 import PurchaseFilters, { type Filters } from "../components/ui/ExpenseFilters";
