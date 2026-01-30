@@ -197,7 +197,7 @@ const Purchases = () => {
 
       {/* DRAWER FILTROS — MOBILE */}
       {openFilters && (
-        <div className="fixed inset-0 z-50 flex justify-center bg-black/60">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
 
           {/* Overlay */}
           <div
@@ -206,8 +206,8 @@ const Purchases = () => {
           />
 
           {/* Drawer */}
-          <div className="relative w-full max-w-md bg-surface-dark
-                          rounded-t-xl p-4 mt-auto">
+          <div className="relative h-auto max-h-[90%] w-auto max-w-[90%] max-w-md bg-zinc-900
+                    rounded-xl p-4 overflow-y-auto">
 
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Filtros</h3>
