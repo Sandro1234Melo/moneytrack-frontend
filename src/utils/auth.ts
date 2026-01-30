@@ -1,4 +1,13 @@
+import { getCurrencySymbol } from "./currency";
+
 export function getLoggedUser() {
   const user = sessionStorage.getItem("user");
-  return user ? JSON.parse(user) : null;
+  if (!user) return null;
+
+  const parsed = JSON.parse(user);
+
+  return {
+    ...parsed,
+    currencySymbol: getCurrencySymbol(parsed.currency_Code)
+  };
 }

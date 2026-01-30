@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import ConfirmDialog from "../ui/ConfirmDialog";
+import { getLoggedUser } from "../../utils/auth";
 
 type Props = {
   purchases: any[];
@@ -9,6 +10,10 @@ type Props = {
 };
 
 const PurchaseList: React.FC<Props> = ({ purchases, onEdit, onDelete }) => {
+
+  const user = getLoggedUser();
+   const currencySymbol = user?.currencySymbol || "€";
+   
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   return (
@@ -32,7 +37,7 @@ const PurchaseList: React.FC<Props> = ({ purchases, onEdit, onDelete }) => {
               </div>
 
               <div className="text-primary-light font-semibold text-right">
-                € {p.amount?.toFixed(2)}
+                {currencySymbol} {p.amount?.toFixed(2)}
               </div>
 
               <button

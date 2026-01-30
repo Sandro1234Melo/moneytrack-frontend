@@ -1,6 +1,7 @@
 import ExpenseItemRow from "./ExpenseItemRow";
 import { formatDateBR } from "../utils/formatDate";
 import { cn } from "../lib/utils";
+import { getLoggedUser } from "../utils/auth";
 
 
 type ExpenseItem = {
@@ -22,6 +23,10 @@ type Props = {
 };
 
 const ExpenseCard: React.FC<Props> = ({ expense, className }) => {
+
+  const user = getLoggedUser();
+   const currencySymbol = user?.currencySymbol || "€";
+   
   const total = expense.items.reduce((sum, i) => sum + i.amount, 0);
   const quantity = expense.items.reduce((sum, i) => sum + (i.quantity ?? 0), 0);
 
@@ -46,7 +51,7 @@ const ExpenseCard: React.FC<Props> = ({ expense, className }) => {
           <span>Data: {formatDateBR(expense.date)}</span>
           <span>Qtd: {quantity}</span>
           <span className="font-semibold text-primary-light">
-            € {total.toFixed(2)}
+            {currencySymbol} {total.toFixed(2)}
           </span>
         </div>
 

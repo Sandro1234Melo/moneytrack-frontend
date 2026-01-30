@@ -1,4 +1,5 @@
 import { Pencil, Trash2 } from "lucide-react";
+import { getLoggedUser } from "../../utils/auth";
 
 type Props = {
   purchase: any;
@@ -7,6 +8,10 @@ type Props = {
 };
 
 const PurchaseCard = ({ purchase, onEdit, onDelete }: Props) => {
+
+  const user = getLoggedUser();
+   const currencySymbol = user?.currencySymbol || "€";
+   
   return (
     <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-2">
 
@@ -16,7 +21,7 @@ const PurchaseCard = ({ purchase, onEdit, onDelete }: Props) => {
         </span>
 
         <span className="font-semibold text-primary-light">
-          € {purchase.amount?.toFixed(2)}
+          {currencySymbol} {purchase.amount?.toFixed(2)}
         </span>
       </div>
 
