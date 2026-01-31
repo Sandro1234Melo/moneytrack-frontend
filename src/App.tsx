@@ -13,6 +13,7 @@ import Locations from "./pages/Locations";
 import Purchases from "./pages/Purchases";
 import Reports from "./pages/Reports";
 import ShoppingLists from "./pages/ShoppingLists";
+import Settings from "./pages/Settings";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/settings" element={<Settings />} />
 
         <Route
           element={

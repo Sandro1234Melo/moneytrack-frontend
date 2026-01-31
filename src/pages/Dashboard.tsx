@@ -1,5 +1,6 @@
 import React from "react";
 import Navbar from "../components/Navbar";
+import { getLoggedUser } from "../utils/auth";
 
 const StatCard: React.FC<{ title: string; value: string }> = ({ title, value }) => (
   <div className="bg-[#0b1220] p-4 rounded-lg shadow-sm border border-[#17202a]">
@@ -9,14 +10,18 @@ const StatCard: React.FC<{ title: string; value: string }> = ({ title, value }) 
 );
 
 const Dashboard: React.FC = () => {
+
+  const user = getLoggedUser();
+     const currencySymbol = user?.currencySymbol || "€";
+     
   return (
     <div>
       <Navbar />
 
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <StatCard title="Saldo Atual" value="R$ 1.200,00" />
-        <StatCard title="Despesa Mensal" value="R$ 450,00" />
-        <StatCard title="Receita Mensal" value="R$ 2.000,00" />
+        <StatCard title="Saldo Atual" value={`${currencySymbol} 1.200,00`} />
+        <StatCard title="Despesa Mensal" value={`${currencySymbol} 450,00`} />
+        <StatCard title="Receita Mensal" value={`${currencySymbol} 2.000,00`} />
       </div>
 
       <div className="grid grid-cols-2 gap-6">
