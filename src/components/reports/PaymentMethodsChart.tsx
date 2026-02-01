@@ -1,19 +1,29 @@
+import { useEffect, useState } from "react";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from "recharts";
+import api from "../../api/axios";
+import type { ReportFilters } from "../reports/ReportFilters";
 
-const data = [
-  { method: "Cartão", total: 1200 },
-  { method: "Dinheiro", total: 300 },
-  { method: "Pix", total: 520 }
-];
+type Props = {
+  userId: number
+  filters: ReportFilters
+}
 
-const PaymentMethodsChart = () => {
+const PaymentMethodsChart: React.FC<Props> = ({ userId, filters }) => {
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    api.get("/reports/payment-methods", {
+      params: { userId, ...filters }
+    })
+      .then(res => setData(res.data))
+      .catch(console.error);
+
+  }, [userId, filters]);
+
   return (
     <div className="bg-[#071122] p-6 rounded-lg border border-[#12202a]">
       <h3 className="text-lg font-semibold mb-4">
@@ -26,11 +36,7 @@ const PaymentMethodsChart = () => {
             <XAxis dataKey="method" stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" />
             <Tooltip />
-            <Bar
-              dataKey="total"
-              fill="#8b5cf6"
-              radius={[6, 6, 0, 0]}
-            />
+            <Bar dataKey="total" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

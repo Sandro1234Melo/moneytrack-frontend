@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import PurchaseItemsTable from "./PurchaseItemsTable";
 import PurchaseHeader from "./PurchaseHeader";
 import PurchaseActions from "./PurchaseActions";
+import FormSelect from "../ui/FormSelect";
+import { paymentMethods } from "../../utils/paymentMethods";
 
 type Props = {
   purchase?: any | null;
@@ -18,18 +20,55 @@ const PurchaseFormDesktop: React.FC<Props> = ({
   onSave,
   onCancel
 }) => {
-
   const formRef = useRef<HTMLDivElement>(null);
 
   const [date, setDate] = useState(
     purchase?.date ?? new Date().toISOString().substring(0, 10)
   );
+
   const [locationId, setLocationId] = useState<number | "">(
     purchase?.locationId ?? ""
   );
+
+  const [paymentMethod, setPaymentMethod] = useState<number | "">(
+    purchase?.paymentMethod ?? ""
+  );
+
   const [items, setItems] = useState<any[]>(purchase?.items ?? []);
 
+  useEffect(() => {
+    if (purchase) {
+      setDate(purchase.date?.substring(0, 10));
+      setLocationId(purchase.locationId ?? "");
+      setPaymentMethod(purchase.paymentMethod ?? "");
+
+      setItems(
+        purchase.items.map((item: any) => ({
+          description: item.description ?? "",
+          categoryId: String(item.categoryId ?? item.category?.id ?? ""),
+          quantity: item.quantity ?? 1,
+          price: item.price ?? item.unitPrice ?? 0
+        }))
+      );
+    } else {
+      setDate(new Date().toISOString().substring(0, 10));
+      setLocationId("");
+      setPaymentMethod("");
+      setItems([]);
+    }
+  }, [purchase]);
+
   const handleSubmit = () => {
+    if (!locationId) {
+      alert("Selecione o local");
+      return;
+    }
+
+    if (paymentMethod === "") {
+      alert("Selecione a forma de pagamento");
+      return;
+    }
+
     if (items.length === 0) {
       alert("Adicione pelo menos um item");
       return;
@@ -45,56 +84,20 @@ const PurchaseFormDesktop: React.FC<Props> = ({
     onSave({
       date,
       locationId,
+      paymentMethod,
       items: items.map(item => ({
-        ...item,
-        categoryId: Number(item.categoryId), // 🔥 aqui sim converte
+        description: item.description,
+        categoryId: Number(item.categoryId),
         quantity: Number(item.quantity),
         price: Number(item.price)
       }))
     });
   };
 
-  useEffect(() => {
-    if (purchase) {
-      setDate(purchase.date?.substring(0, 10));
-      setLocationId(purchase.locationId ?? "");
-
-      setItems(
-        purchase.items.map((item: any) => ({
-        description: item.description ?? "",
-        categoryId: String(
-          item.categoryId ?? item.category?.id ?? ""
-        ),
-        quantity: item.quantity ?? 1,
-        price: item.price ?? item.unitPrice ?? 0
-        }))
-      );
-    } else {
-      setDate(new Date().toISOString().substring(0, 10));
-      setLocationId("");
-      setItems([]);
-    }
-  }, [purchase]);
-
-
-  useEffect(() => {
-    if (purchase && formRef.current) {
-      formRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-    }
-  }, [purchase]);
-
   const handleAddItem = () => {
     setItems([
       ...items,
-      {
-        description: "",
-        categoryId: "",
-        quantity: 1,
-        price: 0
-      }
+      { description: "", categoryId: "", quantity: 1, price: 0 }
     ]);
   };
 
@@ -103,7 +106,6 @@ const PurchaseFormDesktop: React.FC<Props> = ({
       ref={formRef}
       className="bg-surface-dark border border-[#12202a] rounded-lg p-6"
     >
-
       <h2 className="text-lg font-semibold mb-4">
         {purchase ? "Editar Compra" : "Nova Compra"}
       </h2>
@@ -116,6 +118,16 @@ const PurchaseFormDesktop: React.FC<Props> = ({
         locations={locations}
       />
 
+      <div className="mt-4 max-w-sm">
+        <FormSelect
+          label="Forma de pagamento"
+          value={paymentMethod}
+          onChange={value => setPaymentMethod(Number(value))}
+          options={paymentMethods}
+          placeholder="Selecione"
+        />
+      </div>
+
       <PurchaseItemsTable
         items={items}
         setItems={setItems}
@@ -127,8 +139,8 @@ const PurchaseFormDesktop: React.FC<Props> = ({
         onSave={handleSubmit}
         onAddItem={handleAddItem}
       />
-
     </div>
   );
 };
+
 export default PurchaseFormDesktop;

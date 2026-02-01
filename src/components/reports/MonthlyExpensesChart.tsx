@@ -1,21 +1,29 @@
+import { useEffect, useState } from "react";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from "recharts";
+import api from "../../api/axios";
+import type {ReportFilters}  from "../reports/ReportFilters";
 
-const data = [
-  { month: "Jan", total: 450 },
-  { month: "Fev", total: 620 },
-  { month: "Mar", total: 510 },
-  { month: "Abr", total: 780 },
-  { month: "Mai", total: 690 }
-];
+type Props = {
+  userId: number
+  filters: ReportFilters
+}
 
-const MonthlyExpensesChart = () => {
+const MonthlyExpensesChart: React.FC<Props> = ({ userId, filters }) => {
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    api.get("/reports/monthly-expenses", {
+      params: { userId, ...filters }
+    })
+      .then(res => setData(res.data))
+      .catch(console.error);
+
+  }, [userId, filters]);
+
   return (
     <div className="bg-[#071122] p-6 rounded-lg border border-[#12202a]">
       <h3 className="text-lg font-semibold mb-4">
@@ -32,7 +40,7 @@ const MonthlyExpensesChart = () => {
               type="monotone"
               dataKey="total"
               stroke="#8b5cf6"
-              strokeWidth={2}
+              strokeWidth={3}
             />
           </LineChart>
         </ResponsiveContainer>
