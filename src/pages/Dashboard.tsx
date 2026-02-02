@@ -19,9 +19,9 @@ const Dashboard: React.FC = () => {
       <Navbar />
 
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <StatCard title="Saldo Atual" value={`${currencySymbol} 1.200,00`} />
-        <StatCard title="Despesa Mensal" value={`${currencySymbol} 450,00`} />
-        <StatCard title="Receita Mensal" value={`${currencySymbol} 2.000,00`} />
+        <StatCard title="Saldo Atual" value={`${currencySymbol} 0,00`} />
+        <StatCard title="Despesa Mensal" value={`${currencySymbol} 0,00`} />
+        <StatCard title="Receita Mensal" value={`${currencySymbol} 0.00`} />
       </div>
 
       <div className="grid grid-cols-2 gap-6">
