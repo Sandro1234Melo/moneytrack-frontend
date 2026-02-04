@@ -45,11 +45,12 @@ const PurchaseFormDesktop: React.FC<Props> = ({
       setItems(
         purchase.items.map((item: any) => ({
           description: item.description ?? "",
-          categoryId: String(item.categoryId ?? item.category?.id ?? ""),
+          categoryId: String(item.categoryId ?? ""),
           quantity: item.quantity ?? 1,
-          price: item.price ?? item.unitPrice ?? 0
+          price: item.unitPrice ?? item.price ?? 0
         }))
       );
+
     } else {
       setDate(new Date().toISOString().substring(0, 10));
       setLocationId("");
@@ -57,6 +58,7 @@ const PurchaseFormDesktop: React.FC<Props> = ({
       setItems([]);
     }
   }, [purchase]);
+
 
   const handleSubmit = () => {
     if (!locationId) {
@@ -83,8 +85,8 @@ const PurchaseFormDesktop: React.FC<Props> = ({
 
     onSave({
       date,
-      locationId,
-      paymentMethod,
+      locationId: Number(locationId),
+      paymentMethod: Number(paymentMethod),
       items: items.map(item => ({
         description: item.description,
         categoryId: Number(item.categoryId),
@@ -92,6 +94,7 @@ const PurchaseFormDesktop: React.FC<Props> = ({
         price: Number(item.price)
       }))
     });
+
   };
 
   const handleAddItem = () => {

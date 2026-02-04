@@ -31,20 +31,25 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({
     purchase?.paymentMethod ?? ""
   );
 
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]); 
 
   useEffect(() => {
     if (purchase) {
+      setDate(purchase.date?.substring(0, 10));
+      setLocationId(purchase.locationId ?? "");
+      setPaymentMethod(purchase.paymentMethod ?? "");
+
       setItems(
         purchase.items.map((item: any) => ({
           description: item.description ?? "",
-          categoryId: String(item.categoryId ?? item.category?.id ?? ""),
+          categoryId: item.category?.id ?? "",
           quantity: item.quantity ?? 1,
-          price: item.price ?? item.unitPrice ?? 0
+          price: item.unitPrice ?? 0
         }))
       );
     } else {
       setItems([]);
+      setPaymentMethod("");
     }
   }, [purchase]);
 

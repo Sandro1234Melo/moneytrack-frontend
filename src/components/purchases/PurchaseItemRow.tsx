@@ -2,7 +2,8 @@ import { Trash2 } from "lucide-react";
 import FormSelect from "../ui/FormSelect";
 
 const PurchaseItemRow = ({ item, categories, onChange, onRemove }: any) => {
-  return (
+  
+  return (    
     <div className="grid grid-cols-12 gap-2 px-4 py-2 items-center">
 
       <div className="col-span-4">
