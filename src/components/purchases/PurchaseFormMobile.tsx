@@ -42,7 +42,7 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({
       setItems(
         purchase.items.map((item: any) => ({
           description: item.description ?? "",
-          categoryId: item.category?.id ?? "",
+          categoryId: String(item.categoryId ?? ""),
           quantity: item.quantity ?? 1,
           price: item.unitPrice ?? 0
         }))
@@ -161,14 +161,14 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({
 
             <FormSelect
               label="Categoria"
-              value={item.categoryId}
+              value={item.categoryId ?? ""}
               onChange={value => {
                 const copy = [...items];
                 copy[index].categoryId = value;
                 setItems(copy);
               }}
               options={categories.map(c => ({
-                value: c.id,
+                value: String(c.id),
                 label: c.name
               }))}
             />
