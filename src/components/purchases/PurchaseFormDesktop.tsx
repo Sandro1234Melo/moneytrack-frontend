@@ -34,7 +34,7 @@ const PurchaseFormDesktop: React.FC<Props> = ({
     purchase?.paymentMethod ?? ""
   );
 
-  const [openCategoryModal, setOpenCategoryModal] = useState(false);
+  //const [openCategoryModal, setOpenCategoryModal] = useState(false);
 
 
   const [items, setItems] = useState<any[]>(purchase?.items ?? []);
