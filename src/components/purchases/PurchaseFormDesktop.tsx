@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import PurchaseItemsTable from "./PurchaseItemsTable";
 import PurchaseHeader from "./PurchaseHeader";
 import PurchaseActions from "./PurchaseActions";
-import FormSelect from "../ui/FormSelect";
-import { paymentMethods } from "../../utils/paymentMethods";
+import CategoryQuickCreate from "../categories/CreateCategoryModal";
 
 type Props = {
   purchase?: any | null;
@@ -22,38 +21,26 @@ const PurchaseFormDesktop: React.FC<Props> = ({
 }) => {
   const formRef = useRef<HTMLDivElement>(null);
 
-  const [date, setDate] = useState(
-    purchase?.date ?? new Date().toISOString().substring(0, 10)
-  );
-
-  const [locationId, setLocationId] = useState<number | "">(
-    purchase?.locationId ?? ""
-  );
-
-  const [paymentMethod, setPaymentMethod] = useState<number | "">(
-    purchase?.paymentMethod ?? ""
-  );
-
-  //const [openCategoryModal, setOpenCategoryModal] = useState(false);
-
-
-  const [items, setItems] = useState<any[]>(purchase?.items ?? []);
+  const [date, setDate] = useState("");
+  const [locationId, setLocationId] = useState<number | "">("");
+  const [paymentMethod, setPaymentMethod] = useState<number | "">("");
+  const [items, setItems] = useState<any[]>([]);
+  const [openCategoryModal, setOpenCategoryModal] = useState(false);
 
   useEffect(() => {
     if (purchase) {
-      setDate(purchase.date?.substring(0, 10));
-      setLocationId(purchase.locationId ?? "");
-      setPaymentMethod(purchase.paymentMethod ?? "");
+      setDate(purchase.date?.substring(0, 10) ?? "");
+      setLocationId(purchase.locationId ? Number(purchase.locationId) : "");
+      setPaymentMethod(purchase.paymentMethod !== undefined ? Number(purchase.paymentMethod) : "");
 
       setItems(
-        purchase.items.map((item: any) => ({
+        purchase.items?.map((item: any) => ({
           description: item.description ?? "",
           categoryId: String(item.categoryId ?? ""),
           quantity: item.quantity ?? 1,
           price: item.unitPrice ?? item.price ?? 0
-        }))
+        })) ?? []
       );
-
     } else {
       setDate(new Date().toISOString().substring(0, 10));
       setLocationId("");
@@ -62,29 +49,10 @@ const PurchaseFormDesktop: React.FC<Props> = ({
     }
   }, [purchase]);
 
-
   const handleSubmit = () => {
-    if (!locationId) {
-      alert("Selecione o local");
-      return;
-    }
-
-    if (paymentMethod === "") {
-      alert("Selecione a forma de pagamento");
-      return;
-    }
-
-    if (items.length === 0) {
-      alert("Adicione pelo menos um item");
-      return;
-    }
-
-    for (const item of items) {
-      if (!item.categoryId) {
-        alert("Todos os itens devem ter categoria");
-        return;
-      }
-    }
+    if (!locationId) { alert("Selecione o local"); return; }
+    if (paymentMethod === "") { alert("Selecione a forma de pagamento"); return; }
+    if (items.length === 0) { alert("Adicione pelo menos um item"); return; }
 
     onSave({
       date,
@@ -97,21 +65,10 @@ const PurchaseFormDesktop: React.FC<Props> = ({
         price: Number(item.price)
       }))
     });
-
-  };
-
-  const handleAddItem = () => {
-    setItems([
-      ...items,
-      { description: "", categoryId: "", quantity: 1, price: 0 }
-    ]);
   };
 
   return (
-    <div
-      ref={formRef}
-      className="bg-surface-dark border border-[#12202a] rounded-lg p-6"
-    >
+    <div ref={formRef} className="bg-surface-dark border border-[#12202a] rounded-lg p-6">
       <h2 className="text-lg font-semibold mb-4">
         {purchase ? "Editar Compra" : "Nova Compra"}
       </h2>
@@ -121,30 +78,22 @@ const PurchaseFormDesktop: React.FC<Props> = ({
         setDate={setDate}
         locationId={locationId}
         setLocationId={setLocationId}
+        paymentMethod={paymentMethod}
+        setPaymentMethod={setPaymentMethod}
         locations={locations}
       />
 
-      <div className="mt-4 max-w-sm">
-        <FormSelect
-          label="Forma de pagamento"
-          value={paymentMethod}
-          onChange={value => setPaymentMethod(Number(value))}
-          options={paymentMethods}
-          placeholder="Selecione"
-        />
+      <div className="mt-2">
+        <button type="button" onClick={() => setOpenCategoryModal(true)} className="text-sm text-purple-400 hover:underline">
+          + Nova categoria
+        </button>
       </div>
 
-      <PurchaseItemsTable
-        items={items}
-        setItems={setItems}
-        categories={categories}
-      />
+      <PurchaseItemsTable items={items} setItems={setItems} categories={categories} />
 
-      <PurchaseActions
-        onCancel={onCancel}
-        onSave={handleSubmit}
-        onAddItem={handleAddItem}
-      />
+      <PurchaseActions onCancel={onCancel} onSave={handleSubmit} onAddItem={() => setItems([...items, { description: "", categoryId: "", quantity: 1, price: 0 }])} />
+
+      <CategoryQuickCreate open={openCategoryModal} onClose={() => setOpenCategoryModal(false)} onCreated={(newCat) => categories.push(newCat)} />
     </div>
   );
 };

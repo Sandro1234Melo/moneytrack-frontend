@@ -1,7 +1,7 @@
 import { useState } from "react";
-import Modal from "../ui/Modal";
 import api from "../../api/axios";
 import { getLoggedUser } from "../../utils/auth";
+import Modal from "../ui/Modal";
 
 type Props = {
   open: boolean;
@@ -9,40 +9,51 @@ type Props = {
   onCreated: (category: any) => void;
 };
 
-const CreateCategoryModal = ({ open, onClose, onCreated }: Props) => {
+const CategoryQuickCreate: React.FC<Props> = ({
+  open,
+  onClose,
+  onCreated
+}) => {
   const [name, setName] = useState("");
   const user = getLoggedUser();
 
   const handleSave = async () => {
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      alert("Informe o nome da categoria");
+      return;
+    }
 
-    const res = await api.post("/categories", {
+    const response = await api.post("/categories", {
       name,
       userId: user.id
     });
 
-    onCreated(res.data);
+    onCreated(response.data);
     setName("");
     onClose();
   };
 
   return (
-    <Modal open={open} title="Nova Categoria" onClose={onClose}>
-      <input
-        value={name}
-        onChange={e => setName(e.target.value)}
-        placeholder="Nome da categoria"
-        className="input w-full mb-4"
-      />
+    <Modal open={open} onClose={onClose} title="Nova categoria">
+      
+      <div className="space-y-4">
+        <input
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="Nome da categoria"
+          className="input-primary w-full"
+        />
 
-      <button
-        onClick={handleSave}
-        className="w-full bg-purple-700 py-2 rounded-lg"
-      >
-        Salvar
-      </button>
+        <button
+          onClick={handleSave}
+          className="w-full bg-purple-600 py-2 rounded-lg"
+        >
+          Salvar categoria
+        </button>
+      </div>
+
     </Modal>
   );
 };
 
-export default CreateCategoryModal;
+export default CategoryQuickCreate;
