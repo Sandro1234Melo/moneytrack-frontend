@@ -1,9 +1,14 @@
-import { Trash2 } from "lucide-react";
+import { Trash2, Plus } from "lucide-react";
 import FormSelect from "../ui/FormSelect";
 
-const PurchaseItemRow = ({ item, categories, onChange, onRemove }: any) => {
-  
-  return (    
+const PurchaseItemRow = ({
+  item,
+  categories,
+  onChange,
+  onRemove,
+  onAddCategory
+}: any) => {
+  return (
     <div className="grid grid-cols-12 gap-2 px-4 py-2 items-center">
 
       <div className="col-span-4">
@@ -15,18 +20,30 @@ const PurchaseItemRow = ({ item, categories, onChange, onRemove }: any) => {
         />
       </div>
 
-      <div className="col-span-3">
-        <FormSelect
-          label=""
-          value={item.categoryId ?? ""}
-          placeholder="Categoria"
-          onChange={(v) => onChange("categoryId", v)}
-          options={categories.map((cat: any) => ({
-            value: String(cat.id),
-            label: cat.name
-          }))}
-        />
+      {/* CATEGORIA + BOTÃO */}
+      <div className="col-span-3 flex gap-2 items-center">
+        <div className="flex-1">
+          <FormSelect
+            label=""
+            value={item.categoryId ?? ""}
+            placeholder="Categoria"
+            onChange={(v) => onChange("categoryId", v)}
+            options={categories.map((cat: any) => ({
+              value: String(cat.id),
+              label: cat.name
+            }))}
+          />
+        </div>
 
+        <button
+          type="button"
+          onClick={onAddCategory}
+          className="w-8 h-8 flex items-center justify-center 
+                     rounded-md bg-purple-600 hover:bg-purple-700"
+          title="Nova categoria"
+        >
+          <Plus size={16} />
+        </button>
       </div>
 
       <div className="col-span-2">
@@ -45,7 +62,7 @@ const PurchaseItemRow = ({ item, categories, onChange, onRemove }: any) => {
           step="0.01"
           value={item.price}
           onChange={e => onChange("price", Number(e.target.value))}
-          className="input-primary w-full "
+          className="input-primary w-full"
         />
       </div>
 

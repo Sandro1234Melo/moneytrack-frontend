@@ -27,11 +27,22 @@ const PurchaseFormDesktop: React.FC<Props> = ({
   const [items, setItems] = useState<any[]>([]);
   const [openCategoryModal, setOpenCategoryModal] = useState(false);
 
+  // lista local de categorias (para atualizar após criação)
+  const [localCategories, setLocalCategories] = useState<any[]>(categories);
+
+  useEffect(() => {
+    setLocalCategories(categories);
+  }, [categories]);
+
   useEffect(() => {
     if (purchase) {
       setDate(purchase.date?.substring(0, 10) ?? "");
       setLocationId(purchase.locationId ? Number(purchase.locationId) : "");
-      setPaymentMethod(purchase.paymentMethod !== undefined ? Number(purchase.paymentMethod) : "");
+      setPaymentMethod(
+        purchase.paymentMethod !== undefined
+          ? Number(purchase.paymentMethod)
+          : ""
+      );
 
       setItems(
         purchase.items?.map((item: any) => ({
@@ -50,9 +61,18 @@ const PurchaseFormDesktop: React.FC<Props> = ({
   }, [purchase]);
 
   const handleSubmit = () => {
-    if (!locationId) { alert("Selecione o local"); return; }
-    if (paymentMethod === "") { alert("Selecione a forma de pagamento"); return; }
-    if (items.length === 0) { alert("Adicione pelo menos um item"); return; }
+    if (!locationId) {
+      alert("Selecione o local");
+      return;
+    }
+    if (paymentMethod === "") {
+      alert("Selecione a forma de pagamento");
+      return;
+    }
+    if (items.length === 0) {
+      alert("Adicione pelo menos um item");
+      return;
+    }
 
     onSave({
       date,
@@ -67,8 +87,29 @@ const PurchaseFormDesktop: React.FC<Props> = ({
     });
   };
 
+  const handleAddCategory = () => {
+    setOpenCategoryModal(true);
+  };
+
+  const handleCategoryCreated = (newCat: any) => {
+    setLocalCategories(prev => [...prev, newCat]);
+
+    setItems(prev => {
+      if (prev.length === 0) return prev;
+      const copy = [...prev];
+      copy[copy.length - 1].categoryId = String(newCat.id);
+      return copy;
+    });
+
+    setOpenCategoryModal(false);
+  };
+
+
   return (
-    <div ref={formRef} className="bg-surface-dark border border-[#12202a] rounded-lg p-6">
+    <div
+      ref={formRef}
+      className="bg-surface-dark border border-[#12202a] rounded-lg p-6"
+    >
       <h2 className="text-lg font-semibold mb-4">
         {purchase ? "Editar Compra" : "Nova Compra"}
       </h2>
@@ -81,19 +122,39 @@ const PurchaseFormDesktop: React.FC<Props> = ({
         paymentMethod={paymentMethod}
         setPaymentMethod={setPaymentMethod}
         locations={locations}
+        onAddLocation={() => {
+          /* futuro modal de local */
+        }}
       />
 
-      <div className="mt-2">
-        <button type="button" onClick={() => setOpenCategoryModal(true)} className="text-sm text-purple-400 hover:underline">
-          + Nova categoria
-        </button>
-      </div>
+      <PurchaseItemsTable
+        items={items}
+        setItems={setItems}
+        categories={localCategories}
+        onAddCategory={handleAddCategory}
+      />
 
-      <PurchaseItemsTable items={items} setItems={setItems} categories={categories} />
+      <PurchaseActions
+        onCancel={onCancel}
+        onSave={handleSubmit}
+        onAddItem={() =>
+          setItems([
+            ...items,
+            {
+              description: "",
+              categoryId: "",
+              quantity: 1,
+              price: 0
+            }
+          ])
+        }
+      />
 
-      <PurchaseActions onCancel={onCancel} onSave={handleSubmit} onAddItem={() => setItems([...items, { description: "", categoryId: "", quantity: 1, price: 0 }])} />
-
-      <CategoryQuickCreate open={openCategoryModal} onClose={() => setOpenCategoryModal(false)} onCreated={(newCat) => categories.push(newCat)} />
+      <CategoryQuickCreate
+        open={openCategoryModal}
+        onClose={() => setOpenCategoryModal(false)}
+        onCreated={handleCategoryCreated}
+      />
     </div>
   );
 };

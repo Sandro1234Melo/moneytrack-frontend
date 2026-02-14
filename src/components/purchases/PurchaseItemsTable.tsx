@@ -1,6 +1,6 @@
 import PurchaseItemRow from "./PurchaseItemRow";
 
-const PurchaseItemsTable = ({ items, setItems, categories }: any) => {
+const PurchaseItemsTable = ({ items, setItems, categories, onAddCategory }: any) => {
   const updateItem = (index: number, field: string, value: any) => {
     const copy = [...items];
     copy[index][field] = value;
@@ -15,11 +15,14 @@ const PurchaseItemsTable = ({ items, setItems, categories }: any) => {
     <div className="border border-[#12202a] rounded">
 
       <div className="grid grid-cols-12 text-sm text-blue-100 px-4 py-2">
-        
-        <div className="col-span-4"><span>Produto</span></div>
-        <div className="col-span-3"><span>Categoria</span></div>
-        <div className="col-span-2"><span>Qtd</span></div>
-        <div className="col-span-2"><span>Preço</span></div>
+        <div className="col-span-4">Produto</div>
+
+        <div className="col-span-3 flex items-center gap-2">
+          <span>Categoria</span>
+        </div>
+
+        <div className="col-span-2">Qtd</div>
+        <div className="col-span-2">Preço</div>
         <div className="col-span-1"></div>
       </div>
 
@@ -34,7 +37,6 @@ const PurchaseItemsTable = ({ items, setItems, categories }: any) => {
           onRemove={() => removeItem(index)}
         />
       ))}
-
     </div>
   );
 };
