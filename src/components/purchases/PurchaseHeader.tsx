@@ -44,7 +44,7 @@ const PurchaseHeader: React.FC<Props> = ({
         <button
           type="button"
           onClick={onAddLocation}
-          className="w-8 h-8 flex items-center justify-center
+                    className="w-8 h-8 flex items-center justify-center
                      rounded-md bg-purple-600 hover:bg-purple-700"
           title="Novo local"
         >

@@ -6,23 +6,23 @@ import api from "../../api/axios";
 import type { ReportFilters } from "../reports/ReportFilters";
 
 type Props = {
-  userId: number
+  user_Id: number
   filters: ReportFilters
 }
 
-const PaymentMethodsChart: React.FC<Props> = ({ userId, filters }) => {
+const PaymentMethodsChart: React.FC<Props> = ({ user_Id, filters }) => {
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!user_Id) return;
 
     api.get("/reports/payment-methods", {
-      params: { userId, ...filters }
+      params: { user_Id, ...filters }
     })
       .then(res => setData(res.data))
       .catch(console.error);
 
-  }, [userId, filters]);
+  }, [user_Id, filters]);
 
   return (
     <div className="bg-[#071122] p-6 rounded-lg border border-[#12202a]">

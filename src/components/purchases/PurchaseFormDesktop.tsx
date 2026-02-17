@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import PurchaseItemsTable from "./PurchaseItemsTable";
 import PurchaseHeader from "./PurchaseHeader";
 import PurchaseActions from "./PurchaseActions";
-import CategoryQuickCreate from "../categories/CreateCategoryModal";
+import QuickCreateModal from "../ui/QuickCreateModal";
+import api from "../../api/axios";
+import { getLoggedUser } from "../../utils/auth";
 
 type Props = {
   purchase?: any | null;
@@ -20,19 +22,26 @@ const PurchaseFormDesktop: React.FC<Props> = ({
   onCancel
 }) => {
   const formRef = useRef<HTMLDivElement>(null);
+  const user = getLoggedUser();
 
   const [date, setDate] = useState("");
   const [locationId, setLocationId] = useState<number | "">("");
   const [paymentMethod, setPaymentMethod] = useState<number | "">("");
   const [items, setItems] = useState<any[]>([]);
-  const [openCategoryModal, setOpenCategoryModal] = useState(false);
 
-  // lista local de categorias (para atualizar após criação)
+  const [openCategoryModal, setOpenCategoryModal] = useState(false);
+  const [openLocationModal, setOpenLocationModal] = useState(false);
+
   const [localCategories, setLocalCategories] = useState<any[]>(categories);
+  const [localLocations, setLocalLocations] = useState<any[]>(locations);
 
   useEffect(() => {
     setLocalCategories(categories);
   }, [categories]);
+
+  useEffect(() => {
+    setLocalLocations(locations);
+  }, [locations]);
 
   useEffect(() => {
     if (purchase) {
@@ -87,11 +96,15 @@ const PurchaseFormDesktop: React.FC<Props> = ({
     });
   };
 
-  const handleAddCategory = () => {
-    setOpenCategoryModal(true);
-  };
+  // CRIAR CATEGORIA
+  const handleCreateCategory = async (data: any) => {
+    const response = await api.post("/categories", {
+      name: data.name,
+      user_Id: user?.id
+    });
 
-  const handleCategoryCreated = (newCat: any) => {
+    const newCat = response.data;
+
     setLocalCategories(prev => [...prev, newCat]);
 
     setItems(prev => {
@@ -104,6 +117,20 @@ const PurchaseFormDesktop: React.FC<Props> = ({
     setOpenCategoryModal(false);
   };
 
+  // CRIAR LOCAL
+  const handleCreateLocation = async (data: any) => {
+    const response = await api.post("/locations", {
+      name: data.name,
+      user_Id: user?.id
+    });
+
+    const newLoc = response.data;
+
+    setLocalLocations(prev => [...prev, newLoc]);
+    setLocationId(newLoc.id);
+
+    setOpenLocationModal(false);
+  };
 
   return (
     <div
@@ -121,17 +148,15 @@ const PurchaseFormDesktop: React.FC<Props> = ({
         setLocationId={setLocationId}
         paymentMethod={paymentMethod}
         setPaymentMethod={setPaymentMethod}
-        locations={locations}
-        onAddLocation={() => {
-          /* futuro modal de local */
-        }}
+        locations={localLocations}
+        onAddLocation={() => setOpenLocationModal(true)}
       />
 
       <PurchaseItemsTable
         items={items}
         setItems={setItems}
         categories={localCategories}
-        onAddCategory={handleAddCategory}
+        onAddCategory={() => setOpenCategoryModal(true)}
       />
 
       <PurchaseActions
@@ -150,10 +175,26 @@ const PurchaseFormDesktop: React.FC<Props> = ({
         }
       />
 
-      <CategoryQuickCreate
+      {/* MODAL CATEGORIA */}
+      <QuickCreateModal
         open={openCategoryModal}
+        title="Nova categoria"
+        fields={[
+          { name: "name", label: "Nome", placeholder: "Ex: Alimentação" }
+        ]}
         onClose={() => setOpenCategoryModal(false)}
-        onCreated={handleCategoryCreated}
+        onSubmit={handleCreateCategory}
+      />
+
+      {/* MODAL LOCAL */}
+      <QuickCreateModal
+        open={openLocationModal}
+        title="Novo local"
+        fields={[
+          { name: "name", label: "Nome", placeholder: "Ex: Supermercado" }
+        ]}
+        onClose={() => setOpenLocationModal(false)}
+        onSubmit={handleCreateLocation}
       />
     </div>
   );

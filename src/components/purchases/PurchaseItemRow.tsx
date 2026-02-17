@@ -10,7 +10,6 @@ const PurchaseItemRow = ({
 }: any) => {
   return (
     <div className="grid grid-cols-12 gap-2 px-4 py-2 items-center">
-
       <div className="col-span-4">
         <input
           value={item.description}
@@ -20,7 +19,6 @@ const PurchaseItemRow = ({
         />
       </div>
 
-      {/* CATEGORIA + BOTÃO */}
       <div className="col-span-3 flex gap-2 items-center">
         <div className="flex-1">
           <FormSelect
@@ -74,7 +72,6 @@ const PurchaseItemRow = ({
           <Trash2 size={18} />
         </button>
       </div>
-
     </div>
   );
 };

@@ -25,7 +25,7 @@ const CategoryQuickCreate: React.FC<Props> = ({
 
     const response = await api.post("/categories", {
       name,
-      userId: user.id
+      user_Id: user.id
     });
 
     onCreated(response.data);

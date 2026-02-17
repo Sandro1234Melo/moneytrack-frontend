@@ -8,18 +8,18 @@ import type { ReportFilters } from "../reports/ReportFilters";
 const COLORS = ["#8b5cf6", "#22d3ee", "#f97316", "#10b981"];
 
 type Props = {
-  userId: number
+  user_Id: number
   filters: ReportFilters
 }
 
-const CategoryDistributionChart: React.FC<Props> = ({ userId, filters }) => {
+const CategoryDistributionChart: React.FC<Props> = ({ user_Id, filters }) => {
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!user_Id) return;
 
     api.get("/reports/category-distribution", {
-      params: { userId, ...filters }
+      params: { user_Id , ...filters }
     })
       .then(res =>
         setData(
@@ -31,7 +31,7 @@ const CategoryDistributionChart: React.FC<Props> = ({ userId, filters }) => {
       )
       .catch(console.error);
 
-  }, [userId, filters]);
+  }, [user_Id, filters]);
 
   return (
     <div className="bg-[#071122] p-6 rounded-lg border border-[#12202a]">
