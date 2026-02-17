@@ -35,6 +35,11 @@ const Reports = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [locations, setLocations] = useState<any[]>([]);
   const [openFilters, setOpenFilters] = useState(false);
+  const currentYear = new Date().getFullYear();
+
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState( new Date().getMonth() + 1);
+
 
 
   /* ===============================
@@ -56,13 +61,86 @@ const Reports = () => {
     loadCategories();
     loadLocations();
   }, [userId]);
+  
+  useEffect(() => {
+    const from = new Date(selectedYear, selectedMonth - 1, 1);
+    const to = new Date(selectedYear, selectedMonth, 0);
+
+    setFilters((prev) => ({
+      ...prev,
+      fromDate: from.toISOString().substring(0, 10),
+      toDate: to.toISOString().substring(0, 10),
+    }));
+  }, [selectedYear, selectedMonth]);
+
+
+  const years = [currentYear - 1, currentYear, currentYear + 1];
+
+  const months = [
+    { id: 1, label: "Jan" },
+    { id: 2, label: "Fev" },
+    { id: 3, label: "Mar" },
+    { id: 4, label: "Abr" },
+    { id: 5, label: "Mai" },
+    { id: 6, label: "Jun" },
+    { id: 7, label: "Jul" },
+    { id: 8, label: "Ago" },
+    { id: 9, label: "Set" },
+    { id: 10, label: "Out" },
+    { id: 11, label: "Nov" },
+    { id: 12, label: "Dez" },
+  ];
+
 
   return (
   <div className="space-y-6">
 
-    <h2 className="text-2xl font-semibold">
-      Análises e Relatórios
-    </h2>
+    <div className="flex items-center justify-between">
+      <h2 className="text-2xl font-semibold">
+        Análises e Relatórios
+      </h2>
+
+      <Button
+        label="Filtrar"
+        variant="secondary"
+        onClick={() => setOpenFilters(true)}
+        className="lg:hidden"
+      />
+    </div>
+    <div className="flex gap-3 overflow-x-auto py-2">
+      {years.map((year) => (
+        <button
+          key={year}
+          onClick={() => setSelectedYear(year)}
+          className={`
+            px-4 py-2 rounded-lg border
+            ${selectedYear === year
+              ? "bg-blue-600 text-white border-blue-500"
+              : "bg-transparent text-gray-300 border-[#12202a]"
+            }
+          `}
+        >
+          {year}
+        </button>
+      ))}
+    </div>
+    <div className="flex gap-2 overflow-x-auto pb-4">
+      {months.map((month) => (
+        <button
+          key={month.id}
+          onClick={() => setSelectedMonth(month.id)}
+          className={`
+            px-3 py-1 rounded-md text-sm border
+            ${selectedMonth === month.id
+              ? "bg-purple-600 text-white border-purple-500"
+              : "bg-transparent text-gray-300 border-[#12202a]"
+            }
+          `}
+        >
+          {month.label}
+        </button>
+      ))}
+    </div>
 
     {/* BOTÃO FILTRAR — MOBILE */}
     <div className="flex justify-end lg:hidden">
