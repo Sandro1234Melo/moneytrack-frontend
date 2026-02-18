@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import FormSelect from "../ui/FormSelect";
+import FormSelect from "../molecules/select-field";
 import { Trash2 } from "lucide-react";
 import { paymentMethods } from "../../utils/paymentMethods";
 

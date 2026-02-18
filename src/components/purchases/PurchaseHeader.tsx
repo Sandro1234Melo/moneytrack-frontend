@@ -1,7 +1,8 @@
-import { Plus } from "lucide-react";
 import { paymentMethods } from "../../utils/paymentMethods";
-import FormDate from "../ui/FormDate";
-import FormSelect from "../ui/FormSelect";
+
+import { SelectWithAction } from "../molecules/select-with-action";
+import { SelectField } from "../molecules/select-field";
+import { DateField } from "../atoms/date-field";
 
 type Props = {
   date: string;
@@ -27,45 +28,33 @@ const PurchaseHeader: React.FC<Props> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 items-end">
 
-      <div className="flex gap-2 items-end">
-        <div className="flex-1">
-          <FormSelect
-            label="Local"
-            value={locationId}
-            placeholder="Selecione o local"
-            onChange={(v) => setLocationId(v !== "" ? Number(v) : "")}
-            options={locations.map(loc => ({
-              value: loc.id,
-              label: loc.name
-            }))}
-          />
-        </div>
-        
-        <button
-          type="button"
-          onClick={onAddLocation}
-                    className="w-8 h-8 flex items-center justify-center
-                     rounded-md bg-purple-600 hover:bg-purple-700"
-          title="Novo local"
-        >
-          <Plus size={18} />
-        </button>
-      </div>
+      <SelectWithAction
+        label="Local"
+        value={locationId}
+        onChange={(v) => setLocationId(v !== "" ? Number(v) : "")}
+        options={locations.map(loc => ({
+          value: loc.id,
+          label: loc.name
+        }))}
+        onActionClick={onAddLocation}
+        placeholder="Selecione o local"
+      />
 
-      <FormDate
+      <DateField
         label="Data"
         value={date}
         onChange={setDate}
       />
 
-      <FormSelect
+      <SelectField
         label="Forma de pagamento"
         value={paymentMethod}
         onChange={(v) => setPaymentMethod(v !== "" ? Number(v) : "")}
         options={paymentMethods}
         placeholder="Selecione"
       />
-    </div>
+
+    </div>  
   );
 };
 

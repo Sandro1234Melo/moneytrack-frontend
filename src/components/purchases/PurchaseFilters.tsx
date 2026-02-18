@@ -1,5 +1,5 @@
-import FormSelect from "../ui/FormSelect";
-import FormDate from "../ui/FormDate";
+import FormSelect from "../molecules/select-field";
+import FormDate from "../atoms/date-field";
 import FormValue from "../ui/FormValue";
 import { Button } from "../ui/Button";
 

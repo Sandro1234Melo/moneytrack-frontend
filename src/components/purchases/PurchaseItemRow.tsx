@@ -1,5 +1,5 @@
 import { Trash2, Plus } from "lucide-react";
-import FormSelect from "../ui/FormSelect";
+import FormSelect from "../molecules/select-field";
 
 const PurchaseItemRow = ({
   item,

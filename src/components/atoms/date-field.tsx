@@ -1,5 +1,6 @@
-// components/FormDate.tsx
-type FormDateProps = {
+import { Label } from "../atoms/label"
+
+type DateFieldProps = {
   label?: string
   value: string
   onChange: (value: string) => void
@@ -7,19 +8,19 @@ type FormDateProps = {
   placeholder?: string
 }
 
-const FormDate: React.FC<FormDateProps> = ({
+export const DateField = ({
   label,
   value,
   onChange,
   className = "",
   placeholder
-}) => {
+}: DateFieldProps) => {
   return (
-    <div className="flex flex-col gap-1">
+    <div className={`flex flex-col gap-1 ${className}`}>
       {label && (
-        <label className="text-sm text-blue-100">
+        <Label>
           {label}
-        </label>
+        </Label>
       )}
 
       <input
@@ -27,18 +28,17 @@ const FormDate: React.FC<FormDateProps> = ({
         value={value}
         placeholder={placeholder}
         onChange={e => onChange(e.target.value)}
-        className={`
-          input-primary w-full
+        className="
+          w-full h-8
           bg-gray-900 text-white
           border border-gray-700
-          rounded px-2 py-1
+          rounded-md px-3
           focus:outline-none focus:ring-2
-          focus:ring-blue-500
-          ${className}
-        `}
+          focus:ring-purple-500
+        "
       />
     </div>
   )
 }
 
-export default FormDate
+DateField.displayName = "DateField"

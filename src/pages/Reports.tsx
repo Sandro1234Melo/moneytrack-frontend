@@ -61,7 +61,7 @@ const Reports = () => {
     loadCategories();
     loadLocations();
   }, [userId]);
-  
+
   useEffect(() => {
     const from = new Date(selectedYear, selectedMonth - 1, 1);
     const to = new Date(selectedYear, selectedMonth, 0);
@@ -140,15 +140,6 @@ const Reports = () => {
           {month.label}
         </button>
       ))}
-    </div>
-
-    {/* BOTÃO FILTRAR — MOBILE */}
-    <div className="flex justify-end lg:hidden">
-      <Button
-        label="Filtrar"
-        variant="secondary"
-        onClick={() => setOpenFilters(true)}
-      />
     </div>
 
     {/* FILTROS — DESKTOP */}

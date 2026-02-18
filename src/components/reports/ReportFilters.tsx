@@ -1,4 +1,4 @@
-import FormSelect from "../ui/FormSelect";
+import FormSelect from "../molecules/select-field";
 
 export type ReportFilters = {
   fromDate?: string
