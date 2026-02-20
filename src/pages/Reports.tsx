@@ -10,14 +10,15 @@ import { Button } from "../components/ui/Button";
 
 
 /* ===============================
+
    TIPOS
 ================================ */
 export type ReportFiltersType = {
   fromDate: string;
   toDate: string;
-  categoryId: string;
-  locationId: string;
-  paymentMethod: string;
+  //categoryId: string;
+  //locationId: string;
+  //paymentMethod: string;
 };
 
 const Reports = () => {
@@ -27,9 +28,9 @@ const Reports = () => {
   const [filters, setFilters] = useState<ReportFiltersType>({
     fromDate: "",
     toDate: "",
-    categoryId: "",
-    locationId: "",
-    paymentMethod: ""
+    //categoryId: "",
+    //locationId: "",
+    //paymentMethod: ""
   });
 
   const [categories, setCategories] = useState<any[]>([]);
@@ -140,16 +141,6 @@ const Reports = () => {
           {month.label}
         </button>
       ))}
-    </div>
-
-    {/* FILTROS — DESKTOP */}
-    <div className="hidden lg:block">
-      <ReportFilters
-        filters={filters}
-        onChange={setFilters}
-        categories={categories}
-        locations={locations}
-      />
     </div>
 
     {/* GRÁFICO MENSAL */}

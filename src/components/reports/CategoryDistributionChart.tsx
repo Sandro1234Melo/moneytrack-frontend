@@ -19,7 +19,7 @@ const CategoryDistributionChart: React.FC<Props> = ({ user_Id, filters }) => {
     if (!user_Id) return;
 
     api.get("/reports/category-distribution", {
-      params: { user_Id , ...filters }
+      params: { userId: user_Id }
     })
       .then(res =>
         setData(

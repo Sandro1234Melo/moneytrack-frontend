@@ -1,8 +1,10 @@
 import { paymentMethods } from "../../utils/paymentMethods";
 
 import { SelectWithAction } from "../molecules/select-with-action";
-import { SelectField } from "../molecules/select-field";
-import { DateField } from "../atoms/date-field";
+
+import DateField from "../atoms/date-field";
+import SelectField from "../molecules/select-field";
+
 
 type Props = {
   date: string;

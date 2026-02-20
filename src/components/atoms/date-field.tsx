@@ -8,7 +8,7 @@ type DateFieldProps = {
   placeholder?: string
 }
 
-export const DateField = ({
+const DateField = ({
   label,
   value,
   onChange,
@@ -42,3 +42,5 @@ export const DateField = ({
 }
 
 DateField.displayName = "DateField"
+
+export default DateField

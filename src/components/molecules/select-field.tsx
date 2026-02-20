@@ -16,7 +16,7 @@ type SelectFieldProps = {
   className?: string
 }
 
-export const SelectField = ({
+const SelectField = ({
   label,
   value,
   onChange,
@@ -42,4 +42,7 @@ export const SelectField = ({
   )
 }
 
+
 SelectField.displayName = "SelectField"
+
+export default SelectField

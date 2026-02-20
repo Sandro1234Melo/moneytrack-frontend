@@ -1,8 +1,10 @@
-import FormSelect from "../molecules/select-field";
+
 import FormDate from "../atoms/date-field";
 import FormValue from "./FormValue";
 import { Button } from "./Button";
 import FormText from "./FormText";
+import SelectField from "../molecules/select-field";
+
 
 type Filters = {
   fromDate: string;
@@ -53,8 +55,23 @@ const ExpenseFilters: React.FC<Props> = ({
             onChange({ ...filters, description: value })
           }
         />
-
+{/* 
         <FormSelect
+          label="Categoria"
+          placeholder="Todas"
+          value={filters.categoryId ?? ""}
+          onChange={(value) =>
+            onChange({
+              ...filters,
+              categoryId: value ? Number(value) : ""
+            })
+          }
+          options={categories.map((cat: any) => ({
+            value: cat.id,
+            label: cat.name
+          }))}
+        /> */}
+        <SelectField
           label="Categoria"
           placeholder="Todas"
           value={filters.categoryId ?? ""}
@@ -94,7 +111,7 @@ const ExpenseFilters: React.FC<Props> = ({
 
         {/* Local */}
         <div className="flex flex-col gap-1">
-          <FormSelect
+          <SelectField
             label="Local"
             placeholder="Todos"
             value={filters.locationId ?? ""}
@@ -110,14 +127,6 @@ const ExpenseFilters: React.FC<Props> = ({
             }))}
           />
         </div>
-
-        <FormValue
-          label="Valor mín."
-          value={filters.minValue}
-          onChange={(value) =>
-            onChange({ ...filters, minValue: value })
-          }
-        />
 
         <FormValue
           label="Valor máx."

@@ -3,11 +3,11 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from "recharts";
 import api from "../../api/axios";
-import type {ReportFilters}  from "../reports/ReportFilters";
+import type { ReportFiltersType } from "../../pages/Reports";
 
 type Props = {
   user_Id: number
-  filters: ReportFilters
+  filters: ReportFiltersType
 }
 
 const MonthlyExpensesChart: React.FC<Props> = ({ user_Id, filters }) => {
@@ -15,9 +15,16 @@ const MonthlyExpensesChart: React.FC<Props> = ({ user_Id, filters }) => {
 
   useEffect(() => {
     if (!user_Id) return;
+    if (!filters.fromDate) return;
+
+    const year = new Date(filters.fromDate).getFullYear();
 
     api.get("/reports/monthly-expenses", {
-      params: { user_Id, ...filters }
+      params: {
+        userId: user_Id,
+        fromDate: filters.fromDate,
+        toDate: filters.toDate     
+      }
     })
       .then(res => setData(res.data))
       .catch(console.error);
