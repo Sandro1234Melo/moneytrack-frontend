@@ -15,12 +15,13 @@ const PaymentMethodsChart: React.FC<Props> = ({ user_Id, filters }) => {
 
   useEffect(() => {
     if (!user_Id) return;
+    if (!filters?.from || !filters?.to) return;
 
     api.get("/reports/payment-methods", {
       params: {
         userId: user_Id,
-        fromDate: filters.from,
-        toDate: filters.to     
+        from: filters.from,
+        to: filters.to     
       }
       
     })
