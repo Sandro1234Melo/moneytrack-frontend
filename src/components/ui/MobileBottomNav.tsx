@@ -4,13 +4,12 @@ import {
   ShoppingCart,
   ListChecks,
   Wallet,
-  MapPin,
-  Tags
+  BarChart3
 } from "lucide-react";
 
 const navItems = [
   { to: "/", label: "Home", icon: LayoutDashboard },
-  {to: "/reports", label: "Análises", icon: Tags},
+  {to: "/reports", label: "Análises", icon: BarChart3},
   { to: "/shopping-lists", label: "Listas", icon: ListChecks },
   { to: "/expenses", label: "Gastos", icon: Wallet },
   { to: "/purchases", label: "Compras", icon: ShoppingCart }  
