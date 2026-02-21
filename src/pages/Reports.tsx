@@ -3,19 +3,14 @@ import api from "../api/axios";
 import { getLoggedUser } from "../utils/auth";
 
 import MonthlyExpensesChart from "../components/reports/MonthlyExpensesChart";
-import CategoryDistributionChart from "../components/reports/CategoryDistributionChart";
 import PaymentMethodsChart from "../components/reports/PaymentMethodsChart";
-import ReportFilters from "../components/reports/ReportFilters";
 import { Button } from "../components/ui/Button";
+import CategoryDistributionChart from "../components/reports/CategoryDistributionChart";
+import ReportFilters from "../components/reports/ReportFilters";
 
-
-/* ===============================
-
-   TIPOS
-================================ */
 export type ReportFiltersType = {
-  fromDate: string;
-  toDate: string;
+  from: string;
+  to: string;
   //categoryId: string;
   //locationId: string;
   //paymentMethod: string;
@@ -26,8 +21,8 @@ const Reports = () => {
   const userId = user?.id;
 
   const [filters, setFilters] = useState<ReportFiltersType>({
-    fromDate: "",
-    toDate: "",
+    from: "",
+    to: "",
     //categoryId: "",
     //locationId: "",
     //paymentMethod: ""
@@ -69,8 +64,8 @@ const Reports = () => {
 
     setFilters((prev) => ({
       ...prev,
-      fromDate: from.toISOString().substring(0, 10),
-      toDate: to.toISOString().substring(0, 10),
+      from: from.toISOString().substring(0, 10),
+      to: to.toISOString().substring(0, 10),
     }));
   }, [selectedYear, selectedMonth]);
 

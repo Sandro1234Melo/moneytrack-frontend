@@ -1,36 +1,39 @@
 import { useEffect, useState } from "react";
-import {
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer
-} from "recharts";
+import { PieChart, Pie, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import api from "../../api/axios";
-import type { ReportFilters } from "../reports/ReportFilters";
-
-const COLORS = ["#8b5cf6", "#22d3ee", "#f97316", "#10b981"];
+import type { ReportFiltersType } from "../../pages/Reports";
 
 type Props = {
-  user_Id: number
-  filters: ReportFilters
-}
+  user_Id: number;
+  filters: ReportFiltersType;
+};
+
+const COLORS = [
+  "#8b5cf6",
+  "#06b6d4",
+  "#f97316",
+  "#22c55e",
+  "#eab308",
+  "#ef4444"
+];
 
 const CategoryDistributionChart: React.FC<Props> = ({ user_Id, filters }) => {
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user_Id) return;
+    if (!filters.from || !filters.to) return;
 
-    api.get("/reports/category-distribution", {
-      params: { userId: user_Id }
-    })
-      .then(res =>
-        setData(
-          res.data.map((d: any) => ({
-            name: d.category,
-            value: d.total
-          }))
-        )
-      )
+    api
+      .get("/reports/category-distribution", {
+        params: {
+          userId: user_Id,
+          from: filters.from,
+          to: filters.to
+        }
+      })
+      .then(res => setData(res.data))
       .catch(console.error);
-
   }, [user_Id, filters]);
 
   return (
@@ -42,9 +45,15 @@ const CategoryDistributionChart: React.FC<Props> = ({ user_Id, filters }) => {
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie data={data} dataKey="value" nameKey="name" label>
-              {data.map((_, i) => (
-                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+            <Pie
+              data={data}
+              dataKey="value"
+              nameKey="name"
+              outerRadius={90}
+              label
+            >
+              {data.map((_, index) => (
+                <Cell key={index} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
             <Tooltip />

@@ -15,15 +15,15 @@ const MonthlyExpensesChart: React.FC<Props> = ({ user_Id, filters }) => {
 
   useEffect(() => {
     if (!user_Id) return;
-    if (!filters.fromDate) return;
+    if (!filters.from) return;
 
-    const year = new Date(filters.fromDate).getFullYear();
+    const year = new Date(filters.from).getFullYear();
 
     api.get("/reports/monthly-expenses", {
       params: {
         userId: user_Id,
-        fromDate: filters.fromDate,
-        toDate: filters.toDate     
+        from: filters.from,
+        to: filters.to     
       }
     })
       .then(res => setData(res.data))

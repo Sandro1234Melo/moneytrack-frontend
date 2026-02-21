@@ -17,7 +17,11 @@ const PaymentMethodsChart: React.FC<Props> = ({ user_Id, filters }) => {
     if (!user_Id) return;
 
     api.get("/reports/payment-methods", {
-      params: { userId: user_Id }
+      params: {
+        userId: user_Id,
+        fromDate: filters.from,
+        toDate: filters.to     
+      }
       
     })
       .then(res => setData(res.data))

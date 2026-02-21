@@ -1,8 +1,8 @@
 import FormSelect from "../molecules/select-field";
 
 export type ReportFilters = {
-  fromDate?: string
-  toDate?: string
+  from?: string
+  to?: string
   categoryId?: string
   locationId?: string
   paymentMethod?: string
