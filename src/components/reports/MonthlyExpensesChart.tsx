@@ -17,7 +17,7 @@ const MonthlyExpensesChart: React.FC<Props> = ({ user_Id, filters }) => {
     if (!user_Id) return;
     if (!filters.from) return;
 
-    const year = new Date(filters.from).getFullYear();
+    //const year = new Date(filters.from).getFullYear();
 
     api.get("/reports/monthly-expenses", {
       params: {
