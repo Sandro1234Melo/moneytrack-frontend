@@ -9,6 +9,7 @@ import { Button } from "../components/ui/Button";
 import { getLoggedUser } from "../utils/auth";
 import PurchaseFormMobile from "../components/purchases/PurchaseFormMobile";
 import PurchaseFormDesktop from "../components/purchases/PurchaseFormDesktop";
+import QuickCreateModal from "../components/ui/QuickCreateModal";
 
 const Purchases = () => {
   const [purchases, setPurchases] = useState<any[]>([]);
@@ -18,6 +19,10 @@ const Purchases = () => {
   const [formKey, setFormKey] = useState(0);
   const [successMessage, setSuccessMessage] = useState("");
   const [openFilters, setOpenFilters] = useState(false);
+  const [openLocationModal, setOpenLocationModal] = useState(false);
+  const [openCategoryModal, setOpenCategoryModal] = useState(false);
+  const [createdCategoryId, setCreatedCategoryId] = useState<number | null>(null);
+  const [createdLocationId, setCreatedLocationId] = useState<number | null>(null);
 
   const [filters, setFilters] = useState<Filters>({
     fromDate: "",
@@ -27,11 +32,11 @@ const Purchases = () => {
     noteId: "",
     description: "",
     minValue: "",
-    maxValue: ""
+    maxValue: "",
   });
 
   const user = getLoggedUser();
-    const userId = user?.id;
+  const userId = user?.id;
 
   const loadPurchases = async (customFilters: Filters = filters) => {
     try {
@@ -45,8 +50,8 @@ const Purchases = () => {
           noteId: customFilters.noteId || undefined,
           description: customFilters.description || undefined,
           min: customFilters.minValue || undefined,
-          max: customFilters.maxValue || undefined
-        }
+          max: customFilters.maxValue || undefined,
+        },
       });
 
       setPurchases(response.data);
@@ -68,7 +73,7 @@ const Purchases = () => {
       noteId: "",
       description: "",
       minValue: "",
-      maxValue: ""
+      maxValue: "",
     };
 
     setFilters(emptyFilters);
@@ -87,10 +92,11 @@ const Purchases = () => {
 
   useEffect(() => {
     if (!userId) return;
+
     loadPurchases();
     loadCategories();
     loadLocations();
-  }, []);
+  }, [userId]);
 
   const handleSave = async (data: any) => {
     try {
@@ -103,7 +109,7 @@ const Purchases = () => {
       }
 
       setEditingPurchase(null);
-      setFormKey(prev => prev + 1);
+      setFormKey((prev) => prev + 1);
       loadPurchases(filters);
 
       setTimeout(() => setSuccessMessage(""), 3000);
@@ -119,16 +125,10 @@ const Purchases = () => {
 
   return (
     <div className="px-4 sm:px-6 max-w-7xl mx-auto">
-
-      <h1 className="text-2xl font-semibold text-brand-light mb-6">
-        Compras
-      </h1>
+      <h1 className="text-2xl font-semibold text-brand-light mb-6">Compras</h1>
 
       <div className="flex flex-col gap-8">
-
-        {successMessage && (
-          <Alert message={successMessage} variant="success" />
-        )}
+        {successMessage && <Alert message={successMessage} variant="success" />}
 
         {/* FORM — DESKTOP */}
         <div className="hidden lg:block">
@@ -151,9 +151,12 @@ const Purchases = () => {
             locations={locations}
             onCancel={() => setEditingPurchase(null)}
             onSave={handleSave}
+            onAddLocation={() => setOpenLocationModal(true)}
+            onAddCategory={() => setOpenCategoryModal(true)}
+            onCategoryCreated={createdCategoryId} 
+            onLocationCreated={createdLocationId} 
           />
         </div>
-
 
         {/* BOTÃO FILTRAR — MOBILE */}
         <div className="flex justify-end lg:hidden">
@@ -195,10 +198,49 @@ const Purchases = () => {
         </div>
       </div>
 
+      {/* MODAL CATEGORIA — MOBILE */}
+      <QuickCreateModal
+        open={openCategoryModal}
+        title="Nova categoria"
+        fields={[
+          { name: "name", label: "Nome", placeholder: "Ex: Alimentação" },
+        ]}
+        onClose={() => setOpenCategoryModal(false)}
+        onSubmit={async (data) => {
+        const res = await api.post("/categories", {
+          name: data.name,
+          user_Id: userId,
+        });
+
+        setCategories((prev) => [...prev, res.data]);
+        setCreatedCategoryId(res.data.id);
+        setOpenCategoryModal(false);
+      }}
+      />
+
+      {/* MODAL LOCAL — MOBILE */}
+      <QuickCreateModal
+        open={openLocationModal}
+        title="Novo local"
+        fields={[
+          { name: "name", label: "Nome", placeholder: "Ex: Supermercado" },
+        ]}
+        onClose={() => setOpenLocationModal(false)}
+        onSubmit={async (data) => {
+          const res = await api.post("/locations", {
+            name: data.name,
+            user_Id: userId,
+          });
+
+          setLocations((prev) => [...prev, res.data]);
+          setCreatedLocationId(res.data.id);
+          setOpenLocationModal(false);
+        }}
+      />
+
       {/* DRAWER FILTROS — MOBILE */}
       {openFilters && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-
           {/* Overlay */}
           <div
             className="absolute inset-0"
@@ -206,9 +248,10 @@ const Purchases = () => {
           />
 
           {/* Drawer */}
-          <div className="relative h-auto max-h-[90%] w-auto max-w-[90%] max-w-md bg-zinc-900
-                    rounded-xl p-4 overflow-y-auto">
-
+          <div
+            className="relative h-auto max-h-[90%] w-auto max-w-[90%] max-w-md bg-zinc-900
+                    rounded-xl p-4 overflow-y-auto"
+          >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Filtros</h3>
               <button
@@ -236,7 +279,6 @@ const Purchases = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };

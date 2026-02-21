@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import FormSelect from "../molecules/select-field";
 import { Trash2 } from "lucide-react";
 import { paymentMethods } from "../../utils/paymentMethods";
+import { SelectWithAction } from "../molecules/select-with-action";
 
 export interface PurchaseFormMobileProps {
   purchase?: any | null;
@@ -9,6 +10,10 @@ export interface PurchaseFormMobileProps {
   categories: any[];
   onSave: (data: any) => void;
   onCancel: () => void;
+  onAddLocation: () => void;
+  onAddCategory: () => void;
+  onCategoryCreated?: number | null;   // ⭐ agora recebe ID
+  onLocationCreated?: number | null;   // ⭐ agora recebe ID
 }
 
 const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({
@@ -16,7 +21,11 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({
   locations,
   categories,
   onSave,
-  onCancel
+  onCancel,
+  onAddLocation,
+  onAddCategory,
+  onCategoryCreated,
+  onLocationCreated
 }) => {
   const [date, setDate] = useState(
     purchase?.date?.substring(0, 10) ??
@@ -31,8 +40,9 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({
     purchase?.paymentMethod ?? ""
   );
 
-  const [items, setItems] = useState<any[]>([]); 
+  const [items, setItems] = useState<any[]>([]);
 
+  // ✅ quando editar
   useEffect(() => {
     if (purchase) {
       setDate(purchase.date?.substring(0, 10));
@@ -52,6 +62,23 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({
       setPaymentMethod("");
     }
   }, [purchase]);
+
+  useEffect(() => {
+    if (!onLocationCreated) return;
+    setLocationId(onLocationCreated);
+  }, [onLocationCreated]);
+
+  useEffect(() => {
+    if (!onCategoryCreated) return;
+
+    setItems(prev => {
+      if (prev.length === 0) return prev;
+
+      const copy = [...prev];
+      copy[copy.length - 1].categoryId = String(onCategoryCreated);
+      return copy;
+    });
+  }, [onCategoryCreated]);
 
   const handleAddItem = () => {
     setItems([
@@ -106,17 +133,23 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({
         {purchase ? "Editar Compra" : "Nova Compra"}
       </h2>
 
-      <FormSelect
+      <SelectWithAction
         label="Local"
         value={locationId}
-        onChange={value => setLocationId(Number(value))}
+        onChange={value =>
+          setLocationId(value ? Number(value) : "")
+        }
         options={locations.map(l => ({ value: l.id, label: l.name }))}
+        onActionClick={onAddLocation}
+        placeholder="Selecione o local"
       />
 
       <FormSelect
         label="Forma de pagamento"
         value={paymentMethod}
-        onChange={value => setPaymentMethod(Number(value))}
+        onChange={value =>
+          setPaymentMethod(value ? Number(value) : "")
+        }
         options={paymentMethods}
       />
 
@@ -159,7 +192,7 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({
               className="w-full input"
             />
 
-            <FormSelect
+            <SelectWithAction
               label="Categoria"
               value={item.categoryId ?? ""}
               onChange={value => {
@@ -171,6 +204,8 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({
                 value: String(c.id),
                 label: c.name
               }))}
+              onActionClick={onAddCategory}
+              placeholder="Selecione a categoria"
             />
 
             <div className="grid grid-cols-2 gap-3">
