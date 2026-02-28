@@ -1,21 +1,15 @@
-import { useEffect, useState } from "react";
-import { PieChart, Pie, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { use, useEffect, useMemo, useState } from "react";
+
 import api from "../../api/axios";
 import type { ReportFiltersType } from "../../pages/Reports";
+import { PieChart } from "../ui/2.0/pie-chart";
+import HeatMap from "../ui/2.0/heat-map";
 
 type Props = {
   user_Id: number;
   filters: ReportFiltersType;
 };
 
-const COLORS = [
-  "#8b5cf6",
-  "#06b6d4",
-  "#f97316",
-  "#22c55e",
-  "#eab308",
-  "#ef4444"
-];
 
 const CategoryDistributionChart: React.FC<Props> = ({ user_Id, filters }) => {
   const [data, setData] = useState<any[]>([]);
@@ -36,30 +30,25 @@ const CategoryDistributionChart: React.FC<Props> = ({ user_Id, filters }) => {
       .catch(console.error);
   }, [user_Id, filters]);
 
+
   return (
     <div className="bg-[#071122] p-6 rounded-lg border border-[#12202a]">
       <h3 className="text-lg font-semibold mb-4">
         Distribuição por Categoria
       </h3>
 
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              dataKey="value"
-              nameKey="name"
-              outerRadius={90}
-              label
-            >
-              {data.map((_, index) => (
-                <Cell key={index} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
+     {data.length > 0 ? (
+      <HeatMap 
+        data={data.map(d => ({ id: d.name, value: Number(d.value) }))} 
+        
+        animate
+        fromColor="#06b6d4"
+        toColor="#8b5cf6"
+        height={300}
+      />
+    ) : (
+      <div className="text-white">Carregando dados...</div>
+    )}
     </div>
   );
 };
