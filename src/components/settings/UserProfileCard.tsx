@@ -1,5 +1,3 @@
-import { User } from "lucide-react";
-
 type Props = {
   user: {
     full_name?: string;

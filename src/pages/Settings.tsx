@@ -28,7 +28,7 @@ const Settings = () => {
   );
 
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [, setUploading] = useState(false);
   const [openPhotoModal, setOpenPhotoModal] = useState(false);
 
 
