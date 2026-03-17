@@ -55,22 +55,7 @@ const ExpenseFilters: React.FC<Props> = ({
             onChange({ ...filters, description: value })
           }
         />
-{/* 
-        <FormSelect
-          label="Categoria"
-          placeholder="Todas"
-          value={filters.categoryId ?? ""}
-          onChange={(value) =>
-            onChange({
-              ...filters,
-              categoryId: value ? Number(value) : ""
-            })
-          }
-          options={categories.map((cat: any) => ({
-            value: cat.id,
-            label: cat.name
-          }))}
-        /> */}
+
         <SelectField
           label="Categoria"
           placeholder="Todas"

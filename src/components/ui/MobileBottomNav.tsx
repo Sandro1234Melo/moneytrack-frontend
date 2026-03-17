@@ -12,7 +12,7 @@ const navItems = [
   {to: "/reports", label: "Análises", icon: BarChart3},
   { to: "/shopping-lists", label: "Listas", icon: ListChecks },
   { to: "/expenses", label: "Gastos", icon: Wallet },
-  { to: "/purchases", label: "Compras", icon: ShoppingCart }  
+  { to: "/purchases", label: "Comprar", icon: ShoppingCart }  
 ];
 
 const MobileBottomNav = () => {

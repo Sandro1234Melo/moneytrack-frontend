@@ -89,7 +89,7 @@ const Reports = () => {
 
 
   return (
-  <div className="space-y-6">
+  <div className="p-4 lg:p-6 space-y-6">
 
     <div className="flex items-center justify-between">
       <h2 className="text-2xl font-semibold">

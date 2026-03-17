@@ -1,6 +1,8 @@
 import React from "react";
+import { getLoggedUser } from "../utils/auth";
 
 const Navbar: React.FC = () => {
+  const user = getLoggedUser();
   return (
     <header className="flex items-center justify-between mb-6">
       <div>
