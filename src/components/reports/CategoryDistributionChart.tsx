@@ -2,7 +2,6 @@ import { use, useEffect, useMemo, useState } from "react";
 
 import api from "../../api/axios";
 import type { ReportFiltersType } from "../../pages/Reports";
-import { PieChart } from "../ui/2.0/pie-chart";
 import HeatMap from "../ui/2.0/heat-map";
 
 type Props = {
