@@ -1,5 +1,4 @@
 import React from "react";
-import { getLoggedUser } from "../utils/auth";
 
 const Navbar: React.FC = () => {  
   return (

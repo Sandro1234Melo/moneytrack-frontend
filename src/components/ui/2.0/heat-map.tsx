@@ -136,7 +136,6 @@ export default function HeatMap({
     /* ---------- Square packing ---------- */
     const cells: Cell[] = []
 
-    const x = 0
     let y = 0
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     let row: any[] = []
