@@ -157,8 +157,7 @@ export default function HeatTreemap({
       y: number,
       w: number,
       h: number
-    ) => {
-      const rowArea = row.reduce((s, r) => s + r.area, 0)
+    ) => {      
 
       if (w < h) {
         let cy = y
