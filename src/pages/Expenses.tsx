@@ -6,7 +6,6 @@ import { getLoggedUser } from "../utils/auth";
 import { Button } from "../components/ui/Button";
 import { Download } from "lucide-react";
 
-
 type ExpenseItem = {
   id: number;
   quantity?: number;
@@ -27,7 +26,6 @@ const Expenses: React.FC = () => {
   const [openFilters, setOpenFilters] = useState(false);
   const [openExport, setOpenExport] = useState(false);
 
-
   const user = getLoggedUser();
   const userId = user?.id;
 
@@ -42,7 +40,7 @@ const Expenses: React.FC = () => {
     noteId: "",
     description: "",
     minValue: "",
-    maxValue: ""
+    maxValue: "",
   });
 
   const fetchExpenses = async (customFilters: Filters = filters) => {
@@ -57,8 +55,8 @@ const Expenses: React.FC = () => {
           noteId: customFilters.noteId || undefined,
           description: customFilters.description || undefined,
           min: customFilters.minValue || undefined,
-          max: customFilters.maxValue || undefined
-        }
+          max: customFilters.maxValue || undefined,
+        },
       });
 
       setExpenses(response.data);
@@ -71,8 +69,8 @@ const Expenses: React.FC = () => {
     if (!userId) return;
 
     fetchExpenses();
-    api.get(`/locations/${userId}`).then(res => setLocations(res.data));
-    api.get(`/categories/${userId}`).then(res => setCategories(res.data));
+    api.get(`/locations/${userId}`).then((res) => setLocations(res.data));
+    api.get(`/categories/${userId}`).then((res) => setCategories(res.data));
   }, []);
 
   const handleSearch = () => {
@@ -80,28 +78,49 @@ const Expenses: React.FC = () => {
   };
 
   const handleExportExcel = async () => {
-  const response = await api.get("/expenses/export/excel", {
-    params: {
-      userId,
-      from: filters.fromDate || undefined,
-      to: filters.toDate || undefined,
-      locationId: filters.locationId || undefined,
-      categoryId: filters.categoryId || undefined,
-      description: filters.description || undefined,
-      min: filters.minValue || undefined,
-      max: filters.maxValue || undefined,
-    },
-    responseType: "blob",
-  });
+    const response = await api.get("/expenses/export/excel", {
+      params: {
+        userId,
+        from: filters.fromDate || undefined,
+        to: filters.toDate || undefined,
+        locationId: filters.locationId || undefined,
+        categoryId: filters.categoryId || undefined,
+        description: filters.description || undefined,
+        min: filters.minValue || undefined,
+        max: filters.maxValue || undefined,
+      },
+      responseType: "blob",
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "gastos.xlsx");
+    document.body.appendChild(link);
+    link.click();
+  };
 
-  const url = window.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", "gastos.xlsx");
-  document.body.appendChild(link);
-  link.click();
-};
+  const handleExportPdf = async () => {
+    const response = await api.get("/expenses/export/pdf", {
+      params: {
+        userId,
+        from: filters.fromDate || undefined,
+        to: filters.toDate || undefined,
+        locationId: filters.locationId || undefined,
+        categoryId: filters.categoryId || undefined,
+        description: filters.description || undefined,
+        min: filters.minValue || undefined,
+        max: filters.maxValue || undefined,
+      },
+      responseType: "blob",
+    });
 
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "gastos.pdf");
+    document.body.appendChild(link);
+    link.click();
+  };
 
   const handleClear = () => {
     const emptyFilters: Filters = {
@@ -112,7 +131,7 @@ const Expenses: React.FC = () => {
       noteId: "",
       description: "",
       minValue: "",
-      maxValue: ""
+      maxValue: "",
     };
 
     setFilters(emptyFilters);
@@ -138,11 +157,7 @@ const Expenses: React.FC = () => {
             label="Exportar"
             icon={Download}
             variant="secondary"
-            onClick={() => {
-              setOpenExport(false);
-              handleExportExcel();
-            }}
-
+            onClick={() => setOpenExport(!openExport)}
           />
 
           {openExport && (
@@ -165,7 +180,7 @@ const Expenses: React.FC = () => {
                   transition"
                 onClick={() => {
                   setOpenExport(false);
-                  alert("Exportar Excel (em breve)");
+                  handleExportExcel();
                 }}
               >
                 Exportar Excel
@@ -175,7 +190,7 @@ const Expenses: React.FC = () => {
                 className="w-full text-left px-4 py-2 hover:bg-white/5"
                 onClick={() => {
                   setOpenExport(false);
-                  alert("Exportar PDF (em breve)");
+                  handleExportPdf();
                 }}
               >
                 Exportar PDF
@@ -223,7 +238,6 @@ const Expenses: React.FC = () => {
       {/* MODAL FILTROS — MOBILE */}
       {openFilters && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-
           {/* Overlay */}
           <div
             className="absolute inset-0"
