@@ -5,11 +5,13 @@ import PurchaseList from "../components/purchases/PurchaseList";
 import PurchaseCardList from "../components/purchases/PurchaseCardList";
 import PurchaseFilters, { type Filters } from "../components/ui/ExpenseFilters";
 import Alert from "../components/ui/Alert";
-import { Button } from "../components/ui/Button";
+import { GradientButton } from "../components/GradientButton";
+import { Plus } from "lucide-react";
 import { getLoggedUser } from "../utils/auth";
 import PurchaseFormMobile from "../components/purchases/PurchaseFormMobile";
 import PurchaseFormDesktop from "../components/purchases/PurchaseFormDesktop";
 import QuickCreateModal from "../components/ui/QuickCreateModal";
+import { Button } from "../components/ui/Button";
 
 const Purchases = () => {
   const [purchases, setPurchases] = useState<any[]>([]);
@@ -23,6 +25,7 @@ const Purchases = () => {
   const [openCategoryModal, setOpenCategoryModal] = useState(false);
   const [createdCategoryId, setCreatedCategoryId] = useState<number | null>(null);
   const [createdLocationId, setCreatedLocationId] = useState<number | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const [filters, setFilters] = useState<Filters>({
     fromDate: "",
@@ -109,6 +112,7 @@ const Purchases = () => {
       }
 
       setEditingPurchase(null);
+      setIsEditing(false);
       setFormKey((prev) => prev + 1);
       loadPurchases(filters);
 
@@ -125,49 +129,68 @@ const Purchases = () => {
 
   return (
     <div className="px-4 sm:px-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-semibold text-brand-light mb-6">Compras</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold text-brand-light">Compras</h1>
+
+        <GradientButton
+          label="Nova compra"
+          icon={Plus}
+          onClick={() => {
+            setEditingPurchase(null);
+            setIsEditing(true);
+          }}
+        />
+      </div>
 
       <div className="flex flex-col gap-8">
         {successMessage && <Alert message={successMessage} variant="success" />}
 
         {/* FORM — DESKTOP */}
+        {isEditing && (
         <div className="hidden lg:block">
-          <PurchaseFormDesktop
-            key={formKey}
-            purchase={editingPurchase}
-            categories={categories}
-            locations={locations}
-            onCancel={() => setEditingPurchase(null)}
-            onSave={handleSave}
-          />
-        </div>
+                <PurchaseFormDesktop
+                  key={formKey}
+                  purchase={editingPurchase}
+                  categories={categories}
+                  locations={locations}
+                  onCancel={() => {
+                    setEditingPurchase(null);
+                    setIsEditing(false);}}
+                  onSave={handleSave}
+                />
+        </div>)}
 
         {/* FORM — MOBILE */}
+        {isEditing && (
         <div className="lg:hidden">
           <PurchaseFormMobile
             key={formKey}
             purchase={editingPurchase}
             categories={categories}
             locations={locations}
-            onCancel={() => setEditingPurchase(null)}
+            onCancel={() => {
+              setEditingPurchase(null);
+              setIsEditing(false);}}
             onSave={handleSave}
             onAddLocation={() => setOpenLocationModal(true)}
             onAddCategory={() => setOpenCategoryModal(true)}
             onCategoryCreated={createdCategoryId} 
             onLocationCreated={createdLocationId} 
           />
-        </div>
+        </div>)}
 
         {/* BOTÃO FILTRAR — MOBILE */}
+        {!isEditing && (
         <div className="flex justify-end lg:hidden">
           <Button
             label="Filtrar"
             variant="secondary"
             onClick={() => setOpenFilters(true)}
           />
-        </div>
+        </div>)}
 
         {/* FILTROS — DESKTOP */}
+        {!isEditing && (
         <div className="hidden lg:block">
           <PurchaseFilters
             filters={filters}
@@ -177,25 +200,34 @@ const Purchases = () => {
             onSearch={handleSearch}
             onClear={handleClearFilters}
           />
-        </div>
+        </div>)}
 
         {/* LISTA — DESKTOP */}
+        {!isEditing && (
         <div className="hidden lg:block">
           <PurchaseList
             purchases={purchases}
-            onEdit={setEditingPurchase}
+            onEdit={(purchase) => {
+              setEditingPurchase(purchase);
+              setIsEditing(true);
+            }}
             onDelete={handleDelete}
           />
-        </div>
+        </div>)}
 
         {/* LISTA — MOBILE */}
+       {!isEditing && (
         <div className="lg:hidden">
           <PurchaseCardList
             purchases={purchases}
-            onEdit={setEditingPurchase}
+            onEdit={(purchase) => {
+              setEditingPurchase(purchase);
+              setIsEditing(true);
+            }}
             onDelete={handleDelete}
           />
-        </div>
+        </div>)}
+
       </div>
 
       {/* MODAL CATEGORIA — MOBILE */}
