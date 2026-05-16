@@ -1,0 +1,40 @@
+import { Bell, Search } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getLoggedUser } from "../utils/auth";
+import UserAvatar from "../components/user/UserAvatar";
+import UserMenu from "../components/user/UserMenu";
+import ThemeToggle from "../components/ThemeToggle";
+
+const Topbar = () => {
+  const user = getLoggedUser();
+  const navigate = useNavigate();
+  const [openMenu, setOpenMenu] = useState(false);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("user");
+    navigate("/login");
+  };
+
+  if (!user) return null;
+
+  return (
+    <header className="flex h-16 items-center justify-end gap-4 border-b border-white/5 bg-[#050817]/80 px-8 backdrop-blur-xl">
+      <div className="relative hidden w-72 md:block">
+        <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+        <input className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-10 pr-4 text-sm outline-none transition focus:border-violet-500/60" placeholder="Buscar..." />
+      </div>
+      <ThemeToggle />
+      <button className="relative grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/10">
+        <Bell size={18} />
+        <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-violet-600 px-1 text-[10px] font-bold">3</span>
+      </button>
+      <div className="relative">
+        <UserAvatar name={user.full_Name ?? user.fullName ?? "Usuário"} onClick={() => setOpenMenu((prev) => !prev)} />
+        {openMenu && <UserMenu onLogout={handleLogout} />}
+      </div>
+    </header>
+  );
+};
+
+export default Topbar;
