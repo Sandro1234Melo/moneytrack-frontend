@@ -38,11 +38,11 @@ export default function Register() {
 
     try {
       await registerUser({
-        full_Name: fullName,
+        fullName,
         email,
         password,
-        country_Code: country,
-        currency_Code: currency,
+        countryCode: country,
+        currencyCode: currency,
         language
       });
 

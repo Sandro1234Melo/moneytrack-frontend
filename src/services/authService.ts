@@ -1,11 +1,11 @@
 import api from "../api/axios";
 
 export async function registerUser(data: {
-  full_Name: string;
+  fullName: string;
   email: string;
   password: string;
-  country_Code: string;
-  currency_Code: string;
+  countryCode: string;
+  currencyCode: string;
   language: string;
 }) {
   const response = await api.post("/auth/register", data);
