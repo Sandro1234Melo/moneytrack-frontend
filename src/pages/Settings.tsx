@@ -136,8 +136,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <section className={`rounded-3xl border border-white/10 bg-[#081222]/80 p-4 shadow-2xl shadow-black/10 backdrop-blur-xl sm:p-5 ${className}`}>
-      <h2 className="mb-4 text-lg font-bold text-white">{title}</h2>
+    <section className={`w-full min-w-0 rounded-2xl border border-white/10 bg-[#081222]/80 p-4 shadow-2xl shadow-black/10 backdrop-blur-xl sm:rounded-3xl sm:p-5 ${className}`}>
+      <h2 className="mb-4 text-base font-bold text-white sm:text-lg">{title}</h2>
       {children}
     </section>
   );
@@ -160,9 +160,9 @@ function ActionRow({ icon: Icon, label, onClick, danger = false }: { icon: any; 
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm transition ${danger ? "border-red-500/40 text-red-300 hover:bg-red-500/10" : "border-white/10 text-slate-200 hover:border-violet-400/40 hover:bg-white/[0.04]"}`}
+      className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm transition ${danger ? "border-red-500/40 text-red-300 hover:bg-red-500/10" : "border-white/10 text-slate-200 hover:border-violet-400/40 hover:bg-white/[0.04]"}`}
     >
-      <span className="flex items-center gap-3"><Icon size={17} />{label}</span>
+      <span className="flex min-w-0 items-center gap-3"><Icon size={17} className="shrink-0" /><span className="truncate">{label}</span></span>
       {!danger && <ChevronRight size={16} className="text-slate-500" />}
     </button>
   );
@@ -251,7 +251,7 @@ export default function Settings() {
       formData.append("file", file);
       const res = await api.post("/users/me/upload-photo", formData, { headers: { "Content-Type": "multipart/form-data" } });
       const imageUrl = res.data?.url;
-      const base = api.defaults.baseURL?.replace("/api", "") || "";
+      const base = api.defaults.baseURL?.replace(/\/api(?:\/v\d+)?$/, "") || "";
       const fullUrl = imageUrl ? `${base}${imageUrl}?t=${Date.now()}` : "";
       setForm((prev) => ({ ...prev, profile_image_url: fullUrl }));
       setUser((prev) => ({ ...prev, profile_image_url: fullUrl }));
@@ -328,17 +328,17 @@ export default function Settings() {
   }
 
   return (
-    <div className="mx-auto max-w-[1500px] space-y-6 pb-6 text-white">
+    <div className="mx-auto w-full max-w-[1500px] space-y-5 overflow-hidden pb-10 text-white sm:space-y-6 lg:pb-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight sm:text-4xl">Configurações</h1>
+          <h1 className="text-2xl font-black tracking-tight sm:text-4xl">Configurações</h1>
           <p className="mt-1 text-sm text-slate-400 sm:text-base">Personalize sua conta, preferências do app e segurança.</p>
         </div>
         <button
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-violet-600/25 transition hover:scale-[1.01] disabled:opacity-60 sm:min-w-48"
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-violet-600/25 transition hover:scale-[1.01] disabled:opacity-60 sm:w-auto sm:min-w-48"
         >
           <Save size={18} /> {saving ? "Salvando..." : "Salvar alterações"}
         </button>
@@ -350,9 +350,9 @@ export default function Settings() {
         </div>
       )}
 
-      <div className="grid gap-5 xl:grid-cols-[260px_minmax(0,1fr)_320px]">
-        <aside className="rounded-3xl border border-white/10 bg-[#081222]/80 p-3 shadow-2xl shadow-black/10 backdrop-blur-xl xl:sticky xl:top-4 xl:h-fit">
-          <div className="flex gap-2 overflow-x-auto pb-1 xl:block xl:space-y-2 xl:overflow-visible xl:pb-0">
+      <div className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-[260px_minmax(0,1fr)_320px]">
+        <aside className="min-w-0 rounded-2xl border border-white/10 bg-[#081222]/80 p-2 shadow-2xl shadow-black/10 backdrop-blur-xl sm:rounded-3xl sm:p-3 xl:sticky xl:top-4 xl:h-fit">
+          <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1 xl:block xl:space-y-2 xl:overflow-visible xl:pb-0">
             {tabItems.map(({ id, label, icon: Icon }) => {
               const active = activeTab === id;
               return (
@@ -360,7 +360,7 @@ export default function Settings() {
                   type="button"
                   key={id}
                   onClick={() => setActiveTab(id)}
-                  className={`flex min-w-max items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition xl:w-full ${active ? "bg-gradient-to-r from-violet-700 to-violet-600 text-white shadow-lg shadow-violet-700/20" : "text-slate-300 hover:bg-white/[0.04]"}`}
+                  className={`flex min-w-max items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition sm:gap-3 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm xl:w-full ${active ? "bg-gradient-to-r from-violet-700 to-violet-600 text-white shadow-lg shadow-violet-700/20" : "text-slate-300 hover:bg-white/[0.04]"}`}
                 >
                   <Icon size={18} /> {label}
                 </button>
@@ -369,24 +369,24 @@ export default function Settings() {
           </div>
         </aside>
 
-        <main className="space-y-5">
+        <main className="min-w-0 space-y-5">
           {(activeTab === "profile" || activeTab === "preferences") && (
             <Panel title="Perfil">
               <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-violet-600 to-blue-600 text-2xl font-black shadow-xl shadow-violet-600/25">
+                <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                  <div className="grid h-16 w-16 shrink-0 sm:h-20 sm:w-20 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-violet-600 to-blue-600 text-2xl font-black shadow-xl shadow-violet-600/25">
                     {form.profile_image_url ? <img src={form.profile_image_url} alt="Perfil" className="h-full w-full object-cover" /> : "SA"}
                   </div>
                   <div>
-                    <h3 className="text-xl font-black">{form.full_name}</h3>
+                    <h3 className="truncate text-lg font-black sm:text-xl">{form.full_name}</h3>
                     <p className="break-all text-sm text-slate-400">{form.email}</p>
                   </div>
                 </div>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <button type="button" onClick={() => fileInputRef.current?.click()} className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-400/40 px-4 py-2 text-sm font-semibold text-violet-200 hover:bg-violet-500/10">
+                <div className="grid gap-2 sm:flex sm:flex-row">
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-violet-400/40 px-4 py-2.5 text-sm font-semibold text-violet-200 hover:bg-violet-500/10 sm:w-auto">
                     <Upload size={16} /> {uploading ? "Enviando..." : "Alterar foto"}
                   </button>
-                  <button type="button" onClick={handleDeletePhoto} className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-400/40 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/10">
+                  <button type="button" onClick={handleDeletePhoto} className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-400/40 px-4 py-2.5 text-sm font-semibold text-red-300 hover:bg-red-500/10 sm:w-auto">
                     <Trash2 size={16} /> Remover foto
                   </button>
                   <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
@@ -414,7 +414,7 @@ export default function Settings() {
                       { value: "light", label: "Claro", icon: Sun },
                       { value: "system", label: "Sistema", icon: Monitor },
                     ].map(({ value, label, icon: Icon }) => (
-                      <button key={value} type="button" onClick={() => setField("theme", value as ThemeMode)} className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition ${form.theme === value ? "bg-violet-600 text-white" : "text-slate-300 hover:bg-white/[0.05]"}`}>
+                      <button key={value} type="button" onClick={() => setField("theme", value as ThemeMode)} className={`flex items-center justify-center gap-1 rounded-xl px-2 py-2 text-xs font-semibold transition sm:gap-2 sm:px-3 sm:text-sm ${form.theme === value ? "bg-violet-600 text-white" : "text-slate-300 hover:bg-white/[0.05]"}`}>
                         <Icon size={16} /> {label}
                       </button>
                     ))}
@@ -438,8 +438,8 @@ export default function Settings() {
                 </div>
               </div>
               <div className="mt-5 divide-y divide-white/10 rounded-2xl border border-white/10">
-                <div className="flex items-center justify-between gap-4 p-4"><div><p className="font-semibold">Modo compacto</p><p className="text-sm text-slate-400">Reduz espaçamentos e tamanhos para exibir mais informações.</p></div><Toggle checked={form.compact_mode} onChange={(v) => setField("compact_mode", v)} /></div>
-                <div className="flex items-center justify-between gap-4 p-4"><div><p className="font-semibold">Animações da interface</p><p className="text-sm text-slate-400">Ativar animações e transições suaves no aplicativo.</p></div><Toggle checked={form.interface_animations} onChange={(v) => setField("interface_animations", v)} /></div>
+                <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Modo compacto</p><p className="text-sm text-slate-400">Reduz espaçamentos e tamanhos para exibir mais informações.</p></div><div className="self-end sm:self-auto"><Toggle checked={form.compact_mode} onChange={(v) => setField("compact_mode", v)} /></div></div>
+                <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Animações da interface</p><p className="text-sm text-slate-400">Ativar animações e transições suaves no aplicativo.</p></div><div className="self-end sm:self-auto"><Toggle checked={form.interface_animations} onChange={(v) => setField("interface_animations", v)} /></div></div>
               </div>
             </Panel>
           )}
@@ -453,7 +453,7 @@ export default function Settings() {
               </div>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-slate-400"><Shield size={15} className="mr-1 inline" /> Último acesso: Hoje, 09:42 • Dispositivo atual: Windows</p>
-                <button type="button" onClick={handleChangePassword} className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-400/40 px-4 py-3 text-sm font-bold text-violet-200 hover:bg-violet-500/10"><Lock size={16} /> Alterar senha</button>
+                <button type="button" onClick={handleChangePassword} className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-violet-400/40 px-4 py-3 text-sm font-bold text-violet-200 hover:bg-violet-500/10 sm:w-auto"><Lock size={16} /> Alterar senha</button>
               </div>
             </Panel>
           )}
@@ -461,9 +461,9 @@ export default function Settings() {
           {activeTab === "notifications" && (
             <Panel title="Notificações">
               <div className="divide-y divide-white/10 rounded-2xl border border-white/10">
-                <div className="flex items-center justify-between gap-4 p-4"><div><p className="font-semibold">Alertar metas em 80%</p><p className="text-sm text-slate-400">Receba aviso quando uma meta estiver próxima do limite.</p></div><Toggle checked={form.notify_goal_80} onChange={(v) => setField("notify_goal_80", v)} /></div>
-                <div className="flex items-center justify-between gap-4 p-4"><div><p className="font-semibold">Avisar sobre aumento de gastos</p><p className="text-sm text-slate-400">Mostra alertas quando seus gastos subirem acima do normal.</p></div><Toggle checked={form.notify_spending_increase} onChange={(v) => setField("notify_spending_increase", v)} /></div>
-                <div className="flex items-center justify-between gap-4 p-4"><div><p className="font-semibold">Lembrar listas pendentes</p><p className="text-sm text-slate-400">Lembretes para listas de compras abertas ou em execução.</p></div><Toggle checked={form.notify_pending_lists} onChange={(v) => setField("notify_pending_lists", v)} /></div>
+                <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Alertar metas em 80%</p><p className="text-sm text-slate-400">Receba aviso quando uma meta estiver próxima do limite.</p></div><div className="self-end sm:self-auto"><Toggle checked={form.notify_goal_80} onChange={(v) => setField("notify_goal_80", v)} /></div></div>
+                <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Avisar sobre aumento de gastos</p><p className="text-sm text-slate-400">Mostra alertas quando seus gastos subirem acima do normal.</p></div><div className="self-end sm:self-auto"><Toggle checked={form.notify_spending_increase} onChange={(v) => setField("notify_spending_increase", v)} /></div></div>
+                <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Lembrar listas pendentes</p><p className="text-sm text-slate-400">Lembretes para listas de compras abertas ou em execução.</p></div><div className="self-end sm:self-auto"><Toggle checked={form.notify_pending_lists} onChange={(v) => setField("notify_pending_lists", v)} /></div></div>
               </div>
             </Panel>
           )}
@@ -481,7 +481,7 @@ export default function Settings() {
           )}
         </main>
 
-        <aside className="space-y-5 xl:sticky xl:top-4 xl:h-fit">
+        <aside className="hidden space-y-5 xl:sticky xl:top-4 xl:block xl:h-fit">
           <Panel title="Resumo da conta">
             <div className="space-y-4 text-sm">
               <div className="flex justify-between gap-4"><span className="text-slate-400">Plano atual:</span><strong className="text-violet-300">Gratuito</strong></div>

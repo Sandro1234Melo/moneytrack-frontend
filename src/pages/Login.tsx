@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../services/authService";
+import { normalizeUser } from "../utils/auth";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
@@ -19,7 +20,7 @@ export default function Login() {
 
     try {
       const user = await loginUser({ email, password });
-      sessionStorage.setItem("user", JSON.stringify(user));
+      sessionStorage.setItem("user", JSON.stringify(normalizeUser(user)));
       navigate("/");
     } catch {
       setError("Email ou senha inválidos");

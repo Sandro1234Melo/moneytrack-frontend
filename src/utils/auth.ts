@@ -1,13 +1,49 @@
 import { getCurrencySymbol } from "./currency";
 
+export function normalizeUser(raw: any) {
+  if (!raw) return null;
+
+  const currencyCode =
+    raw.currencyCode ??
+    raw.currency_Code ??
+    raw.currency_code ??
+    "EUR";
+
+  const countryCode =
+    raw.countryCode ??
+    raw.country_Code ??
+    raw.country_code ??
+    "PT";
+
+  const fullName =
+    raw.fullName ??
+    raw.full_Name ??
+    raw.full_name ??
+    raw.name ??
+    "Usuário";
+
+  return {
+    ...raw,
+    fullName,
+    full_Name: raw.full_Name ?? fullName,
+    full_name: raw.full_name ?? fullName,
+    countryCode,
+    country_Code: raw.country_Code ?? countryCode,
+    country_code: raw.country_code ?? countryCode,
+    currencyCode,
+    currency_Code: raw.currency_Code ?? currencyCode,
+    currency_code: raw.currency_code ?? currencyCode,
+    currencySymbol: getCurrencySymbol(currencyCode)
+  };
+}
+
 export function getLoggedUser() {
   const user = sessionStorage.getItem("user");
   if (!user) return null;
 
-  const parsed = JSON.parse(user);
-
-  return {
-    ...parsed,
-    currencySymbol: getCurrencySymbol(parsed.currency_Code)
-  };
+  try {
+    return normalizeUser(JSON.parse(user));
+  } catch {
+    return null;
+  }
 }

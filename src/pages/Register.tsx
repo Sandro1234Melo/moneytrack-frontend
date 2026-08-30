@@ -38,8 +38,8 @@ export default function Register() {
 
     try {
       await registerUser({
-        fullName,
-        email,
+        fullName: fullName.trim(),
+        email: email.trim(),
         password,
         countryCode: country,
         currencyCode: currency,
@@ -47,21 +47,27 @@ export default function Register() {
       });
 
       navigate("/login");
-    } catch {
-      setError("Erro ao criar conta");
+    } catch (err: any) {
+      const responseMessage =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        err?.response?.data?.title ||
+        err?.message;
+
+      setError(responseMessage || "Erro ao criar conta");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#000010] px-4">
-      <div className="w-full max-w-md bg-[#0b0b2a] rounded-xl shadow-lg p-6 sm:p-8">
+    <div className="min-h-[100svh] bg-[#000010] px-4 py-6 sm:py-8 overflow-y-auto flex items-start sm:items-center justify-center pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+      <div className="w-full max-w-md bg-[#0b0b2a] rounded-xl shadow-lg p-5 sm:p-8 border border-white/10">
         <h1 className="text-2xl font-bold text-center mb-6 text-white">
           Criar Conta
         </h1>
 
-        <form onSubmit={handleRegister} className="space-y-4">
+        <form onSubmit={handleRegister} className="space-y-4" noValidate={false}>
 
           {/* Nome */}
           <div>
@@ -72,7 +78,8 @@ export default function Register() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
-              className="w-full px-4 py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg"
+              autoComplete="name"
+              className="w-full px-4 py-3 sm:py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg text-base"
             />
           </div>
 
@@ -86,7 +93,9 @@ export default function Register() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg"
+              autoComplete="email"
+              inputMode="email"
+              className="w-full px-4 py-3 sm:py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg text-base"
             />
           </div>
 
@@ -102,7 +111,7 @@ export default function Register() {
                 setCountry(selected);
                 setCurrency(countryCurrencyMap[selected]);
               }}
-              className="w-full px-4 py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg"
+              className="w-full px-4 py-3 sm:py-2 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg text-base"
             >
               <option value="BR">Brasil</option>
               <option value="PT">Portugal</option>
@@ -118,7 +127,7 @@ export default function Register() {
             <input
               value={currency}
               disabled
-              className="w-full px-4 py-2 bg-[#000018] text-gray-400 border border-[#1f1f3a] rounded-lg"
+              className="w-full px-4 py-3 sm:py-2 bg-[#000018] text-gray-400 border border-[#1f1f3a] rounded-lg text-base"
             />
           </div>
 
@@ -135,7 +144,8 @@ export default function Register() {
                 minLength={6}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2 pr-10 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg"
+                autoComplete="new-password"
+                className="w-full px-4 py-3 sm:py-2 pr-10 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg text-base"
               />
 
               <button
@@ -160,7 +170,8 @@ export default function Register() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2 pr-10 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg"
+                autoComplete="new-password"
+                className="w-full px-4 py-3 sm:py-2 pr-10 bg-[#000018] text-white border border-[#1f1f3a] rounded-lg text-base"
               />
 
               <button
@@ -182,7 +193,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-medium"
+            className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium text-base"
           >
             {loading ? "Criando..." : "Criar conta"}
           </button>

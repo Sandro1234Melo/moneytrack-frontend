@@ -45,9 +45,11 @@ export default function AppLayout() {
             <Outlet />
           </main>
 
-          <div className="lg:hidden">
-            <MobileBottomNav />
-          </div>
+          {!drawerOpen && (
+            <div className="lg:hidden">
+              <MobileBottomNav />
+            </div>
+          )}
         </div>
       </div>
     </div>

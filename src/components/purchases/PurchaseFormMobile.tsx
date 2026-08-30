@@ -54,7 +54,7 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, locat
   };
 
   return (
-    <div className="-mx-4 -mt-20 min-h-screen bg-[#020513] px-5 pb-72 pt-20 sm:-mx-6 sm:px-6">
+    <div className="-mx-4 -mt-20 min-h-screen bg-[#020513] px-5 pb-32 pt-20 sm:-mx-6 sm:px-6">
       <div className="mb-8 flex items-center justify-between"><button onClick={onCancel} className="text-slate-200">←</button><h1 className="text-2xl font-bold">Nova compra</h1><div className="grid h-11 w-11 place-items-center rounded-full bg-white/[0.06]"><FileText size={20}/></div></div>
       <div className="mb-8 flex items-center gap-3"><div className="h-1.5 flex-1 rounded-full bg-violet-600"/><div className="h-1.5 flex-1 rounded-full bg-violet-600"/><div className="h-1.5 flex-1 rounded-full bg-white/10"/><span className="rounded-full bg-white/[0.06] px-3 py-1 text-sm">1 de 3</span></div>
 
@@ -134,7 +134,7 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, locat
       </div>
 
       <button onClick={addItem} className="mt-5 w-full rounded-3xl border border-dashed border-violet-500/70 py-5 text-lg font-bold text-violet-300">+ Novo produto</button>
-      <div className="fixed bottom-24 left-0 right-0 z-40 rounded-t-3xl border-t border-white/10 bg-[#0a1425]/95 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl shadow-black/50 backdrop-blur-xl"><p className="text-sm text-slate-400">TOTAL DA COMPRA</p><p className="mb-4 mt-1 text-3xl font-bold text-violet-400">{money(total)}</p><button onClick={handleSave} className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-600 py-4 text-lg font-bold"><Save/> Salvar compra</button></div>
+      <div className="fixed bottom-0 left-0 right-0 z-40 rounded-t-3xl border-t border-white/10 bg-[#0a1425]/95 p-5 backdrop-blur-xl"><p className="text-sm text-slate-400">TOTAL DA COMPRA</p><p className="mb-4 mt-1 text-3xl font-bold text-violet-400">{money(total)}</p><button onClick={handleSave} className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-600 py-4 text-lg font-bold"><Save/> Salvar compra</button></div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Edit3, Filter, Plus, ShoppingCart, Trash2, Wallet } from "lucide-react";
+import { Edit2, Filter, Plus, ShoppingCart, Trash2, Wallet } from "lucide-react";
 import api from "../api/axios";
 import { getLoggedUser } from "../utils/auth";
 import PurchaseFormMobile from "../components/purchases/PurchaseFormMobile";
@@ -7,6 +7,7 @@ import PurchaseFormDesktop from "../components/purchases/PurchaseFormDesktop";
 import QuickCreateModal from "../components/ui/QuickCreateModal";
 import ExpenseFilters, { type Filters } from "../components/ui/ExpenseFilters";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
+import { paymentMethods } from "../utils/paymentMethods";
 
 const Purchases = () => {
   const [purchases, setPurchases] = useState<any[]>([]);
@@ -20,9 +21,9 @@ const Purchases = () => {
   const [createdCategoryId, setCreatedCategoryId] = useState<number | null>(null);
   const [createdLocationId, setCreatedLocationId] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [purchaseToDelete, setPurchaseToDelete] = useState<any | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [period, setPeriod] = useState("Tudo");
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const user = getLoggedUser();
   const userId = user?.id;
   const currency = user?.currencySymbol || "€";
@@ -31,6 +32,10 @@ const Purchases = () => {
 
   const total = (purchase: any) => purchase.items?.reduce((s: number, item: any) => s + Number(item.amount ?? (Number(item.quantity ?? 1) * Number(item.price ?? item.unitPrice ?? 0))), 0) ?? 0;
   const money = (v: number) => `${currency} ${v.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const paymentLabel = (purchase: any) =>
+    purchase.paymentMethodName ??
+    paymentMethods.find((method) => Number(method.value) === Number(purchase.paymentMethod))?.label ??
+    "Forma de pagamento";
 
   const loadPurchases = async (customFilters: Filters = filters) => {
     if (!userId) return;
@@ -66,26 +71,23 @@ const Purchases = () => {
       if (editingPurchase) await api.put(`/expenses/${editingPurchase.id}`, data);
       else await api.post("/expenses", { ...data, userId });
       setEditingPurchase(null); setIsEditing(false); setFormKey((prev) => prev + 1); loadPurchases(filters);
-    } catch { alert("Erro ao salvar a compra"); }
+    } catch (error: any) {
+      alert(error?.response?.data?.details || error?.response?.data?.error || "Erro ao salvar a compra");
+    }
   };
 
-  const requestDeletePurchase = (purchase: any) => {
-    setPurchaseToDelete(purchase);
-  };
-
-  const confirmDeletePurchase = async () => {
-    if (!purchaseToDelete?.id) return;
+  const handleDelete = async () => {
+    if (!deleteTarget?.id) return;
 
     try {
-      setIsDeleting(true);
-      await api.delete(`/expenses/${purchaseToDelete.id}`);
-      setPurchaseToDelete(null);
+      setDeleting(true);
+      await api.delete(`/expenses/${deleteTarget.id}`);
+      setDeleteTarget(null);
       await loadPurchases(filters);
     } catch (error: any) {
-      console.error("Erro ao excluir compra", error);
       alert(error?.response?.data?.details || error?.response?.data?.error || "Erro ao excluir a compra");
     } finally {
-      setIsDeleting(false);
+      setDeleting(false);
     }
   };
 
@@ -161,13 +163,13 @@ const Purchases = () => {
         {purchases.map((purchase) => (
           <article key={purchase.id} className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4">
             <button onClick={() => { setEditingPurchase(purchase); setIsEditing(true); }} className="flex w-full items-center gap-4 text-left">
-              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-gradient-to-br from-lime-500 to-lime-700"><ShoppingCart size={28}/></div>
-              <div className="min-w-0 flex-1"><p className="truncate text-xl font-bold">{purchase.locationName ?? 'Local'}</p><p className="mt-1 text-slate-400">{purchase.items?.length ?? 0} itens • {purchase.paymentMethodName ?? 'Cartão Crédito'}</p></div>
+              <div className="grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-lime-500 to-lime-700"><ShoppingCart size={28}/></div>
+              <div className="min-w-0 flex-1"><p className="truncate text-xl font-bold">{purchase.locationName ?? 'Local'}</p><p className="mt-1 text-slate-400">{purchase.items?.length ?? 0} itens • {paymentLabel(purchase)}</p></div>
               <div className="text-right"><p className="text-sm text-slate-400">{new Date(purchase.date).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</p><p className="mt-2 text-2xl font-bold">{money(total(purchase))}</p></div>
             </button>
-            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-white/5 pt-4">
-              <button onClick={() => { setEditingPurchase(purchase); setIsEditing(true); }} className="flex items-center justify-center gap-2 rounded-2xl border border-violet-500/40 px-4 py-3 font-bold text-violet-300"><Edit3 size={18}/> Editar</button>
-              <button onClick={() => requestDeletePurchase(purchase)} className="flex items-center justify-center gap-2 rounded-2xl border border-red-500/40 px-4 py-3 font-bold text-red-300 hover:bg-red-500/10"><Trash2 size={18}/> Excluir</button>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <button onClick={() => { setEditingPurchase(purchase); setIsEditing(true); }} className="flex items-center justify-center gap-2 rounded-2xl border border-violet-500/40 px-4 py-3 text-violet-300"><Edit2 size={18}/> Editar</button>
+              <button onClick={() => setDeleteTarget(purchase)} className="flex items-center justify-center gap-2 rounded-2xl border border-red-500/40 px-4 py-3 text-red-300"><Trash2 size={18}/> Excluir</button>
             </div>
           </article>
         ))}
@@ -175,21 +177,21 @@ const Purchases = () => {
       </section>
 
       <section className="hidden overflow-hidden rounded-3xl border border-white/10 bg-[#0a1425]/80 lg:block">
-        <table className="w-full text-sm"><thead className="text-slate-400"><tr><th className="px-6 py-4 text-left">LOCAL</th><th className="text-left">ITENS</th><th className="text-left">TOTAL GASTO</th><th className="text-left">DATA</th><th className="px-6 text-right">AÇÕES</th></tr></thead><tbody>{purchases.map((p) => <tr key={p.id} className="border-t border-white/5"><td className="px-6 py-4 font-bold">{p.locationName ?? 'Local'}</td><td>{p.items?.length ?? 0} itens</td><td className="font-bold">{money(total(p))}</td><td>{new Date(p.date).toLocaleDateString('pt-PT')}</td><td className="px-6 text-right"><div className="flex justify-end gap-2"><button onClick={() => { setEditingPurchase(p); setIsEditing(true); }} className="inline-flex items-center gap-2 rounded-xl border border-violet-500/40 px-4 py-2 text-violet-300 hover:bg-violet-500/10"><Edit3 size={16}/> Editar</button><button onClick={() => requestDeletePurchase(p)} className="inline-flex items-center gap-2 rounded-xl border border-red-500/40 px-4 py-2 text-red-300 hover:bg-red-500/10"><Trash2 size={16}/> Excluir</button></div></td></tr>)}</tbody></table>
+        <table className="w-full text-sm"><thead className="text-slate-400"><tr><th className="px-6 py-4 text-left">LOCAL</th><th className="text-left">ITENS</th><th className="text-left">TOTAL GASTO</th><th className="text-left">DATA</th><th className="px-6 text-right">AÇÕES</th></tr></thead><tbody>{purchases.map((p) => <tr key={p.id} className="border-t border-white/5"><td className="px-6 py-4 font-bold">{p.locationName ?? 'Local'}</td><td>{p.items?.length ?? 0} itens</td><td className="font-bold">{money(total(p))}</td><td>{new Date(p.date).toLocaleDateString('pt-PT')}</td><td className="px-6 text-right"><div className="flex justify-end gap-2"><button onClick={() => { setEditingPurchase(p); setIsEditing(true); }} className="inline-flex items-center gap-2 rounded-xl border border-violet-500/40 px-4 py-2 text-violet-300"><Edit2 size={16}/> Editar</button><button onClick={() => setDeleteTarget(p)} className="inline-flex items-center gap-2 rounded-xl border border-red-500/40 px-4 py-2 text-red-300"><Trash2 size={16}/> Excluir</button></div></td></tr>)}</tbody></table>
       </section>
 
       {openFilters && <div className="fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm"><div className="mx-auto mt-16 max-h-[82vh] max-w-md overflow-auto rounded-3xl border border-white/10 bg-[#081222] p-5"><div className="mb-4 flex items-center justify-between"><h3 className="text-xl font-bold">Filtros</h3><button onClick={() => setOpenFilters(false)}>✕</button></div><ExpenseFilters filters={filters} locations={locations} categories={categories} onChange={(next) => { setFilters(next); setPeriod("Tudo"); }} onSearch={() => { loadPurchases(filters); setOpenFilters(false); }} onClear={() => { clearFilters(); setOpenFilters(false); }} /></div></div>}
       <button onClick={() => { setEditingPurchase(null); setIsEditing(true); }} className="fixed bottom-28 right-6 grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-violet-600 to-violet-700 text-white shadow-2xl shadow-violet-950/60 lg:hidden"><Plus size={40}/></button>
       <ConfirmDialog
-        open={purchaseToDelete !== null}
+        open={!!deleteTarget}
         title="Excluir compra"
-        message={`Tem certeza que deseja excluir esta compra${purchaseToDelete?.locationName ? ` de ${purchaseToDelete.locationName}` : ""}? Esta ação não pode ser desfeita.`}
-        confirmLabel="Excluir compra"
+        message={`Tem certeza que deseja excluir esta compra${deleteTarget?.locationName ? ` de ${deleteTarget.locationName}` : ""}? Esta ação não pode ser desfeita.`}
+        confirmLabel={deleting ? "Excluindo..." : "Excluir"}
         cancelLabel="Cancelar"
-        variant="danger"
-        loading={isDeleting}
-        onCancel={() => { if (!isDeleting) setPurchaseToDelete(null); }}
-        onConfirm={confirmDeletePurchase}
+        danger
+        loading={deleting}
+        onCancel={() => !deleting && setDeleteTarget(null)}
+        onConfirm={handleDelete}
       />
     </div>
   );
