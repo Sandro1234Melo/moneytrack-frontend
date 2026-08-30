@@ -1,13 +1,12 @@
 import axios from "axios";
 
-const rawBaseUrl = import.meta.env.VITE_API_URL || "https://localhost:7074";
-const apiVersion = import.meta.env.VITE_API_VERSION || "v1";
+const rawBaseUrl =
+  import.meta.env.VITE_API_URL || "https://moneytrack-api-7ajy.onrender.com";
 
 const normalizedBaseUrl = rawBaseUrl.replace(/\/+$/, "");
-const normalizedVersion = apiVersion.replace(/^\/+|\/+$/g, "");
 
 const api = axios.create({
-  baseURL: `${normalizedBaseUrl}/api/${normalizedVersion}`,
+  baseURL: `${normalizedBaseUrl}/api`,
 });
 
 api.interceptors.request.use((config) => {
