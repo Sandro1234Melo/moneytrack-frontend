@@ -20,6 +20,8 @@ export default function AppLayout() {
     "/reports": "Análises",
     "/settings": "Configurações",
     "/goals": "Metas"
+    ,"/friends": "Amigos"
+    ,"/splits": "Dividir conta"
   };
 
   return (

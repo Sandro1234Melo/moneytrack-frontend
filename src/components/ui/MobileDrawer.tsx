@@ -10,6 +10,8 @@ import {
   ShoppingCart,
   Tags,
   Wallet,
+  Users,
+  Split,
   X,
 } from "lucide-react";
 import { useMemo, useState, type ElementType } from "react";
@@ -34,6 +36,8 @@ const mainItems: MobileDrawerItem[] = [
   { name: "Meus Gastos", path: "/expenses", icon: Wallet },
   { name: "Relatórios", path: "/reports", icon: BarChart3 },
   { name: "Metas", path: "/goals", icon: Crosshair },
+  { name: "Amigos", path: "/friends", icon: Users },
+  { name: "Dividir conta", path: "/splits", icon: Split },
 ];
 
 const registerItems: MobileDrawerItem[] = [

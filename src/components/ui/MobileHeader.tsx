@@ -1,10 +1,11 @@
-import { Bell, Menu, User } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ThemeToggle from "../ThemeToggle";
 import UserAvatar from "../user/UserAvatar";
 import { getLoggedUser } from "../../utils/auth";
 import { getApiAssetUrl } from "../../api/axios";
+import NotificationMenu from "../user/NotificationMenu";
 
 type Props = { title: string; onMenuClick: () => void };
 
@@ -24,7 +25,7 @@ const MobileHeader: React.FC<Props> = ({ title, onMenuClick }) => {
       <h1 className="max-w-[46vw] truncate text-2xl font-bold tracking-tight">{title}</h1>
       <div className="flex items-center gap-2">
         <div className="scale-95"><ThemeToggle /></div>
-        <button className="relative grid h-11 w-11 place-items-center rounded-full bg-white/[0.06]"><Bell size={22} /><span className="absolute right-2 top-2 h-3 w-3 rounded-full bg-violet-500" /></button>
+        <NotificationMenu />
         {user ? (
           <UserAvatar
             name={user.full_Name ?? user.fullName ?? "Usuário"}

@@ -1,4 +1,4 @@
-import { BarChart3, ChevronDown, Crosshair, Home, ListChecks, MapPin, Settings, ShoppingCart, Tags, Wallet, Zap } from "lucide-react";
+import { BarChart3, ChevronDown, Crosshair, Home, ListChecks, MapPin, Settings, ShoppingCart, Tags, Users, Wallet, Zap, Split } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { getLoggedUser } from "../utils/auth";
@@ -28,6 +28,8 @@ const Sidebar = () => {
   const bottomItems = [
     { name: "Relatórios", path: "/reports", icon: BarChart3 },
     { name: "Metas", path: "/goals", icon: Crosshair },
+    { name: "Amigos", path: "/friends", icon: Users },
+    { name: "Dividir conta", path: "/splits", icon: Split },
     { name: "Configurações", path: "/settings", icon: Settings },
   ];
 
