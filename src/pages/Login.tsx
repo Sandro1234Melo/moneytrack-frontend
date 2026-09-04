@@ -20,7 +20,9 @@ export default function Login() {
 
     try {
       const user = await loginUser({ email, password });
-      sessionStorage.setItem("user", JSON.stringify(normalizeUser(user)));
+      const normalizedUser = normalizeUser(user);
+      if (!normalizedUser?.token) throw new Error("Resposta de autenticação inválida");
+      sessionStorage.setItem("user", JSON.stringify(normalizedUser));
       navigate("/");
     } catch {
       setError("Email ou senha inválidos");

@@ -1,8 +1,8 @@
 import api from "../api/axios";
 
-export const getMonthlyExpenses = (userId: number, year: number) =>
+export const getMonthlyExpenses = (userId: number, from?: string, to?: string) =>
   api.get("/reports/monthly-expenses", {
-    params: { userId, year }
+    params: { userId, from, to }
   });
 
 export const getCategoryDistribution = (

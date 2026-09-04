@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Calendar, ChevronDown, CreditCard, FileText, Plus, Save, Store, Trash2 } from "lucide-react";
+import { Calendar, ChevronDown, CreditCard, FileText, Image as ImageIcon, Plus, Save, Store, Trash2 } from "lucide-react";
 import { paymentMethods } from "../../utils/paymentMethods";
 
 export interface PurchaseFormMobileProps {
   purchase?: any | null;
+  receiptPhoto?: File | null;
   locations: any[];
   categories: any[];
   onSave: (data: any) => void;
@@ -17,7 +18,7 @@ export interface PurchaseFormMobileProps {
 const fieldClass = "w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-white outline-none focus:border-violet-500/70";
 const iconBox = "grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-violet-600/15 text-violet-300";
 
-const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, locations, categories, onSave, onCancel, onAddLocation, onAddCategory, onCategoryCreated, onLocationCreated }) => {
+const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, receiptPhoto, locations, categories, onSave, onCancel, onAddLocation, onAddCategory, onCategoryCreated, onLocationCreated }) => {
   const [date, setDate] = useState(purchase?.date?.substring(0, 10) ?? new Date().toISOString().substring(0, 10));
   const [locationId, setLocationId] = useState<number | "">(purchase?.locationId ?? "");
   const [paymentMethod, setPaymentMethod] = useState<number | "">(purchase?.paymentMethod ?? "");
@@ -57,6 +58,8 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, locat
     <div className="-mx-4 -mt-20 min-h-screen bg-[#020513] px-5 pb-32 pt-20 sm:-mx-6 sm:px-6">
       <div className="mb-8 flex items-center justify-between"><button onClick={onCancel} className="text-slate-200">←</button><h1 className="text-2xl font-bold">Nova compra</h1><div className="grid h-11 w-11 place-items-center rounded-full bg-white/[0.06]"><FileText size={20}/></div></div>
       <div className="mb-8 flex items-center gap-3"><div className="h-1.5 flex-1 rounded-full bg-violet-600"/><div className="h-1.5 flex-1 rounded-full bg-violet-600"/><div className="h-1.5 flex-1 rounded-full bg-white/10"/><span className="rounded-full bg-white/[0.06] px-3 py-1 text-sm">1 de 3</span></div>
+
+      {receiptPhoto && <div className="mb-5 flex items-center gap-3 rounded-2xl border border-violet-500/30 bg-violet-600/10 p-4"><ImageIcon className="text-violet-300"/><div className="min-w-0"><p className="font-bold">Nota adicionada</p><p className="truncate text-sm text-slate-400">{receiptPhoto.name}</p></div></div>}
 
       <div className="space-y-4">
         <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><Store/></div><label className="flex-1"><span className="text-xs text-slate-400">Local</span><select value={locationId} onChange={e => setLocationId(e.target.value ? Number(e.target.value) : "")} className="mt-1 w-full bg-transparent text-lg font-bold outline-none"><option className="bg-slate-900" value="">Selecione</option>{locations.map(l => <option className="bg-slate-900" key={l.id} value={l.id}>{l.name}</option>)}</select></label><button onClick={onAddLocation} className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-600"><Plus/></button></div></div>

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Edit2, Filter, Plus, ShoppingCart, Trash2, Wallet } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Camera, Edit2, FileText, Filter, ImageUp, Plus, ShoppingCart, Trash2, Wallet, X } from "lucide-react";
 import api from "../api/axios";
 import { getLoggedUser } from "../utils/auth";
 import PurchaseFormMobile from "../components/purchases/PurchaseFormMobile";
@@ -24,6 +24,9 @@ const Purchases = () => {
   const [period, setPeriod] = useState("Tudo");
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [openNewPurchaseModal, setOpenNewPurchaseModal] = useState(false);
+  const [receiptPhoto, setReceiptPhoto] = useState<File | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const user = getLoggedUser();
   const userId = user?.id;
   const currency = user?.currencySymbol || "€";
@@ -130,11 +133,28 @@ const Purchases = () => {
     loadPurchases(empty);
   };
 
+  const startManualPurchase = () => {
+    setReceiptPhoto(null);
+    setOpenNewPurchaseModal(false);
+    setEditingPurchase(null);
+    setIsEditing(true);
+  };
+
+  const handleReceiptPhoto = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const photo = event.target.files?.[0];
+    if (!photo) return;
+    setReceiptPhoto(photo);
+    setOpenNewPurchaseModal(false);
+    setEditingPurchase(null);
+    setIsEditing(true);
+    event.target.value = "";
+  };
+
   if (isEditing) {
     return (
       <div className="mx-auto max-w-7xl">
-        <div className="hidden lg:block"><PurchaseFormDesktop key={formKey} purchase={editingPurchase} categories={categories} locations={locations} onCancel={() => { setEditingPurchase(null); setIsEditing(false); }} onSave={handleSave} /></div>
-        <div className="lg:hidden"><PurchaseFormMobile key={formKey} purchase={editingPurchase} categories={categories} locations={locations} onCancel={() => { setEditingPurchase(null); setIsEditing(false); }} onSave={handleSave} onAddLocation={() => setOpenLocationModal(true)} onAddCategory={() => setOpenCategoryModal(true)} onCategoryCreated={createdCategoryId} onLocationCreated={createdLocationId} /></div>
+        <div className="hidden lg:block"><PurchaseFormDesktop key={formKey} purchase={editingPurchase} receiptPhoto={receiptPhoto} categories={categories} locations={locations} onCancel={() => { setEditingPurchase(null); setReceiptPhoto(null); setIsEditing(false); }} onSave={handleSave} /></div>
+        <div className="lg:hidden"><PurchaseFormMobile key={formKey} purchase={editingPurchase} receiptPhoto={receiptPhoto} categories={categories} locations={locations} onCancel={() => { setEditingPurchase(null); setReceiptPhoto(null); setIsEditing(false); }} onSave={handleSave} onAddLocation={() => setOpenLocationModal(true)} onAddCategory={() => setOpenCategoryModal(true)} onCategoryCreated={createdCategoryId} onLocationCreated={createdLocationId} /></div>
         <QuickCreateModal open={openCategoryModal} title="Nova categoria" fields={[{ name: "name", label: "Nome", placeholder: "Ex: Alimentação" }]} onClose={() => setOpenCategoryModal(false)} onSubmit={async (data) => { const res = await api.post("/categories", { name: data.name, user_Id: userId }); setCategories((prev) => [...prev, res.data]); setCreatedCategoryId(res.data.id); setOpenCategoryModal(false); }} />
         <QuickCreateModal open={openLocationModal} title="Novo local" fields={[{ name: "name", label: "Nome", placeholder: "Ex: Supermercado" }]} onClose={() => setOpenLocationModal(false)} onSubmit={async (data) => { const res = await api.post("/locations", { name: data.name, user_Id: userId }); setLocations((prev) => [...prev, res.data]); setCreatedLocationId(res.data.id); setOpenLocationModal(false); }} />
       </div>
@@ -145,7 +165,7 @@ const Purchases = () => {
     <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div><h1 className="text-3xl font-bold tracking-tight">Compras</h1><p className="mt-1 hidden text-slate-400 sm:block">Registre e acompanhe suas compras</p></div>
-        <div className="flex items-center gap-3"><button onClick={() => setOpenFilters(true)} className="flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-slate-300 lg:hidden"><Filter size={20}/> Filtros</button><button onClick={() => { setEditingPurchase(null); setIsEditing(true); }} className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-600 px-5 py-3 font-bold shadow-lg shadow-violet-950/40"><Plus size={22}/> Nova compra</button></div>
+        <div className="flex items-center gap-3"><button onClick={() => setOpenFilters(true)} className="flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-slate-300 lg:hidden"><Filter size={20}/> Filtros</button><button onClick={() => setOpenNewPurchaseModal(true)} className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-600 px-5 py-3 font-bold shadow-lg shadow-violet-950/40"><Plus size={22}/> Nova compra</button></div>
       </div>
 
       <div className="flex items-center justify-between gap-3 lg:hidden">
@@ -173,7 +193,7 @@ const Purchases = () => {
             </div>
           </article>
         ))}
-        <button onClick={() => { setEditingPurchase(null); setIsEditing(true); }} className="flex w-full items-center gap-4 rounded-3xl border border-dashed border-violet-500/70 p-5 text-left text-violet-400"><Plus size={34}/><div><p className="text-xl font-bold">Nova compra rápida</p><p className="text-slate-400">Adicione uma compra em segundos</p></div></button>
+        <button onClick={() => setOpenNewPurchaseModal(true)} className="flex w-full items-center gap-4 rounded-3xl border border-dashed border-violet-500/70 p-5 text-left text-violet-400"><Plus size={34}/><div><p className="text-xl font-bold">Nova compra rápida</p><p className="text-slate-400">Adicione uma compra em segundos</p></div></button>
       </section>
 
       <section className="hidden overflow-hidden rounded-3xl border border-white/10 bg-[#0a1425]/80 lg:block">
@@ -181,7 +201,17 @@ const Purchases = () => {
       </section>
 
       {openFilters && <div className="fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm"><div className="mx-auto mt-16 max-h-[82vh] max-w-md overflow-auto rounded-3xl border border-white/10 bg-[#081222] p-5"><div className="mb-4 flex items-center justify-between"><h3 className="text-xl font-bold">Filtros</h3><button onClick={() => setOpenFilters(false)}>✕</button></div><ExpenseFilters filters={filters} locations={locations} categories={categories} onChange={(next) => { setFilters(next); setPeriod("Tudo"); }} onSearch={() => { loadPurchases(filters); setOpenFilters(false); }} onClear={() => { clearFilters(); setOpenFilters(false); }} /></div></div>}
-      <button onClick={() => { setEditingPurchase(null); setIsEditing(true); }} className="fixed bottom-28 right-6 grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-violet-600 to-violet-700 text-white shadow-2xl shadow-violet-950/60 lg:hidden"><Plus size={40}/></button>
+      <button onClick={() => setOpenNewPurchaseModal(true)} className="fixed bottom-28 right-6 grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-violet-600 to-violet-700 text-white shadow-2xl shadow-violet-950/60 lg:hidden"><Plus size={40}/></button>
+      {openNewPurchaseModal && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+        <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#081222] p-6 shadow-2xl">
+          <div className="flex items-start justify-between gap-4"><div><h2 className="text-2xl font-bold">Como deseja adicionar?</h2><p className="mt-1 text-slate-400">Escolha uma forma de criar a compra.</p></div><button onClick={() => setOpenNewPurchaseModal(false)} className="rounded-xl p-2 text-slate-400 hover:bg-white/10" aria-label="Fechar"><X/></button></div>
+          <div className="mt-6 grid gap-3">
+            <button onClick={startManualPurchase} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-left transition hover:border-violet-500/60 hover:bg-violet-600/10"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-600/20 text-violet-300"><FileText/></span><span><strong className="block text-lg">Preencher manualmente</strong><span className="text-sm text-slate-400">Informe os dados e os itens da compra.</span></span></button>
+            <button onClick={() => photoInputRef.current?.click()} className="flex items-center gap-4 rounded-2xl border border-violet-500/40 bg-violet-600/10 p-5 text-left transition hover:bg-violet-600/20"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-600 text-white"><Camera/></span><span><strong className="block text-lg">Adicionar pela foto da nota</strong><span className="text-sm text-slate-300">Tire uma foto ou escolha-a na galeria.</span></span><ImageUp className="ml-auto text-violet-300"/></button>
+          </div>
+          <input ref={photoInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleReceiptPhoto}/>
+        </div>
+      </div>}
       <ConfirmDialog
         open={!!deleteTarget}
         title="Excluir compra"

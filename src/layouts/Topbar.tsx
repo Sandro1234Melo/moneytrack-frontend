@@ -1,15 +1,22 @@
 import { Bell, Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getLoggedUser } from "../utils/auth";
+import { getApiAssetUrl } from "../api/axios";
 import UserAvatar from "../components/user/UserAvatar";
 import UserMenu from "../components/user/UserMenu";
 import ThemeToggle from "../components/ThemeToggle";
 
 const Topbar = () => {
-  const user = getLoggedUser();
+  const [user, setUser] = useState(getLoggedUser());
   const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(false);
+
+  useEffect(() => {
+    const updateUser = () => setUser(getLoggedUser());
+    window.addEventListener("moneytrack:user-updated", updateUser);
+    return () => window.removeEventListener("moneytrack:user-updated", updateUser);
+  }, []);
 
   const handleLogout = () => {
     sessionStorage.removeItem("user");
@@ -30,7 +37,7 @@ const Topbar = () => {
         <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-violet-600 px-1 text-[10px] font-bold">3</span>
       </button>
       <div className="relative">
-        <UserAvatar name={user.full_Name ?? user.fullName ?? "Usuário"} onClick={() => setOpenMenu((prev) => !prev)} />
+        <UserAvatar name={user.full_Name ?? user.fullName ?? "Usuário"} imageUrl={getApiAssetUrl(user.profile_Image_Url ?? user.profile_image_url ?? user.profileImageUrl)} onClick={() => setOpenMenu((prev) => !prev)} />
         {openMenu && <UserMenu onLogout={handleLogout} />}
       </div>
     </header>
