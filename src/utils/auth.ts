@@ -3,6 +3,8 @@ import { getCurrencySymbol } from "./currency";
 export function normalizeUser(raw: any) {
   if (!raw) return null;
 
+  const token = raw.token ?? raw.Token;
+
   const currencyCode =
     raw.currencyCode ??
     raw.currency_Code ??
@@ -24,6 +26,7 @@ export function normalizeUser(raw: any) {
 
   return {
     ...raw,
+    token,
     fullName,
     full_Name: raw.full_Name ?? fullName,
     full_name: raw.full_name ?? fullName,

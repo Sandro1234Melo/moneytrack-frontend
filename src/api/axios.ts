@@ -31,6 +31,11 @@ api.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${user.token}`;
       }
 
+      // A API usa o identificador do usuário para os endpoints de perfil.
+      if (user?.id) {
+        config.headers["X-User-Id"] = String(user.id);
+      }
+
     }
   } catch (err) {
     console.error("Erro ao ler usuário do storage", err);
