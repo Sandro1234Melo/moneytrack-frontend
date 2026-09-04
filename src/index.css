@@ -37,7 +37,69 @@
    ============================================================ */
 :root {
   color-scheme: dark;
+  --app-accent: #7c3aed;
+  --app-accent-soft: #2563eb;
 }
+
+.accent-surface {
+  background: linear-gradient(135deg, var(--app-accent), var(--app-accent-soft)) !important;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--app-accent) 30%, transparent) !important;
+}
+
+/* Cor principal escolhida em Configurações > Aparência. */
+html[data-accent-color="blue"] [class*="bg-violet-"],
+html[data-accent-color="blue"] [class*="bg-purple-"] { background-color: #2563eb !important; }
+html[data-accent-color="blue"] [class*="text-violet-"],
+html[data-accent-color="blue"] [class*="text-purple-"] { color: #93c5fd !important; }
+html[data-accent-color="blue"] [class*="border-violet-"],
+html[data-accent-color="blue"] [class*="border-purple-"] { border-color: #3b82f6 !important; }
+html[data-accent-color="blue"] [class*="from-violet-"],
+html[data-accent-color="blue"] [class*="from-purple-"] { --tw-gradient-from: #2563eb var(--tw-gradient-from-position) !important; }
+
+html[data-accent-color="green"] [class*="bg-violet-"],
+html[data-accent-color="green"] [class*="bg-purple-"],
+html[data-accent-color="green"] [class*="bg-blue-"] { background-color: #16a34a !important; }
+html[data-accent-color="green"] [class*="text-violet-"],
+html[data-accent-color="green"] [class*="text-purple-"],
+html[data-accent-color="green"] [class*="text-blue-"] { color: #86efac !important; }
+html[data-accent-color="green"] [class*="border-violet-"],
+html[data-accent-color="green"] [class*="border-purple-"],
+html[data-accent-color="green"] [class*="border-blue-"] { border-color: #22c55e !important; }
+html[data-accent-color="green"] [class*="from-violet-"],
+html[data-accent-color="green"] [class*="from-purple-"],
+html[data-accent-color="green"] [class*="from-blue-"] { --tw-gradient-from: #16a34a var(--tw-gradient-from-position) !important; }
+html[data-accent-color="green"] [class*="to-violet-"],
+html[data-accent-color="green"] [class*="to-blue-"] { --tw-gradient-to: #22c55e var(--tw-gradient-to-position) !important; }
+
+html[data-accent-color="orange"] [class*="bg-violet-"],
+html[data-accent-color="orange"] [class*="bg-purple-"],
+html[data-accent-color="orange"] [class*="bg-blue-"] { background-color: #ea580c !important; }
+html[data-accent-color="orange"] [class*="text-violet-"],
+html[data-accent-color="orange"] [class*="text-purple-"],
+html[data-accent-color="orange"] [class*="text-blue-"] { color: #fdba74 !important; }
+html[data-accent-color="orange"] [class*="border-violet-"],
+html[data-accent-color="orange"] [class*="border-purple-"],
+html[data-accent-color="orange"] [class*="border-blue-"] { border-color: #f97316 !important; }
+html[data-accent-color="orange"] [class*="from-violet-"],
+html[data-accent-color="orange"] [class*="from-purple-"],
+html[data-accent-color="orange"] [class*="from-blue-"] { --tw-gradient-from: #ea580c var(--tw-gradient-from-position) !important; }
+html[data-accent-color="orange"] [class*="to-violet-"],
+html[data-accent-color="orange"] [class*="to-blue-"] { --tw-gradient-to: #f97316 var(--tw-gradient-to-position) !important; }
+
+html[data-accent-color="custom"] [class*="bg-violet-"],
+html[data-accent-color="custom"] [class*="bg-purple-"],
+html[data-accent-color="custom"] [class*="bg-blue-"] { background-color: var(--app-accent) !important; }
+html[data-accent-color="custom"] [class*="text-violet-"],
+html[data-accent-color="custom"] [class*="text-purple-"],
+html[data-accent-color="custom"] [class*="text-blue-"] { color: color-mix(in srgb, var(--app-accent) 55%, white) !important; }
+html[data-accent-color="custom"] [class*="border-violet-"],
+html[data-accent-color="custom"] [class*="border-purple-"],
+html[data-accent-color="custom"] [class*="border-blue-"] { border-color: var(--app-accent) !important; }
+html[data-accent-color="custom"] [class*="from-violet-"],
+html[data-accent-color="custom"] [class*="from-purple-"],
+html[data-accent-color="custom"] [class*="from-blue-"] { --tw-gradient-from: var(--app-accent) var(--tw-gradient-from-position) !important; }
+html[data-accent-color="custom"] [class*="to-violet-"],
+html[data-accent-color="custom"] [class*="to-blue-"] { --tw-gradient-to: var(--app-accent-soft) var(--tw-gradient-to-position) !important; }
 
 html.theme-light {
   color-scheme: light;

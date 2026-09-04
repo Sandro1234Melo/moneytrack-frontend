@@ -26,10 +26,11 @@ import { getApiAssetUrl } from "../api/axios";
 import { getLoggedUser } from "../utils/auth";
 
 const THEME_KEY = "moneytrack-theme";
+const ACCENT_COLOR_KEY = "moneytrack-accent-color";
 
 type SettingsTab = "profile" | "preferences" | "appearance" | "security" | "notifications" | "data";
 type ThemeMode = "dark" | "light" | "system";
-type AccentColor = "purple" | "blue" | "green" | "orange";
+type AccentColor = string;
 
 type UserSettings = {
   id: number;
@@ -107,6 +108,22 @@ const applyTheme = (theme: ThemeMode) => {
   document.documentElement.classList.toggle("theme-light", resolved === "light");
   document.documentElement.classList.toggle("theme-dark", resolved === "dark");
   localStorage.setItem(THEME_KEY, resolved);
+};
+
+const applyAccentColor = (accentColor: AccentColor) => {
+  const presets: Record<string, { solid: string; soft: string }> = {
+    purple: { solid: "#7c3aed", soft: "#2563eb" },
+    blue: { solid: "#2563eb", soft: "#0ea5e9" },
+    green: { solid: "#16a34a", soft: "#22c55e" },
+    orange: { solid: "#ea580c", soft: "#f97316" },
+  };
+  const isCustomColor = /^#[0-9a-f]{6}$/i.test(accentColor);
+  const accent = isCustomColor ? { solid: accentColor, soft: accentColor } : presets[accentColor] ?? presets.purple;
+
+  document.documentElement.dataset.accentColor = isCustomColor ? "custom" : accentColor;
+  document.documentElement.style.setProperty("--app-accent", accent.solid);
+  document.documentElement.style.setProperty("--app-accent-soft", accent.soft);
+  localStorage.setItem(ACCENT_COLOR_KEY, accentColor);
 };
 
 const currencies = [
@@ -226,6 +243,10 @@ export default function Settings() {
   useEffect(() => {
     applyTheme(form.theme);
   }, [form.theme]);
+
+  useEffect(() => {
+    applyAccentColor(form.accent_color);
+  }, [form.accent_color]);
 
   const handleSave = async () => {
     try {
@@ -361,7 +382,7 @@ export default function Settings() {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-violet-600/25 transition hover:scale-[1.01] disabled:opacity-60 sm:w-auto sm:min-w-48"
+          className="accent-surface inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-bold text-white shadow-lg transition hover:scale-[1.01] disabled:opacity-60 sm:w-auto sm:min-w-48"
         >
           <Save size={18} /> {saving ? "Salvando..." : "Salvar alterações"}
         </button>
@@ -383,7 +404,7 @@ export default function Settings() {
                   type="button"
                   key={id}
                   onClick={() => setActiveTab(id)}
-                  className={`flex min-w-max items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition sm:gap-3 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm xl:w-full ${active ? "bg-gradient-to-r from-violet-700 to-violet-600 text-white shadow-lg shadow-violet-700/20" : "text-slate-300 hover:bg-white/[0.04]"}`}
+                  className={`flex min-w-max items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition sm:gap-3 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm xl:w-full ${active ? "accent-surface text-white shadow-lg" : "text-slate-300 hover:bg-white/[0.04]"}`}
                 >
                   <Icon size={18} /> {label}
                 </button>
@@ -457,6 +478,13 @@ export default function Settings() {
                         {c.label}
                       </button>
                     ))}
+                    <label className="flex cursor-pointer flex-col items-center gap-1 text-xs text-slate-300">
+                      <span className={`grid h-9 w-9 place-items-center overflow-hidden rounded-full ring-offset-2 ring-offset-[#081222] ${/^#[0-9a-f]{6}$/i.test(form.accent_color) ? "ring-2 ring-white" : ""}`} style={{ background: /^#[0-9a-f]{6}$/i.test(form.accent_color) ? form.accent_color : "conic-gradient(#ef4444, #facc15, #22c55e, #3b82f6, #a855f7, #ef4444)" }}>
+                        {/^#[0-9a-f]{6}$/i.test(form.accent_color) && <Check size={18} />}
+                      </span>
+                      <span>Personalizar</span>
+                      <input aria-label="Cor personalizada" type="color" value={/^#[0-9a-f]{6}$/i.test(form.accent_color) ? form.accent_color : "#7c3aed"} onChange={(e) => setField("accent_color", e.target.value)} className="sr-only" />
+                    </label>
                   </div>
                 </div>
               </div>
