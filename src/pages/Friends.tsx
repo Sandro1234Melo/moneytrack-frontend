@@ -1,4 +1,4 @@
-import { Check, Search, UserPlus, Users, X } from "lucide-react";
+import { Check, Search, UserMinus, UserPlus, Users, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import api, { getApiAssetUrl } from "../api/axios";
 
@@ -39,6 +39,11 @@ export default function Friends() {
   }, [query]);
   const send = async (userId: number) => { try { await api.post("/friendships/requests", { userId }); setMessage("Pedido enviado."); setResults([]); setQuery(""); } catch (e: any) { setMessage(e.response?.data?.error ?? "Não foi possível enviar o pedido."); } };
   const respond = async (id: number, action: "accept" | "decline") => { try { await api.post(`/friendships/requests/${id}/${action}`); setMessage(action === "accept" ? "Pedido aceito." : "Pedido recusado."); await load(); } catch { setMessage("Não foi possível responder ao pedido."); } };
+  const removeFriend = async (friend: Profile) => {
+    if (!window.confirm(`Desfazer amizade com ${friend.fullName}?`)) return;
+    try { await api.delete(`/friendships/${friend.id}`); setMessage("Amizade desfeita."); await load(); }
+    catch (e: any) { setMessage(e.response?.data?.error ?? "Não foi possível desfazer a amizade."); }
+  };
 
   return <div className="mx-auto max-w-4xl space-y-6 pb-8">
     <div><h1 className="text-3xl font-black">Amigos</h1><p className="mt-1 text-slate-400">Adicione pessoas para dividir despesas em breve.</p></div>
@@ -51,6 +56,6 @@ export default function Friends() {
     </section>
     {message && <p className="rounded-2xl border border-violet-400/30 bg-violet-500/10 px-4 py-3 text-sm text-violet-200">{message}</p>}
     {requests.length > 0 && <section className="rounded-3xl border border-white/10 bg-[#081222]/80 p-5"><h2 className="mb-3 text-lg font-black">Pedidos recebidos</h2><div className="space-y-3">{requests.map(request => <div key={request.id} className="flex items-center gap-3"><Avatar profile={{ ...request, id: request.userId }}/><div className="min-w-0 flex-1"><p className="truncate font-bold">{request.fullName}</p><p className="truncate text-sm text-slate-400">{request.email}</p></div><button onClick={() => respond(request.id, "accept")} className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-600"><Check size={18}/></button><button onClick={() => respond(request.id, "decline")} className="grid h-10 w-10 place-items-center rounded-xl bg-red-600"><X size={18}/></button></div>)}</div></section>}
-    <section className="rounded-3xl border border-white/10 bg-[#081222]/80 p-5"><h2 className="mb-4 flex items-center gap-2 text-lg font-black"><Users size={20} className="text-violet-300"/>Meus amigos</h2>{friends.length ? <div className="grid gap-3 sm:grid-cols-2">{friends.map(profile => <div key={profile.id} className="flex items-center gap-3 rounded-2xl bg-white/[0.04] p-3"><Avatar profile={profile}/><div className="min-w-0"><p className="truncate font-bold">{profile.fullName}</p><p className="truncate text-sm text-slate-400">{profile.email}</p></div></div>)}</div> : <p className="text-sm text-slate-400">Ainda não tem amigos adicionados.</p>}</section>
+    <section className="rounded-3xl border border-white/10 bg-[#081222]/80 p-5"><h2 className="mb-4 flex items-center gap-2 text-lg font-black"><Users size={20} className="text-violet-300"/>Meus amigos</h2>{friends.length ? <div className="grid gap-3 sm:grid-cols-2">{friends.map(profile => <div key={profile.id} className="flex items-center gap-3 rounded-2xl bg-white/[0.04] p-3"><Avatar profile={profile}/><div className="min-w-0 flex-1"><p className="truncate font-bold">{profile.fullName}</p><p className="truncate text-sm text-slate-400">{profile.email}</p></div><button type="button" onClick={() => removeFriend(profile)} aria-label={`Desfazer amizade com ${profile.fullName}`} title="Desfazer amizade" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-slate-400 hover:bg-red-500/15 hover:text-red-300"><UserMinus size={18}/></button></div>)}</div> : <p className="text-sm text-slate-400">Ainda não tem amigos adicionados.</p>}</section>
   </div>;
 }
