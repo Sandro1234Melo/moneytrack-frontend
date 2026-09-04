@@ -37,7 +37,7 @@ const Topbar = () => {
         <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-violet-600 px-1 text-[10px] font-bold">3</span>
       </button>
       <div className="relative">
-        <UserAvatar name={user.full_Name ?? user.fullName ?? "Usuário"} imageUrl={getApiAssetUrl(user.profile_Image_Url ?? user.profile_image_url ?? user.profileImageUrl)} onClick={() => setOpenMenu((prev) => !prev)} />
+        <UserAvatar name={user.full_Name ?? user.fullName ?? "Usuário"} imageUrl={getApiAssetUrl(user.profileImageUrl ?? user.profile_Image_Url ?? user.profile_image_url)} onClick={() => setOpenMenu((prev) => !prev)} />
         {openMenu && <UserMenu onLogout={handleLogout} />}
       </div>
     </header>

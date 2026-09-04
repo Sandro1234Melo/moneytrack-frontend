@@ -68,7 +68,7 @@ const normalizeUser = (raw: any): UserSettings => ({
   notify_goal_80: raw?.notify_Goal_80 ?? raw?.notify_goal_80 ?? true,
   notify_spending_increase: raw?.notify_Spending_Increase ?? raw?.notify_spending_increase ?? true,
   notify_pending_lists: raw?.notify_Pending_Lists ?? raw?.notify_pending_lists ?? false,
-  profile_image_url: raw?.profile_Image_Url ?? raw?.profile_image_url ?? "",
+  profile_image_url: raw?.profileImageUrl ?? raw?.profile_Image_Url ?? raw?.profile_image_url ?? "",
   bottom_nav_config: raw?.bottom_Nav_Config ?? raw?.bottom_nav_config ?? "",
   created_at: raw?.created_At ?? raw?.created_at,
   last_backup_at: raw?.last_Backup_At ?? raw?.last_backup_at ?? null,
@@ -81,6 +81,7 @@ const toSessionUser = (u: UserSettings) => ({
   currency_Code: u.currency_code,
   country_Code: u.country_code,
   profile_Image_Url: u.profile_image_url,
+  profileImageUrl: u.profile_image_url,
   bottom_Nav_Config: u.bottom_nav_config,
   token: u.token,
 });
@@ -211,6 +212,7 @@ export default function Settings() {
         setUser(normalized);
         setForm(normalized);
         sessionStorage.setItem("user", JSON.stringify(toSessionUser(normalized)));
+        window.dispatchEvent(new Event("moneytrack:user-updated"));
         applyTheme(normalized.theme);
       } catch (err: any) {
         setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || "Erro ao carregar configurações." });
@@ -252,6 +254,7 @@ export default function Settings() {
       setForm(updated);
       sessionStorage.setItem("user", JSON.stringify(toSessionUser(updated)));
       localStorage.setItem("user", JSON.stringify(toSessionUser(updated)));
+      window.dispatchEvent(new Event("moneytrack:user-updated"));
       setMessage({ type: "success", text: "Configurações salvas com sucesso." });
     } catch (err: any) {
       setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || "Erro ao salvar configurações." });

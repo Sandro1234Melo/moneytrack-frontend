@@ -28,7 +28,7 @@ const MobileHeader: React.FC<Props> = ({ title, onMenuClick }) => {
         {user ? (
           <UserAvatar
             name={user.full_Name ?? user.fullName ?? "Usuário"}
-            imageUrl={getApiAssetUrl(user.profile_Image_Url ?? user.profile_image_url ?? user.profileImageUrl)}
+            imageUrl={getApiAssetUrl(user.profileImageUrl ?? user.profile_Image_Url ?? user.profile_image_url)}
             onClick={() => navigate("/settings")}
             className="h-11 w-11 bg-white/[0.08]"
           />
