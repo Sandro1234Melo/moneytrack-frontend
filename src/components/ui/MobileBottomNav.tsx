@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { BarChart3, Home, ListChecks, ShoppingCart, Wallet } from "lucide-react";
 
 const navItems = [
-  { to: "/", label: "Home", icon: Home },
+  { to: "/dashboard", label: "Home", icon: Home },
   { to: "/reports", label: "Análises", icon: BarChart3 },
   { to: "/shopping-lists", label: "Listas", icon: ListChecks },
   { to: "/expenses", label: "Gastos", icon: Wallet },

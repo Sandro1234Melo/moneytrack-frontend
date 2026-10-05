@@ -14,13 +14,13 @@ import Reports from "./pages/Reports";
 import ShoppingLists from "./pages/ShoppingLists";
 import Settings from "./pages/Settings";
 import Goals from "./pages/Goals";
-import Friends from "./pages/Friends";
-import Splits from "./pages/Splits";
+import Landing from "./pages/Landing";
 
 export default function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -31,7 +31,7 @@ export default function App() {
             </PrivateRoute>
           }
         >
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/locations" element={<Locations />} />
@@ -40,8 +40,6 @@ export default function App() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/goals" element={<Goals />} />
-          <Route path="/friends" element={<Friends />} />
-          <Route path="/splits" element={<Splits />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" />} />

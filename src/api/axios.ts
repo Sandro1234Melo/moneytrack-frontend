@@ -1,23 +1,18 @@
 import axios from "axios";
 
+// A API publicada no Render hoje expõe as rotas no padrão /api
+// Exemplo: https://moneytrack-api-7ajy.onrender.com/api/auth/login
+// Se no futuro a API publicada passar a usar /api/v1, basta mudar VITE_API_BASE_PATH.
 const rawBaseUrl =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? "http://localhost:5139" : undefined);
+  import.meta.env.VITE_API_URL || "https://moneytrack-api-7ajy.onrender.com";
 
-if (!rawBaseUrl) {
-  throw new Error("VITE_API_URL precisa ser configurada para o ambiente de produção.");
-}
+const rawApiBasePath = import.meta.env.VITE_API_BASE_PATH || "/api";
 
 const normalizedBaseUrl = rawBaseUrl.replace(/\/+$/, "");
-
-export function getApiAssetUrl(path?: string | null) {
-  if (!path) return "";
-  if (/^https?:\/\//i.test(path)) return path;
-  return `${normalizedBaseUrl}${path.startsWith("/") ? path : `/${path}`}`;
-}
+const normalizedApiBasePath = `/${rawApiBasePath.replace(/^\/+|\/+$/g, "")}`;
 
 const api = axios.create({
-  baseURL: `${normalizedBaseUrl}/api`,
+  baseURL: `${normalizedBaseUrl}${normalizedApiBasePath}`,
 });
 
 api.interceptors.request.use((config) => {
@@ -27,15 +22,9 @@ api.interceptors.request.use((config) => {
     if (userStr) {
       const user = JSON.parse(userStr);
 
-      if (user?.token) {
-        config.headers.Authorization = `Bearer ${user.token}`;
-      }
-
-      // A API usa o identificador do usuário para os endpoints de perfil.
       if (user?.id) {
-        config.headers["X-User-Id"] = String(user.id);
+        config.headers["X-User-Id"] = user.id.toString();
       }
-
     }
   } catch (err) {
     console.error("Erro ao ler usuário do storage", err);
@@ -43,21 +32,5 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      sessionStorage.removeItem("user");
-      localStorage.removeItem("user");
-
-      if (window.location.pathname !== "/login") {
-        window.location.assign("/login");
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
 
 export default api;

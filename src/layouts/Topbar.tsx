@@ -1,23 +1,15 @@
-import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Bell, Search } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getLoggedUser } from "../utils/auth";
-import { getApiAssetUrl } from "../api/axios";
 import UserAvatar from "../components/user/UserAvatar";
 import UserMenu from "../components/user/UserMenu";
 import ThemeToggle from "../components/ThemeToggle";
-import NotificationMenu from "../components/user/NotificationMenu";
 
 const Topbar = () => {
-  const [user, setUser] = useState(getLoggedUser());
+  const user = getLoggedUser();
   const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(false);
-
-  useEffect(() => {
-    const updateUser = () => setUser(getLoggedUser());
-    window.addEventListener("moneytrack:user-updated", updateUser);
-    return () => window.removeEventListener("moneytrack:user-updated", updateUser);
-  }, []);
 
   const handleLogout = () => {
     sessionStorage.removeItem("user");
@@ -33,9 +25,12 @@ const Topbar = () => {
         <input className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-10 pr-4 text-sm outline-none transition focus:border-violet-500/60" placeholder="Buscar..." />
       </div>
       <ThemeToggle />
-      <NotificationMenu />
+      <button className="relative grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/10">
+        <Bell size={18} />
+        <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-violet-600 px-1 text-[10px] font-bold">3</span>
+      </button>
       <div className="relative">
-        <UserAvatar name={user.full_Name ?? user.fullName ?? "Usuário"} imageUrl={getApiAssetUrl(user.profileImageUrl ?? user.profile_Image_Url ?? user.profile_image_url)} onClick={() => setOpenMenu((prev) => !prev)} />
+        <UserAvatar name={user.full_Name ?? user.fullName ?? "Usuário"} onClick={() => setOpenMenu((prev) => !prev)} />
         {openMenu && <UserMenu onLogout={handleLogout} />}
       </div>
     </header>

@@ -22,15 +22,13 @@ import {
   Monitor,
 } from "lucide-react";
 import api from "../api/axios";
-import { getApiAssetUrl } from "../api/axios";
 import { getLoggedUser } from "../utils/auth";
 
 const THEME_KEY = "moneytrack-theme";
-const ACCENT_COLOR_KEY = "moneytrack-accent-color";
 
 type SettingsTab = "profile" | "preferences" | "appearance" | "security" | "notifications" | "data";
 type ThemeMode = "dark" | "light" | "system";
-type AccentColor = string;
+type AccentColor = "purple" | "blue" | "green" | "orange";
 
 type UserSettings = {
   id: number;
@@ -51,7 +49,6 @@ type UserSettings = {
   bottom_nav_config?: string;
   created_at?: string;
   last_backup_at?: string | null;
-  token?: string;
 };
 
 const normalizeUser = (raw: any): UserSettings => ({
@@ -69,11 +66,10 @@ const normalizeUser = (raw: any): UserSettings => ({
   notify_goal_80: raw?.notify_Goal_80 ?? raw?.notify_goal_80 ?? true,
   notify_spending_increase: raw?.notify_Spending_Increase ?? raw?.notify_spending_increase ?? true,
   notify_pending_lists: raw?.notify_Pending_Lists ?? raw?.notify_pending_lists ?? false,
-  profile_image_url: raw?.profileImageUrl ?? raw?.profile_Image_Url ?? raw?.profile_image_url ?? "",
+  profile_image_url: raw?.profile_Image_Url ?? raw?.profile_image_url ?? "",
   bottom_nav_config: raw?.bottom_Nav_Config ?? raw?.bottom_nav_config ?? "",
   created_at: raw?.created_At ?? raw?.created_at,
   last_backup_at: raw?.last_Backup_At ?? raw?.last_backup_at ?? null,
-  token: raw?.token,
 });
 
 const toSessionUser = (u: UserSettings) => ({
@@ -82,25 +78,8 @@ const toSessionUser = (u: UserSettings) => ({
   currency_Code: u.currency_code,
   country_Code: u.country_code,
   profile_Image_Url: u.profile_image_url,
-  profileImageUrl: u.profile_image_url,
   bottom_Nav_Config: u.bottom_nav_config,
-  token: u.token,
 });
-
-const updateStoredProfilePhoto = (profileImageUrl: string) => {
-  const storedUser = getLoggedUser();
-  if (!storedUser) return;
-
-  const updatedUser = {
-    ...storedUser,
-    profile_image_url: profileImageUrl,
-    profile_Image_Url: profileImageUrl,
-  };
-  const serializedUser = JSON.stringify(updatedUser);
-  sessionStorage.setItem("user", serializedUser);
-  localStorage.setItem("user", serializedUser);
-  window.dispatchEvent(new Event("moneytrack:user-updated"));
-};
 
 const applyTheme = (theme: ThemeMode) => {
   const resolved = theme === "system" ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") : theme;
@@ -108,22 +87,6 @@ const applyTheme = (theme: ThemeMode) => {
   document.documentElement.classList.toggle("theme-light", resolved === "light");
   document.documentElement.classList.toggle("theme-dark", resolved === "dark");
   localStorage.setItem(THEME_KEY, resolved);
-};
-
-const applyAccentColor = (accentColor: AccentColor) => {
-  const presets: Record<string, { solid: string; soft: string }> = {
-    purple: { solid: "#7c3aed", soft: "#2563eb" },
-    blue: { solid: "#2563eb", soft: "#0ea5e9" },
-    green: { solid: "#16a34a", soft: "#22c55e" },
-    orange: { solid: "#ea580c", soft: "#f97316" },
-  };
-  const isCustomColor = /^#[0-9a-f]{6}$/i.test(accentColor);
-  const accent = isCustomColor ? { solid: accentColor, soft: accentColor } : presets[accentColor] ?? presets.purple;
-
-  document.documentElement.dataset.accentColor = isCustomColor ? "custom" : accentColor;
-  document.documentElement.style.setProperty("--app-accent", accent.solid);
-  document.documentElement.style.setProperty("--app-accent-soft", accent.soft);
-  localStorage.setItem(ACCENT_COLOR_KEY, accentColor);
 };
 
 const currencies = [
@@ -225,11 +188,10 @@ export default function Settings() {
     const load = async () => {
       try {
         const res = await api.get("/users/me");
-        const normalized = normalizeUser({ ...res.data, token: getLoggedUser()?.token });
+        const normalized = normalizeUser(res.data);
         setUser(normalized);
         setForm(normalized);
         sessionStorage.setItem("user", JSON.stringify(toSessionUser(normalized)));
-        window.dispatchEvent(new Event("moneytrack:user-updated"));
         applyTheme(normalized.theme);
       } catch (err: any) {
         setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || "Erro ao carregar configurações." });
@@ -243,10 +205,6 @@ export default function Settings() {
   useEffect(() => {
     applyTheme(form.theme);
   }, [form.theme]);
-
-  useEffect(() => {
-    applyAccentColor(form.accent_color);
-  }, [form.accent_color]);
 
   const handleSave = async () => {
     try {
@@ -270,12 +228,11 @@ export default function Settings() {
       };
 
       const res = await api.put("/users/me/preferences", payload);
-      const updated = normalizeUser({ ...(res.data ?? form), token: getLoggedUser()?.token });
+      const updated = normalizeUser(res.data ?? form);
       setUser(updated);
       setForm(updated);
       sessionStorage.setItem("user", JSON.stringify(toSessionUser(updated)));
       localStorage.setItem("user", JSON.stringify(toSessionUser(updated)));
-      window.dispatchEvent(new Event("moneytrack:user-updated"));
       setMessage({ type: "success", text: "Configurações salvas com sucesso." });
     } catch (err: any) {
       setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || "Erro ao salvar configurações." });
@@ -294,10 +251,10 @@ export default function Settings() {
       formData.append("file", file);
       const res = await api.post("/users/me/upload-photo", formData, { headers: { "Content-Type": "multipart/form-data" } });
       const imageUrl = res.data?.url;
-      const fullUrl = imageUrl ? `${getApiAssetUrl(imageUrl)}?t=${Date.now()}` : "";
+      const base = api.defaults.baseURL?.replace(/\/api(?:\/v\d+)?$/, "") || "";
+      const fullUrl = imageUrl ? `${base}${imageUrl}?t=${Date.now()}` : "";
       setForm((prev) => ({ ...prev, profile_image_url: fullUrl }));
       setUser((prev) => ({ ...prev, profile_image_url: fullUrl }));
-      updateStoredProfilePhoto(imageUrl);
       setMessage({ type: "success", text: "Foto atualizada com sucesso." });
     } catch (err: any) {
       setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || "Erro ao enviar foto." });
@@ -311,7 +268,6 @@ export default function Settings() {
       await api.delete("/users/me/profile-photo");
       setForm((prev) => ({ ...prev, profile_image_url: "" }));
       setUser((prev) => ({ ...prev, profile_image_url: "" }));
-      updateStoredProfilePhoto("");
       setMessage({ type: "success", text: "Foto removida com sucesso." });
     } catch (err: any) {
       setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || "Erro ao remover foto." });
@@ -382,7 +338,7 @@ export default function Settings() {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="accent-surface inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-bold text-white shadow-lg transition hover:scale-[1.01] disabled:opacity-60 sm:w-auto sm:min-w-48"
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-violet-600/25 transition hover:scale-[1.01] disabled:opacity-60 sm:w-auto sm:min-w-48"
         >
           <Save size={18} /> {saving ? "Salvando..." : "Salvar alterações"}
         </button>
@@ -404,7 +360,7 @@ export default function Settings() {
                   type="button"
                   key={id}
                   onClick={() => setActiveTab(id)}
-                  className={`flex min-w-max items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition sm:gap-3 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm xl:w-full ${active ? "accent-surface text-white shadow-lg" : "text-slate-300 hover:bg-white/[0.04]"}`}
+                  className={`flex min-w-max items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition sm:gap-3 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm xl:w-full ${active ? "bg-gradient-to-r from-violet-700 to-violet-600 text-white shadow-lg shadow-violet-700/20" : "text-slate-300 hover:bg-white/[0.04]"}`}
                 >
                   <Icon size={18} /> {label}
                 </button>
@@ -419,7 +375,7 @@ export default function Settings() {
               <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                   <div className="grid h-16 w-16 shrink-0 sm:h-20 sm:w-20 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-violet-600 to-blue-600 text-2xl font-black shadow-xl shadow-violet-600/25">
-                    {form.profile_image_url ? <img src={getApiAssetUrl(form.profile_image_url)} alt="Perfil" className="h-full w-full object-cover" /> : "SA"}
+                    {form.profile_image_url ? <img src={form.profile_image_url} alt="Perfil" className="h-full w-full object-cover" /> : "SA"}
                   </div>
                   <div>
                     <h3 className="truncate text-lg font-black sm:text-xl">{form.full_name}</h3>
@@ -478,13 +434,6 @@ export default function Settings() {
                         {c.label}
                       </button>
                     ))}
-                    <label className="flex cursor-pointer flex-col items-center gap-1 text-xs text-slate-300">
-                      <span className={`grid h-9 w-9 place-items-center overflow-hidden rounded-full ring-offset-2 ring-offset-[#081222] ${/^#[0-9a-f]{6}$/i.test(form.accent_color) ? "ring-2 ring-white" : ""}`} style={{ background: /^#[0-9a-f]{6}$/i.test(form.accent_color) ? form.accent_color : "conic-gradient(#ef4444, #facc15, #22c55e, #3b82f6, #a855f7, #ef4444)" }}>
-                        {/^#[0-9a-f]{6}$/i.test(form.accent_color) && <Check size={18} />}
-                      </span>
-                      <span>Personalizar</span>
-                      <input aria-label="Cor personalizada" type="color" value={/^#[0-9a-f]{6}$/i.test(form.accent_color) ? form.accent_color : "#7c3aed"} onChange={(e) => setField("accent_color", e.target.value)} className="sr-only" />
-                    </label>
                   </div>
                 </div>
               </div>

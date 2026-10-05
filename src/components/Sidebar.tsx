@@ -1,4 +1,4 @@
-import { BarChart3, ChevronDown, Crosshair, Home, ListChecks, MapPin, Settings, ShoppingCart, Tags, Users, Wallet, Zap, Split } from "lucide-react";
+import { BarChart3, ChevronDown, Crosshair, Home, ListChecks, MapPin, Settings, ShoppingCart, Tags, Wallet, Zap } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { getLoggedUser } from "../utils/auth";
@@ -13,7 +13,7 @@ const Sidebar = () => {
   }, [user]);
 
   const normalItems = [
-    { name: "Dashboard", path: "/", icon: Home },
+    { name: "Dashboard", path: "/dashboard", icon: Home },
     { name: "Análises", path: "/reports", icon: BarChart3 },
     { name: "Listas de Compras", path: "/shopping-lists", icon: ListChecks },
     { name: "Meus Gastos", path: "/expenses", icon: Wallet },
@@ -28,8 +28,6 @@ const Sidebar = () => {
   const bottomItems = [
     { name: "Relatórios", path: "/reports", icon: BarChart3 },
     { name: "Metas", path: "/goals", icon: Crosshair },
-    { name: "Amigos", path: "/friends", icon: Users },
-    { name: "Dividir conta", path: "/splits", icon: Split },
     { name: "Configurações", path: "/settings", icon: Settings },
   ];
 
@@ -38,7 +36,7 @@ const Sidebar = () => {
   return (
     <aside className="flex h-screen w-[292px] shrink-0 flex-col justify-between border-r border-white/5 bg-[#07101f]/90 p-5 backdrop-blur-xl">
       <div>
-        <Link to="/" className="mb-8 flex items-center gap-3 px-1">
+        <Link to="/dashboard" className="mb-8 flex items-center gap-3 px-1">
           <div className="flex h-8 w-8 items-end gap-1 text-violet-500">
             <span className="h-3 w-1.5 rounded-full bg-current" /><span className="h-5 w-1.5 rounded-full bg-current" /><span className="h-7 w-1.5 rounded-full bg-current" />
           </div>

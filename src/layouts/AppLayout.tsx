@@ -11,7 +11,7 @@ export default function AppLayout() {
   const location = useLocation();
 
   const pageTitleMap: Record<string, string> = {
-    "/": "Dashboard",
+    "/dashboard": "Dashboard",
     "/expenses": "Meus Gastos",
     "/purchases": "Compras",
     "/shopping-lists": "Listas",
@@ -20,8 +20,6 @@ export default function AppLayout() {
     "/reports": "Análises",
     "/settings": "Configurações",
     "/goals": "Metas"
-    ,"/friends": "Amigos"
-    ,"/splits": "Dividir conta"
   };
 
   return (
@@ -47,11 +45,9 @@ export default function AppLayout() {
             <Outlet />
           </main>
 
-          {!drawerOpen && (
-            <div className="lg:hidden">
-              <MobileBottomNav />
-            </div>
-          )}
+          <div className="lg:hidden">
+            <MobileBottomNav />
+          </div>
         </div>
       </div>
     </div>
