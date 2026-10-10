@@ -30,9 +30,19 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#000010] px-4">
-      <div className="w-full max-w-md bg-[#0b0b2a] rounded-xl shadow-lg p-6 sm:p-8">
-        <h1 className="text-2xl font-bold text-center mb-6 text-white">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#020919] px-4">
+      <div className="relative w-full max-w-md">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-1 rounded-2xl bg-violet-500/50 blur-xl"
+        />
+        <div className="relative rounded-xl bg-[#0b0b2a] p-6 shadow-lg sm:p-8">
+        <h1 className="mb-6 flex items-end justify-center gap-2 text-center text-2xl font-bold text-white">
+          <span className="flex h-7 w-6 items-end gap-1 text-violet-400" aria-hidden="true">
+            <i className="h-2.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,.8)]" />
+            <i className="h-5 w-1.5 rounded-full bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,.9)]" />
+            <i className="h-7 w-1.5 rounded-full bg-violet-400 shadow-[0_0_10px_rgba(167,139,250,.9)]" />
+          </span>
           MoneyTrack
         </h1>
 
@@ -89,6 +99,7 @@ export default function Login() {
             Criar conta
           </Link>
         </p>
+        </div>
       </div>
     </div>
   );

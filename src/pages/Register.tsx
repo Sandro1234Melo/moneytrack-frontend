@@ -61,8 +61,13 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-[100svh] bg-[#000010] px-4 py-6 sm:py-8 overflow-y-auto flex items-start sm:items-center justify-center pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-      <div className="w-full max-w-md bg-[#0b0b2a] rounded-xl shadow-lg p-5 sm:p-8 border border-white/10">
+    <div className="relative flex min-h-[100svh] items-center justify-center overflow-y-auto bg-[#020919] px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:py-8">
+      <div className="relative w-full max-w-md">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-1 rounded-2xl bg-violet-500/50 blur-xl"
+        />
+        <div className="relative rounded-xl border border-white/10 bg-[#0b0b2a] p-5 shadow-lg sm:p-8">
         <h1 className="text-2xl font-bold text-center mb-6 text-white">
           Criar Conta
         </h1>
@@ -205,6 +210,7 @@ export default function Register() {
             Entrar
           </Link>
         </p>
+        </div>
       </div>
     </div>
   );
