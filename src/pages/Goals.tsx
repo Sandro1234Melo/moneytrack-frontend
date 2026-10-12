@@ -90,6 +90,7 @@ const Goals: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [detailGoal, setDetailGoal] = useState<Goal | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm());
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
@@ -357,6 +358,7 @@ const Goals: React.FC = () => {
                   key={goal.id}
                   goal={goal}
                   money={money}
+                  onDetails={() => setDetailGoal(goal)}
                   onEdit={() => openEdit(goal)}
                   onDelete={() => setDeleteId(goal.id)}
                   onFavorite={() => toggleFavorite(goal)}
@@ -466,6 +468,15 @@ const Goals: React.FC = () => {
         />
       )}
 
+      {detailGoal && (
+        <GoalDetailsModal
+          goal={detailGoal}
+          money={money}
+          onClose={() => setDetailGoal(null)}
+          onEdit={() => { setDetailGoal(null); openEdit(detailGoal); }}
+        />
+      )}
+
       <ConfirmDialog
         open={deleteId !== null}
         title="Excluir meta"
@@ -500,7 +511,7 @@ const IconBubble = ({ goal, small = false }: { goal: Goal; small?: boolean }) =>
   return <div className={`grid shrink-0 place-items-center rounded-2xl ${tone} ${small ? 'h-11 w-11' : 'h-16 w-16'}`}><Icon size={small ? 20 : 30} /></div>;
 };
 
-const GoalCard = ({ goal, money, onEdit, onDelete, onFavorite }: { goal: Goal; money: (v?: number) => string; onEdit: () => void; onDelete: () => void; onFavorite: () => void }) => {
+const GoalCard = ({ goal, money, onDetails, onEdit, onDelete, onFavorite }: { goal: Goal; money: (v?: number) => string; onDetails: () => void; onEdit: () => void; onDelete: () => void; onFavorite: () => void }) => {
   const progress = clamp(goal.progressPercentage, 0, 100);
   const statusClass = goal.riskLevel >= 2 ? 'bg-orange-500/15 text-orange-300 border-orange-500/20' : goal.statusKey === 'completed' ? 'bg-violet-500/15 text-violet-300 border-violet-500/20' : goal.statusKey === 'starting' ? 'bg-blue-500/15 text-blue-300 border-blue-500/20' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20';
 
@@ -543,7 +554,7 @@ const GoalCard = ({ goal, money, onEdit, onDelete, onFavorite }: { goal: Goal; m
         </div>
 
         <div className="grid grid-cols-[1fr_1fr_auto] gap-2 xl:grid-cols-1">
-          <button className="rounded-xl border border-white/10 px-4 py-2 text-sm font-bold hover:bg-white/[0.06]">Ver detalhes</button>
+          <button onClick={onDetails} className="rounded-xl border border-white/10 px-4 py-2 text-sm font-bold hover:bg-white/[0.06]">Ver detalhes</button>
           <button onClick={onEdit} className="flex items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-bold text-violet-300 hover:bg-white/[0.06]"><Edit3 size={16} /> Editar</button>
           <button onClick={onDelete} className="grid h-10 w-10 place-items-center rounded-xl border border-red-500/20 text-red-300 hover:bg-red-500/10 xl:w-full"><Trash2 size={16} /></button>
         </div>
@@ -551,6 +562,18 @@ const GoalCard = ({ goal, money, onEdit, onDelete, onFavorite }: { goal: Goal; m
     </article>
   );
 };
+
+const GoalDetailsModal = ({ goal, money, onClose, onEdit }: { goal: Goal; money: (value?: number) => string; onClose: () => void; onEdit: () => void }) => (
+  <div className="fixed inset-0 z-[80] grid place-items-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="goal-details-title" onClick={onClose}>
+    <section className="w-full max-w-lg rounded-3xl border border-white/10 bg-[#081222] p-5 shadow-2xl sm:p-7" onClick={(event) => event.stopPropagation()}>
+      <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[.16em] text-violet-300">Detalhes da meta</p><h2 id="goal-details-title" className="mt-2 text-2xl font-black">{goal.name}</h2></div><button type="button" aria-label="Fechar detalhes" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 text-xl">×</button></div>
+      {goal.description && <p className="mt-4 text-sm leading-6 text-slate-300">{goal.description}</p>}
+      <dl className="mt-6 grid grid-cols-2 gap-3 text-sm"><div className="rounded-2xl bg-white/[0.04] p-4"><dt className="text-slate-400">Objetivo</dt><dd className="mt-1 text-lg font-bold">{money(goal.targetAmount)}</dd></div><div className="rounded-2xl bg-white/[0.04] p-4"><dt className="text-slate-400">Atual</dt><dd className="mt-1 text-lg font-bold">{money(goal.currentAmount)}</dd></div><div className="rounded-2xl bg-white/[0.04] p-4"><dt className="text-slate-400">Restante</dt><dd className="mt-1 font-bold">{money(goal.remainingAmount)}</dd></div><div className="rounded-2xl bg-white/[0.04] p-4"><dt className="text-slate-400">Prazo</dt><dd className="mt-1 font-bold">{goal.endDate ? new Date(goal.endDate).toLocaleDateString('pt-PT') : 'Sem prazo'}</dd></div></dl>
+      <div className="mt-6"><div className="mb-2 flex justify-between text-sm"><span>Progresso</span><strong>{Math.round(goal.progressPercentage)}%</strong></div><div className="h-3 overflow-hidden rounded-full bg-slate-800"><div className="h-full rounded-full bg-gradient-to-r from-violet-600 to-blue-500" style={{ width: `${clamp(goal.progressPercentage, 0, 100)}%` }} /></div></div>
+      <button type="button" onClick={onEdit} className="mt-6 w-full rounded-xl bg-violet-600 px-4 py-3 font-bold hover:bg-violet-500">Editar meta</button>
+    </section>
+  </div>
+);
 
 const Info = ({ label, value }: { label: string; value: string }) => (
   <div>

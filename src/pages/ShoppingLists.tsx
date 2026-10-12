@@ -62,6 +62,11 @@ type ItemForm = {
   price: string;
 };
 
+type HistoricalExpense = {
+  date: string;
+  items: Array<{ description?: string; unitPrice?: number; price?: number; amount?: number; quantity?: number }>;
+};
+
 const statusFilters: StatusFilter[] = [
   "Todas",
   "Ativas",
@@ -136,6 +141,7 @@ const ShoppingLists = () => {
   const [itemForm, setItemForm] = useState<ItemForm>(initialItemForm);
   const [convertList, setConvertList] = useState<ShoppingList | null>(null);
   const [paymentMethod, setPaymentMethod] = useState("0");
+  const [priceHistory, setPriceHistory] = useState<HistoricalExpense[]>([]);
 
   const money = useCallback(
     (value: number | null | undefined) => {
@@ -188,6 +194,16 @@ const ShoppingLists = () => {
     }
   }, [search, showError, status, userId]);
 
+  const loadPriceHistory = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const response = await api.get<HistoricalExpense[]>("/expenses", { params: { userId } });
+      setPriceHistory(response.data ?? []);
+    } catch {
+      setPriceHistory([]);
+    }
+  }, [userId]);
+
   const loadAuxiliaryData = useCallback(async () => {
     if (!userId) return;
     try {
@@ -213,6 +229,10 @@ const ShoppingLists = () => {
 
     return () => window.clearTimeout(timer);
   }, [loadLists]);
+
+  useEffect(() => {
+    void loadPriceHistory();
+  }, [loadPriceHistory]);
 
   const sortedLists = useMemo(() => {
     const copy = [...lists];
@@ -263,6 +283,28 @@ const ShoppingLists = () => {
       .filter((list) => list.status !== "Converted" && new Date(list.plannedDate) >= today)
       .sort((first, second) => new Date(first.plannedDate).getTime() - new Date(second.plannedDate).getTime())[0];
   }, [lists]);
+
+  const priceInsights = useMemo(() => {
+    const selectedList = lists.find((list) => list.id === expandedId);
+    if (!selectedList) return [];
+    const normalize = (value: string) => value.trim().toLocaleLowerCase("pt-PT");
+
+    return selectedList.items.flatMap((item) => {
+      const prices = priceHistory
+        .flatMap((expense) => expense.items.map((expenseItem) => ({ ...expenseItem, date: expense.date })))
+        .filter((expenseItem) => normalize(expenseItem.description ?? "") === normalize(item.description))
+        .map((expenseItem) => ({
+          value: Number(expenseItem.unitPrice ?? expenseItem.price ?? ((expenseItem.amount ?? 0) / Math.max(Number(expenseItem.quantity ?? 1), 1))),
+          date: expenseItem.date,
+        }))
+        .filter((price) => Number.isFinite(price.value) && price.value > 0)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      if (!prices.length) return [];
+      const current = Number(item.price ?? 0);
+      const lowest = Math.min(...prices.map((price) => price.value));
+      return [{ description: item.description, lowest, last: prices[0].value, current, samples: prices.length }];
+    }).slice(0, 3);
+  }, [expandedId, lists, priceHistory]);
 
   const openCreateList = () => {
     setEditingList(null);
@@ -450,6 +492,7 @@ const ShoppingLists = () => {
       setConvertList(null);
       showSuccess("Lista convertida em gasto com sucesso.");
       await loadLists();
+      await loadPriceHistory();
     } catch (err) {
       showError(extractError(err));
     } finally {
@@ -633,6 +676,23 @@ const ShoppingLists = () => {
                 ))
               )}
             </div>
+          </InsightCard>
+
+          <InsightCard title="Histórico de preços" icon={Store}>
+            {priceInsights.length === 0 ? (
+              <p className="text-sm leading-6 text-slate-400">Abra uma lista com itens já comprados para comparar os preços registrados no seu histórico.</p>
+            ) : (
+              <div className="space-y-3">
+                {priceInsights.map((item) => (
+                  <div key={item.description} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm">
+                    <p className="truncate font-semibold text-white">{item.description}</p>
+                    <p className="mt-1 text-slate-400">Menor registrado: <strong className="text-emerald-300">{money(item.lowest)}</strong> · última compra: {money(item.last)}</p>
+                    {item.current > item.lowest && <p className="mt-1 text-amber-300">A estimativa atual está {money(item.current - item.lowest)} acima do menor preço.</p>}
+                    <p className="mt-1 text-xs text-slate-500">Baseado em {item.samples} {item.samples === 1 ? "compra" : "compras"} registrada{item.samples === 1 ? "" : "s"}.</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </InsightCard>
 
           <InsightCard title="Dica para você" icon={Lightbulb}>

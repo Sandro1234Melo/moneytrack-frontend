@@ -7,6 +7,7 @@ type DraftItem = Pick<PurchaseItem, "description" | "categoryId"> & { quantity: 
 
 export interface PurchaseFormMobileProps {
   purchase?: Purchase | null;
+  initialLocationId?: number | null;
   locations: NamedOption[];
   categories: NamedOption[];
   onSave: (data: PurchasePayload) => void;
@@ -20,7 +21,7 @@ export interface PurchaseFormMobileProps {
 const fieldClass = "w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-white outline-none focus:border-violet-500/70";
 const iconBox = "grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-violet-600/15 text-violet-300";
 
-const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, locations, categories, onSave, onCancel, onAddLocation, onAddCategory, onCategoryCreated, onLocationCreated }) => {
+const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, initialLocationId, locations, categories, onSave, onCancel, onAddLocation, onAddCategory, onCategoryCreated, onLocationCreated }) => {
   const [date, setDate] = useState(purchase?.date?.substring(0, 10) ?? new Date().toISOString().substring(0, 10));
   const [locationId, setLocationId] = useState<number | "">(purchase?.locationId ?? "");
   const [paymentMethod, setPaymentMethod] = useState<number | "">(purchase?.paymentMethod ?? "");
@@ -35,9 +36,10 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, locat
       setItems(purchase.items.map((item) => ({ description: item.description ?? "", categoryId: String(item.categoryId ?? ""), quantity: item.quantity ?? 1, price: item.price ?? item.unitPrice ?? item.amount ?? 0 })));
     } else {
       setItems([{ description: "", categoryId: "", quantity: 1, price: 0 }]);
+      setLocationId(initialLocationId ?? "");
       setPaymentMethod("");
     }
-  }, [purchase]);
+  }, [initialLocationId, purchase]);
 
   useEffect(() => { if (onLocationCreated) setLocationId(onLocationCreated); }, [onLocationCreated]);
   useEffect(() => { if (!onCategoryCreated) return; setItems(prev => { const copy = [...prev]; if (copy.length) copy[copy.length - 1].categoryId = String(onCategoryCreated); return copy; }); }, [onCategoryCreated]);

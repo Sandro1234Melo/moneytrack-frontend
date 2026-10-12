@@ -32,6 +32,7 @@ const Purchases = () => {
   const userId = user?.id;
   const currency = user?.currencySymbol || "€";
   const searchTerm = searchParams.get("search")?.trim() ?? "";
+  const requestedLocationId = Number(searchParams.get("locationId")) || null;
 
   const [filters, setFilters] = useState<Filters>({ fromDate: "", toDate: "", locationId: "", categoryId: "", noteId: "", description: "", minValue: "", maxValue: "" });
 
@@ -78,6 +79,13 @@ const Purchases = () => {
     loadCategories();
     loadLocations();
   }, [loadCategories, loadLocations, loadPurchases, searchTerm, userId]);
+
+  useEffect(() => {
+    if (!requestedLocationId) return;
+    setEditingPurchase(null);
+    setIsEditing(true);
+    setFormKey((current) => current + 1);
+  }, [requestedLocationId]);
 
   const handleSave = async (data: PurchasePayload) => {
     try {
@@ -146,8 +154,8 @@ const Purchases = () => {
   if (isEditing) {
     return (
       <div className="mx-auto max-w-7xl">
-        <div className="hidden lg:block"><PurchaseFormDesktop key={formKey} purchase={editingPurchase} categories={categories} locations={locations} onCancel={() => { setEditingPurchase(null); setIsEditing(false); }} onSave={handleSave} /></div>
-        <div className="lg:hidden"><PurchaseFormMobile key={formKey} purchase={editingPurchase} categories={categories} locations={locations} onCancel={() => { setEditingPurchase(null); setIsEditing(false); }} onSave={handleSave} onAddLocation={() => setOpenLocationModal(true)} onAddCategory={() => setOpenCategoryModal(true)} onCategoryCreated={createdCategoryId} onLocationCreated={createdLocationId} /></div>
+        <div className="hidden lg:block"><PurchaseFormDesktop key={formKey} purchase={editingPurchase} initialLocationId={editingPurchase ? null : requestedLocationId} categories={categories} locations={locations} onCancel={() => { setEditingPurchase(null); setIsEditing(false); }} onSave={handleSave} /></div>
+        <div className="lg:hidden"><PurchaseFormMobile key={formKey} purchase={editingPurchase} initialLocationId={editingPurchase ? null : requestedLocationId} categories={categories} locations={locations} onCancel={() => { setEditingPurchase(null); setIsEditing(false); }} onSave={handleSave} onAddLocation={() => setOpenLocationModal(true)} onAddCategory={() => setOpenCategoryModal(true)} onCategoryCreated={createdCategoryId} onLocationCreated={createdLocationId} /></div>
         <QuickCreateModal open={openCategoryModal} title="Nova categoria" fields={[{ name: "name", label: "Nome", placeholder: "Ex: Alimentação" }]} onClose={() => setOpenCategoryModal(false)} onSubmit={async (data) => { const res = await api.post("/categories", { name: data.name, user_Id: userId }); setCategories((prev) => [...prev, res.data]); setCreatedCategoryId(res.data.id); setOpenCategoryModal(false); }} />
         <QuickCreateModal open={openLocationModal} title="Novo local" fields={[{ name: "name", label: "Nome", placeholder: "Ex: Supermercado" }]} onClose={() => setOpenLocationModal(false)} onSubmit={async (data) => { const res = await api.post("/locations", { name: data.name, user_Id: userId }); setLocations((prev) => [...prev, res.data]); setCreatedLocationId(res.data.id); setOpenLocationModal(false); }} />
       </div>

@@ -7,10 +7,10 @@ import { getLoggedUser } from "../../utils/auth";
 import type { NamedOption, Purchase, PurchaseItem, PurchasePayload } from "../../types/purchases";
 
 type DraftItem = Pick<PurchaseItem, "description" | "categoryId"> & { quantity: number | string; price: number | string };
-type Props = { purchase?: Purchase | null; locations: NamedOption[]; categories: NamedOption[]; onSave: (data: PurchasePayload) => void; onCancel: () => void };
+type Props = { purchase?: Purchase | null; initialLocationId?: number | null; locations: NamedOption[]; categories: NamedOption[]; onSave: (data: PurchasePayload) => void; onCancel: () => void };
 const fieldClass = "h-12 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-white outline-none focus:border-violet-500/70";
 
-const PurchaseFormDesktop: React.FC<Props> = ({ purchase, locations, categories, onSave, onCancel }) => {
+const PurchaseFormDesktop: React.FC<Props> = ({ purchase, initialLocationId, locations, categories, onSave, onCancel }) => {
   const user = getLoggedUser();
   const [date, setDate] = useState("");
   const [locationId, setLocationId] = useState<number | "">("");
@@ -31,10 +31,10 @@ const PurchaseFormDesktop: React.FC<Props> = ({ purchase, locations, categories,
       setItems(purchase.items.map((item) => ({ description: item.description ?? "", categoryId: String(item.categoryId ?? ""), quantity: item.quantity ?? 1, price: item.price ?? item.unitPrice ?? item.amount ?? 0 })));
     } else {
       setDate(new Date().toISOString().substring(0, 10));
-      setLocationId(""); setPaymentMethod("");
+      setLocationId(initialLocationId ?? ""); setPaymentMethod("");
       setItems([{ description: "", categoryId: "", quantity: 1, price: 0 }]);
     }
-  }, [purchase]);
+  }, [initialLocationId, purchase]);
 
   const total = useMemo(() => items.reduce((s, item) => s + Number(item.quantity || 0) * Number(item.price || 0), 0), [items]);
   const money = (v: number) => `€ ${v.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

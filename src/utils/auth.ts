@@ -25,6 +25,12 @@ export type SessionUser = {
   compact_mode?: boolean;
   interface_Animations?: boolean;
   interface_animations?: boolean;
+  notify_Goal_80?: boolean;
+  notify_goal_80?: boolean;
+  notify_Spending_Increase?: boolean;
+  notify_spending_increase?: boolean;
+  notify_Pending_Lists?: boolean;
+  notify_pending_lists?: boolean;
   [key: string]: unknown;
 };
 
