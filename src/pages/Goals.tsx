@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   CalendarDays,
@@ -43,10 +43,13 @@ type FormState = {
   isActive: boolean;
 };
 
-const today = () => new Date().toISOString().slice(0, 10);
+const dateForInput = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+const today = () => dateForInput(new Date());
 const endOfMonth = () => {
   const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+  return dateForInput(new Date(now.getFullYear(), now.getMonth() + 1, 0));
 };
 
 const emptyForm = (): FormState => ({
@@ -65,8 +68,8 @@ const emptyForm = (): FormState => ({
   isActive: true,
 });
 
-const getApiError = (error: any, fallback: string) => {
-  const data = error?.response?.data;
+const getApiError = (error: unknown, fallback: string) => {
+  const data = (error as { response?: { data?: { details?: string; error?: string; message?: string } } })?.response?.data;
   return data?.details || data?.error || data?.message || fallback;
 };
 
@@ -98,17 +101,17 @@ const Goals: React.FC = () => {
       maximumFractionDigits: 2,
     })}`;
 
-  const showSuccess = (message: string) => {
+  const showSuccess = useCallback((message: string) => {
     setSuccessMessage(message);
     setTimeout(() => setSuccessMessage(''), 3000);
-  };
+  }, []);
 
-  const showError = (message: string) => {
+  const showError = useCallback((message: string) => {
     setErrorMessage(message);
     setTimeout(() => setErrorMessage(''), 6000);
-  };
+  }, []);
 
-  const loadGoals = async () => {
+  const loadGoals = useCallback(async () => {
     if (!userId) return;
     try {
       setLoading(true);
@@ -118,14 +121,14 @@ const Goals: React.FC = () => {
       ]);
       setGoals(goalsData ?? []);
       setSummary(summaryData);
-    } catch (error: any) {
+    } catch (error) {
       showError(getApiError(error, 'Erro ao carregar metas.'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderBy, search, showError, typeFilter, userId]);
 
-  const loadSupportData = async () => {
+  const loadSupportData = useCallback(async () => {
     if (!userId) return;
     try {
       const [categoriesResponse, locationsResponse] = await Promise.all([
@@ -137,16 +140,16 @@ const Goals: React.FC = () => {
     } catch {
       // Mantem a tela funcional mesmo se um select auxiliar falhar.
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
     loadSupportData();
-  }, [userId]);
+  }, [loadSupportData]);
 
   useEffect(() => {
     const timer = setTimeout(loadGoals, 250);
     return () => clearTimeout(timer);
-  }, [userId, search, typeFilter, orderBy]);
+  }, [loadGoals]);
 
   const openCreate = () => {
     setEditingGoal(null);
@@ -224,7 +227,7 @@ const Goals: React.FC = () => {
       }
       closeModal();
       await loadGoals();
-    } catch (error: any) {
+    } catch (error) {
       showError(getApiError(error, 'Erro ao salvar meta.'));
     }
   };
@@ -235,7 +238,7 @@ const Goals: React.FC = () => {
       showSuccess('Meta excluída com sucesso!');
       setDeleteId(null);
       await loadGoals();
-    } catch (error: any) {
+    } catch (error) {
       showError(getApiError(error, 'Erro ao excluir meta.'));
     }
   };
@@ -244,7 +247,7 @@ const Goals: React.FC = () => {
     try {
       await goalService.toggleFavorite(goal.id);
       await loadGoals();
-    } catch (error: any) {
+    } catch (error) {
       showError(getApiError(error, 'Erro ao favoritar meta.'));
     }
   };
@@ -258,6 +261,16 @@ const Goals: React.FC = () => {
     if (limits <= 0) return 0;
     return clamp((spending / limits) * 100, 0, 100);
   }, [summary]);
+
+  const projectedSpending = summary?.projectedMonthlySpending ?? 0;
+  const definedLimits = summary?.definedLimits ?? 0;
+  const projectionStatus = definedLimits <= 0
+    ? { label: 'Sem limite definido', className: 'bg-slate-500/15 text-slate-300', message: 'Crie uma meta de limite para comparar a projeção de gastos do mês.' }
+    : projectedPercent >= 100
+      ? { label: 'Limite ultrapassado', className: 'bg-red-500/15 text-red-300', message: 'A projeção atual ultrapassa o valor definido nas suas metas de limite.' }
+      : projectedPercent >= 80
+        ? { label: 'Atenção ao limite', className: 'bg-orange-500/15 text-orange-300', message: 'Você está próximo do limite definido. Revise os gastos restantes do mês.' }
+        : { label: 'Dentro do limite', className: 'bg-emerald-500/15 text-emerald-300', message: 'A projeção atual permanece dentro dos limites definidos.' };
 
   return (
     <div className="mx-auto max-w-[1500px] space-y-5 px-2 pb-24 sm:px-4 lg:px-0 lg:pb-8">
@@ -360,7 +373,7 @@ const Goals: React.FC = () => {
                 <div className="mt-5 grid gap-2 text-sm sm:grid-cols-2">
                   <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/[0.03] px-4 py-3">
                     <span className="flex items-center gap-2 text-slate-300"><span className="h-3 w-3 rounded-full bg-violet-500" /> Gasto projetado</span>
-                    <strong>{money(summary?.projectedMonthlySpending)}</strong>
+                    <strong>{money(projectedSpending)}</strong>
                   </div>
                   <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/[0.03] px-4 py-3">
                     <span className="flex items-center gap-2 text-slate-300"><span className="h-3 w-3 rounded-full bg-slate-500" /> Limites definidos</span>
@@ -370,8 +383,8 @@ const Goals: React.FC = () => {
                 <div className="mt-5">
                   <div className="mb-2 flex items-center justify-between text-xs text-slate-500">
                     <span>{money(0)}</span>
-                    <span className="rounded-full bg-emerald-500/15 px-3 py-1 font-bold text-emerald-300">Dentro do limite</span>
-                    <span>{money(Math.max(summary?.definedLimits ?? 0, 800))}</span>
+                    <span className={`rounded-full px-3 py-1 font-bold ${projectionStatus.className}`}>{projectionStatus.label}</span>
+                    <span>{money(definedLimits)}</span>
                   </div>
                   <div className="h-4 overflow-hidden rounded-full bg-slate-800">
                     <div className="h-full rounded-full bg-gradient-to-r from-violet-600 to-blue-500" style={{ width: `${projectedPercent}%` }} />
@@ -383,7 +396,7 @@ const Goals: React.FC = () => {
                   <Lightbulb />
                 </div>
                 <p className="text-sm leading-6 text-slate-300">
-                  Seus gastos permanecem dentro dos limites definidos. Continue assim!
+                  {projectionStatus.message}
                 </p>
               </div>
             </div>
@@ -406,7 +419,6 @@ const Goals: React.FC = () => {
                     </div>
                   </div>
                 ))}
-                <button className="text-sm font-bold text-violet-400">Ver todas em risco →</button>
               </div>
             )}
           </InsightCard>
@@ -428,16 +440,16 @@ const Goals: React.FC = () => {
                     </div>
                   </div>
                 ))}
-                <button className="text-sm font-bold text-violet-400">Ver calendário completo →</button>
               </div>
             )}
           </InsightCard>
 
           <InsightCard title="Dica para você" icon={Lightbulb}>
-            <p className="text-sm leading-6 text-slate-300">
-              Acompanhe metas acima de 80% com atenção. Se o ritmo continuar, você pode ultrapassar o limite antes do fim do mês.
-            </p>
-            <button className="mt-4 text-sm font-bold text-violet-400">Ver todas as dicas →</button>
+            <p className="text-sm leading-6 text-slate-300">{riskGoals.length > 0
+              ? `${riskGoals.length} ${riskGoals.length === 1 ? 'meta está' : 'metas estão'} em atenção. Revise os cartões de meta antes de registrar novas compras.`
+              : definedLimits > 0
+                ? 'Suas metas não apresentam alertas agora. Continue acompanhando a projeção até o fim do período.'
+                : 'Crie uma meta de limite ou economia para acompanhar melhor o seu planejamento financeiro.'}</p>
           </InsightCard>
         </aside>
       </div>
@@ -465,7 +477,7 @@ const Goals: React.FC = () => {
   );
 };
 
-const MetricCard = ({ icon: Icon, title, value, subtitle, tone }: { icon: any; title: string; value: string; subtitle: string; tone: 'violet' | 'emerald' | 'blue' | 'orange' }) => {
+const MetricCard = ({ icon: Icon, title, value, subtitle, tone }: { icon: React.ElementType; title: string; value: string; subtitle: string; tone: 'violet' | 'emerald' | 'blue' | 'orange' }) => {
   const tones = {
     violet: 'bg-violet-500/15 text-violet-300',
     emerald: 'bg-emerald-500/15 text-emerald-300',
@@ -547,7 +559,7 @@ const Info = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-const InsightCard = ({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) => (
+const InsightCard = ({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) => (
   <section className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-5 shadow-xl shadow-black/10">
     <div className="mb-4 flex items-center gap-3">
       <div className="grid h-11 w-11 place-items-center rounded-2xl bg-violet-500/15 text-violet-300"><Icon size={20} /></div>

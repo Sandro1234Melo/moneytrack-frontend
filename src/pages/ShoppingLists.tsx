@@ -20,7 +20,6 @@ import {
   Plus,
   Search,
   ShoppingCart,
-  Sparkles,
   Store,
   Trash2,
   Trophy,
@@ -70,10 +69,13 @@ const statusFilters: StatusFilter[] = [
   "Finalizadas",
 ];
 
+const dateForInput = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
 const initialListForm: ListForm = {
   name: "",
   locationId: "",
-  plannedDate: new Date().toISOString().slice(0, 10),
+  plannedDate: dateForInput(new Date()),
 };
 
 const initialItemForm: ItemForm = {
@@ -106,8 +108,8 @@ const iconPalette = [
 ];
 
 const toInputDate = (date?: string) => {
-  if (!date) return new Date().toISOString().slice(0, 10);
-  return new Date(date).toISOString().slice(0, 10);
+  if (!date) return dateForInput(new Date());
+  return date.slice(0, 10);
 };
 
 const ShoppingLists = () => {
@@ -236,18 +238,30 @@ const ShoppingLists = () => {
       (sum, list) => sum + Number(list.estimatedTotal || 0),
       0,
     );
-    const potentialSavings = estimatedTotal * 0.08;
-    return { totalLists, pendingItems, estimatedTotal, potentialSavings };
+    const completedItems = lists.reduce(
+      (sum, list) => sum + list.items.filter((item) => item.checked).length,
+      0,
+    );
+    return { totalLists, pendingItems, estimatedTotal, completedItems };
   }, [lists]);
 
-  const economyRanking = useMemo(() => {
+  const valueRanking = useMemo(() => {
     return [...lists]
       .sort((a, b) => b.estimatedTotal - a.estimatedTotal)
       .slice(0, 3)
       .map((list) => ({
         name: list.name,
-        economy: list.estimatedTotal * 0.08,
+        value: list.estimatedTotal,
       }));
+  }, [lists]);
+
+  const nextPlannedList = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return lists
+      .filter((list) => list.status !== "Converted" && new Date(list.plannedDate) >= today)
+      .sort((first, second) => new Date(first.plannedDate).getTime() - new Date(second.plannedDate).getTime())[0];
   }, [lists]);
 
   const openCreateList = () => {
@@ -500,10 +514,10 @@ const ShoppingLists = () => {
           tone="emerald"
         />
         <SummaryCard
-          icon={Sparkles}
-          title="Economia potencial"
-          value={money(stats.potentialSavings)}
-          hint="estimativa com pesquisa"
+          icon={Check}
+          title="Itens concluídos"
+          value={String(stats.completedItems)}
+          hint="marcados nas listas"
           tone="orange"
         />
       </section>
@@ -585,39 +599,26 @@ const ShoppingLists = () => {
         </main>
 
         <aside className="space-y-4 xl:sticky xl:top-6 xl:self-start">
-          <InsightCard title="Melhor dia para comprar" icon={CalendarDays}>
-            <p className="text-xl font-bold text-emerald-300">Terças-feiras</p>
-            <p className="mt-1 text-sm text-slate-400">
-              Itens em média 12% mais baratos.
-            </p>
-            <div className="mt-5 flex h-24 items-end gap-3">
-              {[32, 74, 45, 48, 36, 51, 28].map((height, index) => (
-                <div
-                  key={index}
-                  className="flex flex-1 flex-col items-center gap-2"
-                >
-                  <div
-                    className={`w-full rounded-t-lg ${index === 1 ? "bg-emerald-400" : "bg-slate-600/60"}`}
-                    style={{ height: `${height}%` }}
-                  />
-                  <span
-                    className={`text-xs ${index === 1 ? "text-emerald-300" : "text-slate-500"}`}
-                  >
-                    {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"][index]}
-                  </span>
-                </div>
-              ))}
-            </div>
+          <InsightCard title="Próxima lista planejada" icon={CalendarDays}>
+            {nextPlannedList ? (
+              <>
+                <p className="text-xl font-bold text-emerald-300">{formatDate(nextPlannedList.plannedDate)}</p>
+                <p className="mt-1 font-semibold text-white">{nextPlannedList.name}</p>
+                <p className="mt-1 text-sm text-slate-400">{nextPlannedList.totalItems} {nextPlannedList.totalItems === 1 ? "item" : "itens"} • {money(nextPlannedList.estimatedTotal)}</p>
+              </>
+            ) : (
+              <p className="text-sm text-slate-400">Não há listas futuras planejadas.</p>
+            )}
           </InsightCard>
 
-          <InsightCard title="Listas com maior economia" icon={Trophy}>
+          <InsightCard title="Listas de maior valor" icon={Trophy}>
             <div className="space-y-4">
-              {economyRanking.length === 0 ? (
+              {valueRanking.length === 0 ? (
                 <p className="text-sm text-slate-400">
                   Crie listas para ver o ranking.
                 </p>
               ) : (
-                economyRanking.map((item, index) => (
+                valueRanking.map((item, index) => (
                   <div key={item.name} className="flex items-center gap-3">
                     <span className="grid h-9 w-9 place-items-center rounded-full bg-white/5 text-sm font-bold text-slate-300">
                       {index + 1}
@@ -625,7 +626,7 @@ const ShoppingLists = () => {
                     <div>
                       <p className="font-semibold text-white">{item.name}</p>
                       <p className="font-bold text-emerald-300">
-                        {money(item.economy)}
+                        {money(item.value)} estimados
                       </p>
                     </div>
                   </div>

@@ -1,6 +1,8 @@
 import { Check, Search, UserMinus, UserPlus, Users, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api, { getApiAssetUrl } from "../api/axios";
+import { getApiErrorMessage } from "../utils/apiError";
 
 type Profile = { id: number; fullName: string; email: string; profileImageUrl?: string | null };
 type Request = Profile & { id: number; userId: number };
@@ -32,21 +34,21 @@ export default function Friends() {
         setSearching(true); setSearchError("");
         setResults((await api.get("/friendships/search", { params: { q: query.trim() } })).data);
       }
-      catch (e: any) { setResults([]); setSearchError(e.response?.data?.error ?? "Não foi possível pesquisar perfis."); }
+      catch (error) { setResults([]); setSearchError(getApiErrorMessage(error, "Não foi possível pesquisar perfis.")); }
       finally { setSearching(false); }
     }, 300);
     return () => window.clearTimeout(timer);
   }, [query]);
-  const send = async (userId: number) => { try { await api.post("/friendships/requests", { userId }); setMessage("Pedido enviado."); setResults([]); setQuery(""); } catch (e: any) { setMessage(e.response?.data?.error ?? "Não foi possível enviar o pedido."); } };
+  const send = async (userId: number) => { try { await api.post("/friendships/requests", { userId }); setMessage("Pedido enviado."); setResults([]); setQuery(""); } catch (error) { setMessage(getApiErrorMessage(error, "Não foi possível enviar o pedido.")); } };
   const respond = async (id: number, action: "accept" | "decline") => { try { await api.post(`/friendships/requests/${id}/${action}`); setMessage(action === "accept" ? "Pedido aceito." : "Pedido recusado."); await load(); } catch { setMessage("Não foi possível responder ao pedido."); } };
   const removeFriend = async (friend: Profile) => {
     if (!window.confirm(`Desfazer amizade com ${friend.fullName}?`)) return;
     try { await api.delete(`/friendships/${friend.id}`); setMessage("Amizade desfeita."); await load(); }
-    catch (e: any) { setMessage(e.response?.data?.error ?? "Não foi possível desfazer a amizade."); }
+    catch (error) { setMessage(getApiErrorMessage(error, "Não foi possível desfazer a amizade.")); }
   };
 
   return <div className="mx-auto max-w-4xl space-y-6 pb-8">
-    <div><h1 className="text-3xl font-black">Amigos</h1><p className="mt-1 text-slate-400">Adicione pessoas para dividir despesas em breve.</p></div>
+    <div className="flex flex-wrap items-end justify-between gap-4"><div><h1 className="text-3xl font-black">Amigos</h1><p className="mt-1 text-slate-400">Adicione pessoas para dividir despesas.</p></div><Link to="/splits" className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-3 font-bold shadow-lg shadow-violet-950/40"><Users size={18}/>Dividir conta</Link></div>
     <section className="rounded-3xl border border-white/10 bg-[#081222]/80 p-5"><label className="mb-2 block text-sm font-semibold">Encontrar perfis</label><div className="relative"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={19}/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Nome ou e-mail" className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-11 pr-4 outline-none focus:border-violet-500/70" /></div>
       {query.trim().length === 1 && <p className="mt-3 text-sm text-slate-400">Digite pelo menos 2 caracteres para pesquisar.</p>}
       {searching && <p className="mt-3 text-sm text-slate-400">Pesquisando perfis...</p>}

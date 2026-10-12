@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import api from "../api/axios";
 import { GradientButton } from "../components/GradientButton";
 import { Plus, Pencil } from "lucide-react";
 import { getLoggedUser } from "../utils/auth";
 import Alert from "../components/ui/Alert";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
+import { getApiErrorMessage } from "../utils/apiError";
 
 type Category = {
   id: number;
@@ -24,15 +25,15 @@ const Categories: React.FC = () => {
   const user = getLoggedUser();
   const userId = user?.id;
 
-  const loadCategories = async () => {
-    const response = await api.get(`/categories/${userId}`);
+  const loadCategories = useCallback(async () => {
+    if (!userId) return;
+    const response = await api.get<Category[]>(`/categories/${userId}`);
     setCategories(response.data);
-  };
+  }, [userId]);
 
   useEffect(() => {
-    if (!userId) return;
-    loadCategories();
-  }, [userId]);
+    void loadCategories();
+  }, [loadCategories, userId]);
 
   const handleDelete = async (id: number) => {
     try {
@@ -48,13 +49,8 @@ const Categories: React.FC = () => {
 
       setTimeout(() => setSuccessMessage(""), 3000);
 
-    } catch (error: any) {
-
-      if (error.response?.data?.message) {
-        setErrorMessage(error.response.data.message);
-      } else {
-        setErrorMessage("Não foi possível excluir a categoria.");
-      }
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error, "Não foi possível excluir a categoria."));
 
       setTimeout(() => setErrorMessage(""), 4000);
     }
@@ -88,13 +84,8 @@ const Categories: React.FC = () => {
 
       setTimeout(() => setSuccessMessage(""), 3000);
 
-    } catch (error: any) {
-
-      if (error.response?.data?.message) {
-        setErrorMessage(error.response.data.message);
-      } else {
-        setErrorMessage("Erro ao salvar categoria.");
-      }
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error, "Erro ao salvar categoria."));
 
       setTimeout(() => setErrorMessage(""), 4000);
     }

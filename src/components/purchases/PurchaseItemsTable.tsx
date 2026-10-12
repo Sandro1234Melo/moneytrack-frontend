@@ -1,19 +1,27 @@
 import PurchaseItemRow from "./PurchaseItemRow";
+import type { NamedOption, PurchaseItem } from "../../types/purchases";
+
+type Props = {
+  items: PurchaseItem[];
+  setItems: (items: PurchaseItem[]) => void;
+  categories: NamedOption[];
+  onAddCategory: () => void;
+};
 
 const PurchaseItemsTable = ({
   items,
   setItems,
   categories,
   onAddCategory
-}: any) => {
-  const updateItem = (index: number, field: string, value: any) => {
+}: Props) => {
+  const updateItem = (index: number, field: keyof PurchaseItem, value: string | number) => {
     const copy = [...items];
-    copy[index][field] = value;
+    copy[index] = { ...copy[index], [field]: value };
     setItems(copy);
   };
 
   const removeItem = (index: number) => {
-    setItems(items.filter((_: any, i: number) => i !== index));
+    setItems(items.filter((_, i) => i !== index));
   };
 
   return (
@@ -26,12 +34,12 @@ const PurchaseItemsTable = ({
         <div className="col-span-1"></div>
       </div>
 
-      {items.map((item: any, index: number) => (
+      {items.map((item, index) => (
         <PurchaseItemRow
           key={index}
           item={item}
           categories={categories}
-          onChange={(field: string, value: any) =>
+          onChange={(field, value) =>
             updateItem(index, field, value)
           }
           onRemove={() => removeItem(index)}

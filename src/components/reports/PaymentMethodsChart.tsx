@@ -1,35 +1,46 @@
 import { useEffect, useState } from "react";
 
 import api from "../../api/axios";
-import type { ReportFilters } from "../reports/ReportFilters";
+import type { PaymentMethodTotal, ReportFilters } from "../../types/reports";
 import { BarChart } from "../ui/2.0/bar-chart";
 
 type Props = {
-  user_Id: number
+  userId: number
   filters: ReportFilters
 }
 
-const PaymentMethodsChart: React.FC<Props> = ({ user_Id, filters }) => {
-  const [data, setData] = useState<any[]>([]);
+const paymentMethodLabels: Record<number, string> = {
+  0: "Dinheiro",
+  1: "Débito",
+  2: "Crédito",
+  3: "PIX",
+  4: "Transferência",
+  5: "MB Way",
+  6: "Vale alimentação",
+};
+
+const PaymentMethodsChart: React.FC<Props> = ({ userId, filters }) => {
+  const [data, setData] = useState<PaymentMethodTotal[]>([]);
 
   useEffect(() => {
-    if (!user_Id) return;
+    if (!userId) return;
     if (!filters?.from || !filters?.to) return;
 
     api.get("/reports/payment-methods", {
       params: {
-        userId: user_Id,
+        userId,
         from: filters.from,
-        to: filters.to     
+        to: filters.to,
+        categoryId: filters.categoryId || undefined,
+        locationId: filters.locationId || undefined,
+        paymentMethod: filters.paymentMethod || undefined,
       }
       
     })
       .then(res => setData(res.data))
       .catch(console.error);
 
-  }, [user_Id, filters]);
-
-  console.log("PaymentMethodsChart data:", data);
+  }, [userId, filters]);
 
   return (
     <div className="bg-[#071122] p-6 rounded-lg border border-[#12202a]">
@@ -45,13 +56,13 @@ const PaymentMethodsChart: React.FC<Props> = ({ user_Id, filters }) => {
                  id: "payment-methods",
                  label: "Formas de Pagamento",
                  color: "#06b6d4",
-                 data: data.map(d => d.total),
+                 data: data.map(d => Number(d.total)),
               }
             ]
           }
           
           
-          labels={data.map(d => d.method)}
+          labels={data.map(d => paymentMethodLabels[Number(d.method)] ?? "Outro")}
           height={300}
 
         />

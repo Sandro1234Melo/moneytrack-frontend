@@ -46,7 +46,25 @@
    ============================================================ */
 :root {
   color-scheme: dark;
+  accent-color: #7c3aed;
 }
+
+html[data-accent="blue"] { accent-color: #2563eb; }
+html[data-accent="green"] { accent-color: #16a34a; }
+html[data-accent="orange"] { accent-color: #ea580c; }
+
+html.reduce-interface-motion *,
+html.reduce-interface-motion *::before,
+html.reduce-interface-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.01ms !important;
+}
+
+html.compact-mode [class*="p-6"] { padding: 1rem !important; }
+html.compact-mode [class*="p-5"] { padding: 0.875rem !important; }
+html.compact-mode [class*="gap-6"] { gap: 1rem !important; }
 
 html.theme-light {
   color-scheme: light;

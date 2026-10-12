@@ -226,11 +226,13 @@ export function LineChart({
       }))
 
       ctx.beginPath()
-      lineStyle === 'straight'
-        ? points.forEach((p, i) =>
+      if (lineStyle === 'straight') {
+        points.forEach((p, i) =>
             i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)
           )
-        : drawSmoothLine(ctx, points)
+      } else {
+        drawSmoothLine(ctx, points)
+      }
 
       if (dataset.showArea) {
         ctx.save()
@@ -254,11 +256,13 @@ export function LineChart({
         ctx.restore()
 
         ctx.beginPath()
-        lineStyle === 'straight'
-          ? points.forEach((p, i) =>
+        if (lineStyle === 'straight') {
+          points.forEach((p, i) =>
               i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)
             )
-          : drawSmoothLine(ctx, points)
+        } else {
+          drawSmoothLine(ctx, points)
+        }
       }
 
       ctx.strokeStyle = dataset.color
@@ -312,7 +316,7 @@ export function LineChart({
     }
 
     requestAnimationFrame(frame)
-  }, [width, datasets])
+  }, [width, datasets, animate, animationDuration, draw])
 
   /* ---------- Events ---------- */
   function handleMove(e: React.MouseEvent<HTMLCanvasElement>) {

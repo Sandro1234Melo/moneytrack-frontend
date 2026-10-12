@@ -6,7 +6,7 @@ export const getExpensesByUser = (userId: number) =>
 export const getExpenseById = (id: number) =>
   api.get(`/expenses/${id}`);
 
-export const createExpense = (data: any) =>
+export const createExpense = (data: Record<string, unknown>) =>
   api.post("/expenses", data);
 
 export const deleteExpense = (id: number) =>

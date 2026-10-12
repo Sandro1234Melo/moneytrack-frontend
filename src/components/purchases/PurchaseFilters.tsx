@@ -2,6 +2,7 @@ import FormSelect from "../molecules/select-field";
 import FormDate from "../atoms/date-field";
 import FormValue from "../ui/FormValue";
 import { Button } from "../ui/Button";
+import type { NamedOption } from "../../types/purchases";
 
 type Filters = {
   fromDate: string;
@@ -16,8 +17,8 @@ type Filters = {
 
 type Props = {
   filters: Filters;
-  locations: any[];
-  categories: any[];
+  locations: NamedOption[];
+  categories: NamedOption[];
   onChange: (filters: Filters) => void;
   onSearch: () => void;
   onClear: () => void;
@@ -69,7 +70,7 @@ const PurchaseFilters: React.FC<Props> = ({
               categoryId: value ? Number(value) : ""
             })
           }
-          options={categories.map((cat: any) => ({
+          options={categories.map((cat) => ({
             value: cat.id,
             label: cat.name
           }))}
@@ -109,7 +110,7 @@ const PurchaseFilters: React.FC<Props> = ({
                 locationId: value ? Number(value) : ""
               })
             }
-            options={locations.map((loc: any) => ({
+            options={locations.map((loc) => ({
               value: loc.id,
               label: loc.name
             }))}

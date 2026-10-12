@@ -1,7 +1,9 @@
 import { Check, Plus, ReceiptText, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../api/axios";
 import { getLoggedUser } from "../utils/auth";
+import { getApiErrorMessage } from "../utils/apiError";
 
 type Friend = { id: number; fullName: string; email: string };
 type Split = { id: number; description: string; totalAmount: number; paidByUserId: number; createdAt: string; participants: { id: number; userId: number; name: string; amount: number; isPaid: boolean }[] };
@@ -20,11 +22,11 @@ export default function Splits() {
     const value = Number(total); const participants = people.map(person => ({ userId: person.id, amount: Number(custom ? amounts[person.id] || 0 : equalAmount) }));
     if (!description.trim() || !value || people.length < 2) return setMessage("Informe descrição, valor e pelo menos um amigo.");
     try { await api.post("/splits", { description, totalAmount: value, participants }); setDescription(""); setTotal(""); setSelected([]); setAmounts({}); setMessage("Conta dividida com sucesso."); await load(); }
-    catch (e: any) { setMessage(e.response?.data?.error ?? "Não foi possível criar a divisão."); }
+    catch (error) { setMessage(getApiErrorMessage(error, "Não foi possível criar a divisão.")); }
   };
   const markPaid = async (id: number) => { await api.post(`/splits/participants/${id}/paid`); await load(); };
 
-  return <div className="mx-auto max-w-5xl space-y-6 pb-8"><div><h1 className="text-3xl font-black">Dividir conta</h1><p className="mt-1 text-slate-400">Crie uma divisão e acompanhe quem já acertou a parte.</p></div>
+  return <div className="mx-auto max-w-5xl space-y-6 pb-8"><div className="flex flex-wrap items-end justify-between gap-4"><div><h1 className="text-3xl font-black">Dividir conta</h1><p className="mt-1 text-slate-400">Crie uma divisão e acompanhe quem já acertou a parte.</p></div><Link to="/friends" className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/50 px-4 py-3 font-bold text-violet-200 hover:bg-violet-500/10"><Users size={18}/>Adicionar pessoas</Link></div>
     <section className="rounded-3xl border border-white/10 bg-[#081222]/80 p-5"><h2 className="mb-4 flex items-center gap-2 text-lg font-black"><Plus size={20} className="text-violet-300"/>Nova divisão</h2><div className="grid gap-3 sm:grid-cols-2"><input value={description} onChange={e => setDescription(e.target.value)} placeholder="Ex.: Jantar de sexta" className="h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-4 outline-none"/><input value={total} onChange={e => setTotal(e.target.value)} type="number" min="0.01" step="0.01" placeholder="Valor total" className="h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-4 outline-none"/></div>
       <div className="mt-4"><p className="mb-2 text-sm font-semibold">Participantes</p><div className="grid gap-2 sm:grid-cols-2">{friends.map(friend => <label key={friend.id} className="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3"><input type="checkbox" checked={selected.includes(friend.id)} onChange={() => toggle(friend.id)} /><span className="min-w-0"><b className="block truncate">{friend.fullName}</b><span className="text-xs text-slate-400">{friend.email}</span></span></label>)}</div>{!friends.length && <p className="text-sm text-slate-400">Adicione amigos antes de criar uma divisão.</p>}</div>
       <label className="mt-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={custom} onChange={e => setCustom(e.target.checked)}/> Definir valores personalizados</label>

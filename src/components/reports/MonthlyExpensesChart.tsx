@@ -1,35 +1,36 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import type { ReportFiltersType } from "../../pages/Reports";
+import type { MonthlyExpense, ReportFilters } from "../../types/reports";
 import { LineChart } from "../ui/2.0/line-chart";
 
 type Props = {
-  user_Id: number
-  filters: ReportFiltersType
+  userId: number
+  filters: ReportFilters
 }
 
-const MonthlyExpensesChart: React.FC<Props> = ({ user_Id, filters }) => {
-  const [data, setData] = useState<any[]>([]);
+const MonthlyExpensesChart: React.FC<Props> = ({ userId, filters }) => {
+  const [data, setData] = useState<MonthlyExpense[]>([]);
 
   useEffect(() => {
-    if (!user_Id) return;
+    if (!userId) return;
     if (!filters.from) return;
 
     //const year = new Date(filters.from).getFullYear();
 
     api.get("/reports/monthly-expenses", {
       params: {
-        userId: user_Id,
+        userId,
         from: filters.from,
-        to: filters.to     
+        to: filters.to,
+        categoryId: filters.categoryId || undefined,
+        locationId: filters.locationId || undefined,
+        paymentMethod: filters.paymentMethod || undefined,
       }
     })
       .then(res => setData(res.data))
       .catch(console.error);
 
-  }, [user_Id, filters]);
-
-  console.log("MonthlyExpensesChart data:", data);
+  }, [userId, filters]);
 
   return (
     <div className="bg-[#071122] p-6 px-2 rounded-lg border border-[#12202a]">
@@ -44,13 +45,13 @@ const MonthlyExpensesChart: React.FC<Props> = ({ user_Id, filters }) => {
               id: "gastos",
               label: "Gastos",
               color: "#8884d8",
-              data: data.map(d => d.total),
+              data: data.map(d => Number(d.total)),
               showArea: true,
               showDots: true
             }
   
           ]} 
-          labels={data.map(d => d.month)}
+          labels={data.map(d => d.label)}
           height={300}
           />
         

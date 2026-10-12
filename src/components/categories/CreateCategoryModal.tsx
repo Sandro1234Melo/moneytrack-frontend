@@ -6,7 +6,7 @@ import Modal from "../ui/Modal";
 type Props = {
   open: boolean;
   onClose: () => void;
-  onCreated: (category: any) => void;
+  onCreated: (category: { id: number; name: string }) => void;
 };
 
 const CategoryQuickCreate: React.FC<Props> = ({
@@ -23,7 +23,9 @@ const CategoryQuickCreate: React.FC<Props> = ({
       return;
     }
 
-    const response = await api.post("/categories", {
+    if (!user?.id) return;
+
+    const response = await api.post<{ id: number; name: string }>("/categories", {
       name,
       user_Id: user.id
     });

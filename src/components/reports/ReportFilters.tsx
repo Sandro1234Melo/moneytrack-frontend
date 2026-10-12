@@ -1,18 +1,11 @@
 import FormSelect from "../molecules/select-field";
-
-export type ReportFilters = {
-  from?: string
-  to?: string
-  categoryId?: string
-  locationId?: string
-  paymentMethod?: string
-}
+import type { ReportFilters as ReportFiltersType, ReportLookupOption } from "../../types/reports";
 
 type Props = {
-  filters: any;
-  onChange: (filters: any) => void;
-  categories: any[];
-  locations: any[];
+  filters: ReportFiltersType;
+  onChange: (filters: ReportFiltersType) => void;
+  categories: ReportLookupOption[];
+  locations: ReportLookupOption[];
 };
 
 const ReportFilters = ({
@@ -28,8 +21,8 @@ const ReportFilters = ({
         <label className="text-sm">De</label>
         <input
           type="date"
-          value={filters.fromDate}
-          onChange={e => onChange({ ...filters, fromDate: e.target.value })}
+          value={filters.from}
+          onChange={e => onChange({ ...filters, from: e.target.value })}
           className="input-primary w-full"
         />
       </div>
@@ -38,8 +31,8 @@ const ReportFilters = ({
         <label className="text-sm">Até</label>
         <input
           type="date"
-          value={filters.toDate}
-          onChange={e => onChange({ ...filters, toDate: e.target.value })}
+          value={filters.to}
+          onChange={e => onChange({ ...filters, to: e.target.value })}
           className="input-primary w-full"
         />
       </div>
@@ -47,36 +40,37 @@ const ReportFilters = ({
       <FormSelect
         label="Categoria"
         value={filters.categoryId}
-        onChange={v => onChange({ ...filters, categoryId: v })}
-        options={categories.map(c => ({
-          value: c.id,
-          label: c.name
-        }))}
-        placeholder="Todas"
+        onChange={value => onChange({ ...filters, categoryId: String(value) })}
+        options={[
+          { value: "", label: "Todas as categorias" },
+          ...categories.map(category => ({ value: category.id, label: category.name }))
+        ]}
       />
 
       <FormSelect
         label="Local"
         value={filters.locationId}
-        onChange={v => onChange({ ...filters, locationId: v })}
-        options={locations.map(l => ({
-          value: l.id,
-          label: l.name
-        }))}
-        placeholder="Todos"
+        onChange={value => onChange({ ...filters, locationId: String(value) })}
+        options={[
+          { value: "", label: "Todos os locais" },
+          ...locations.map(location => ({ value: location.id, label: location.name }))
+        ]}
       />
 
       <FormSelect
         label="Pagamento"
         value={filters.paymentMethod}
-        onChange={v => onChange({ ...filters, paymentMethod: v })}
+        onChange={value => onChange({ ...filters, paymentMethod: String(value) })}
         options={[
+          { value: "", label: "Todas as formas" },
           { value: 0, label: "Dinheiro" },
           { value: 1, label: "Débito" },
           { value: 2, label: "Crédito" },
-          { value: 3, label: "PIX" }
+          { value: 3, label: "PIX" },
+          { value: 4, label: "Transferência" },
+          { value: 5, label: "MB Way" },
+          { value: 6, label: "Vale alimentação" }
         ]}
-        placeholder="Todos"
       />
     </div>
   );

@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import { getLoggedUser } from "../../utils/auth";
+import type { Purchase } from "../../types/purchases";
 
 type Props = {
-  purchases: any[];
-  onEdit: (purchase: any) => void;
+  purchases: Purchase[];
+  onEdit: (purchase: Purchase) => void;
   onDelete: (id: number) => void;
 };
 

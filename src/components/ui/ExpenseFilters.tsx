@@ -2,6 +2,7 @@
 import FormDate from "../atoms/date-field";
 import FormValue from "./FormValue";
 import { Button } from "./Button";
+import type { NamedOption } from "../../types/purchases";
 import FormText from "./FormText";
 import SelectField from "../molecules/select-field";
 
@@ -19,8 +20,8 @@ type Filters = {
 
 type Props = {
   filters: Filters;
-  locations: any[];
-  categories: any[];
+  locations: NamedOption[];
+  categories: NamedOption[];
   onChange: (filters: Filters) => void;
   onSearch: () => void;
   onClear: () => void;
@@ -60,7 +61,7 @@ const ExpenseFilters: React.FC<Props> = ({
             placeholder="Todas"
             value={filters.categoryId ?? ""}
             onChange={(value) => onChange({ ...filters, categoryId: value ? Number(value) : "" })}
-            options={categories.map((cat: any) => ({ value: cat.id, label: cat.name }))}
+            options={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
           />
         </div>
 
@@ -70,7 +71,7 @@ const ExpenseFilters: React.FC<Props> = ({
             placeholder="Todos"
             value={filters.locationId ?? ""}
             onChange={(value) => onChange({ ...filters, locationId: value ? Number(value) : "" })}
-            options={locations.map((loc: any) => ({ value: loc.id, label: loc.name }))}
+            options={locations.map((loc) => ({ value: loc.id, label: loc.name }))}
           />
         </div>
 

@@ -1,10 +1,13 @@
 import { Bell, CheckCircle2, UserPlus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { getLoggedUser } from "../../utils/auth";
 
 type Notice = { id: string; title: string; detail: string; path: string; icon: "friend" | "split" };
+type FriendRequest = { id: number; fullName: string };
+type SplitParticipant = { id: number; userId: number; isPaid: boolean; amount: number };
+type Split = { description: string; participants?: SplitParticipant[] };
 
 export default function NotificationMenu({ onCountChange }: { onCountChange?: (count: number) => void }) {
   const navigate = useNavigate();
@@ -12,25 +15,25 @@ export default function NotificationMenu({ onCountChange }: { onCountChange?: (c
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
-      const [requestsResult, splitsResult] = await Promise.allSettled([api.get("/friendships/requests"), api.get("/splits")]);
+      const [requestsResult, splitsResult] = await Promise.allSettled([api.get<FriendRequest[]>("/friendships/requests"), api.get<Split[]>("/splits")]);
       const userId = Number(getLoggedUser()?.id);
       const requests = requestsResult.status === "fulfilled" ? requestsResult.value.data : [];
       const splits = splitsResult.status === "fulfilled" ? splitsResult.value.data : [];
-      const friendNotices = (requests ?? []).map((request: any) => ({ id: `friend-${request.id}`, title: "Novo pedido de amizade", detail: `${request.fullName} quer adicionar você.`, path: "/friends", icon: "friend" as const }));
-      const splitNotices = (splits ?? []).flatMap((split: any) => (split.participants ?? [])
-        .filter((participant: any) => participant.userId === userId && !participant.isPaid)
-        .map((participant: any) => ({ id: `split-${participant.id}`, title: "Parcela pendente", detail: `${split.description}: € ${Number(participant.amount).toFixed(2)}`, path: "/splits", icon: "split" as const })));
+      const friendNotices = (requests as FriendRequest[]).map((request) => ({ id: `friend-${request.id}`, title: "Novo pedido de amizade", detail: `${request.fullName} quer adicionar você.`, path: "/friends", icon: "friend" as const }));
+      const splitNotices = (splits as Split[]).flatMap((split) => (split.participants ?? [])
+        .filter((participant) => participant.userId === userId && !participant.isPaid)
+        .map((participant) => ({ id: `split-${participant.id}`, title: "Parcela pendente", detail: `${split.description}: € ${Number(participant.amount).toFixed(2)}`, path: "/splits", icon: "split" as const })));
       const next = [...friendNotices, ...splitNotices];
       setNotices(next); onCountChange?.(next.length);
     } catch {
       setNotices([]); onCountChange?.(0);
     } finally { setLoading(false); }
-  };
+  }, [onCountChange]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { void load(); }, [load]);
   const goTo = (path: string) => { setOpen(false); navigate(path); };
 
   return <div className="relative">

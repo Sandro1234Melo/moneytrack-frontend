@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Edit3,
   MoreVertical,
@@ -17,6 +17,7 @@ import api from "../api/axios";
 import { getLoggedUser } from "../utils/auth";
 import Alert from "../components/ui/Alert";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
+import { getApiErrorMessage } from "../utils/apiError";
 
 type Location = {
   id: number;
@@ -28,23 +29,7 @@ type Location = {
   lastPurchaseDate?: string | null;
 };
 
-const tags = ["Supermercado", "Alimentação", "Farmácia", "Combustível", "Casa", "Outros"];
-const tagClass = (i: number) =>
-  [
-    "bg-emerald-500/15 text-emerald-300",
-    "bg-orange-500/15 text-orange-300",
-    "bg-pink-500/15 text-pink-300",
-    "bg-amber-500/15 text-amber-300",
-    "bg-blue-500/15 text-blue-300",
-    "bg-slate-500/15 text-slate-300",
-  ][i % 6];
-
 const icons = ["🛒", "🏪", "☕", "⛽", "💊", "🥐", "🏠", "🧾"];
-
-const getApiError = (error: any, fallback: string) => {
-  const data = error?.response?.data;
-  return data?.details || data?.error || data?.message || fallback;
-};
 
 const Locations: React.FC = () => {
   const [locations, setLocations] = useState<Location[]>([]);
@@ -69,24 +54,24 @@ const Locations: React.FC = () => {
       maximumFractionDigits: 2,
     })}`;
 
-  const loadLocations = async () => {
+  const loadLocations = useCallback(async () => {
     if (!userId) return;
 
     try {
       setLoading(true);
-      const response = await api.get(`/locations/${userId}`);
+      const response = await api.get<Location[]>(`/locations/${userId}`);
       setLocations(response.data ?? []);
-    } catch (error: any) {
-      setErrorMessage(getApiError(error, "Erro ao carregar locais."));
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error, "Erro ao carregar locais."));
       setTimeout(() => setErrorMessage(""), 5000);
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
     loadLocations();
-  }, [userId]);
+  }, [loadLocations]);
 
   const showSuccess = (message: string) => {
     setSuccessMessage(message);
@@ -107,8 +92,8 @@ const Locations: React.FC = () => {
       setName("");
       setOpenMenuId(null);
       await loadLocations();
-    } catch (error: any) {
-      showError(getApiError(error, "Não foi possível excluir o local."));
+    } catch (error) {
+      showError(getApiErrorMessage(error, "Não foi possível excluir o local."));
     }
   };
 
@@ -130,8 +115,8 @@ const Locations: React.FC = () => {
       setEditingLocation(null);
       setName("");
       await loadLocations();
-    } catch (error: any) {
-      showError(getApiError(error, "Erro ao salvar local."));
+    } catch (error) {
+      showError(getApiErrorMessage(error, "Erro ao salvar local."));
     }
   };
 
@@ -365,8 +350,8 @@ const Locations: React.FC = () => {
                       <span className="truncate">{location.name}</span>
                       {purchases > 0 && <Star size={15} className="shrink-0 text-amber-400" />}
                     </div>
-                    <span className={`mt-1 inline-flex rounded-md px-2 py-1 text-xs ${tagClass(index)}`}>
-                      {tags[index % tags.length]}
+                    <span className="mt-1 block text-xs text-slate-400">
+                      {purchases > 0 ? `${purchases} ${purchases === 1 ? "compra registrada" : "compras registradas"}` : "Sem compras registradas"}
                     </span>
                   </div>
                 </div>

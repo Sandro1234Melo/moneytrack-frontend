@@ -1,9 +1,12 @@
+import { getApiAssetUrl } from "../../api/axios";
+
 type UserAvatarProps = {
   name: string;
+  imageUrl?: string | null;
   onClick: () => void;
 };
 
-const UserAvatar: React.FC<UserAvatarProps> = ({ name, onClick }) => {
+const UserAvatar: React.FC<UserAvatarProps> = ({ name, imageUrl, onClick }) => {
   const initials = name
     .split(" ")
     .map(n => n[0])
@@ -15,7 +18,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ name, onClick }) => {
     <button
       onClick={onClick}
       className="
-        w-9 h-9 rounded-full
+        h-9 w-9 overflow-hidden rounded-full
         bg-purple-600 text-white
         flex items-center justify-center
         font-semibold
@@ -24,7 +27,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ name, onClick }) => {
       "
       title={name}
     >
-      {initials}
+      {imageUrl ? <img src={getApiAssetUrl(imageUrl)} alt={`Foto de ${name}`} className="h-full w-full object-cover" /> : initials}
     </button>
   );
 };

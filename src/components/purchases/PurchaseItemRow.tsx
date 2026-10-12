@@ -1,5 +1,14 @@
 import { Trash2, Plus } from "lucide-react";
 import FormSelect from "../molecules/select-field";
+import type { NamedOption, PurchaseItem } from "../../types/purchases";
+
+type Props = {
+  item: PurchaseItem;
+  categories: NamedOption[];
+  onChange: (field: keyof PurchaseItem, value: string | number) => void;
+  onRemove: () => void;
+  onAddCategory: () => void;
+};
 
 const PurchaseItemRow = ({
   item,
@@ -7,7 +16,7 @@ const PurchaseItemRow = ({
   onChange,
   onRemove,
   onAddCategory
-}: any) => {
+}: Props) => {
   return (
     <div className="grid grid-cols-12 gap-2 px-4 py-2 items-center">
       <div className="col-span-4">
@@ -26,7 +35,7 @@ const PurchaseItemRow = ({
             value={item.categoryId ?? ""}
             placeholder="Categoria"
             onChange={(v) => onChange("categoryId", v)}
-            options={categories.map((cat: any) => ({
+            options={categories.map((cat) => ({
               value: String(cat.id),
               label: cat.name
             }))}

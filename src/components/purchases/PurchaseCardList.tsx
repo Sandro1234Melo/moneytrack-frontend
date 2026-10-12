@@ -1,8 +1,9 @@
 import PurchaseCard from "./PurchaseCard";
+import type { Purchase } from "../../types/purchases";
 
 type Props = {
-  purchases: any[];
-  onEdit: (p: any) => void;
+  purchases: Purchase[];
+  onEdit: (purchase: Purchase) => void;
   onDelete: (id: number) => void;
 };
 

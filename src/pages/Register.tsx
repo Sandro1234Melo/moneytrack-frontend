@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerUser } from "../services/authService";
 import { Eye, EyeOff } from "lucide-react";
+import { getApiErrorMessage } from "../utils/apiError";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -47,14 +48,8 @@ export default function Register() {
       });
 
       navigate("/login");
-    } catch (err: any) {
-      const responseMessage =
-        err?.response?.data?.error ||
-        err?.response?.data?.message ||
-        err?.response?.data?.title ||
-        err?.message;
-
-      setError(responseMessage || "Erro ao criar conta");
+    } catch (error) {
+      setError(getApiErrorMessage(error, "Erro ao criar conta"));
     } finally {
       setLoading(false);
     }

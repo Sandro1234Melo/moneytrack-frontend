@@ -20,8 +20,9 @@ import {
   Upload,
   User,
   Monitor,
+  type LucideIcon,
 } from "lucide-react";
-import api from "../api/axios";
+import api, { getApiAssetUrl } from "../api/axios";
 import { getLoggedUser } from "../utils/auth";
 
 const THEME_KEY = "moneytrack-theme";
@@ -51,26 +52,48 @@ type UserSettings = {
   last_backup_at?: string | null;
 };
 
-const normalizeUser = (raw: any): UserSettings => ({
-  id: raw?.id ?? 0,
-  full_name: raw?.full_Name ?? raw?.full_name ?? raw?.fullName ?? "Usuário",
-  email: raw?.email ?? "",
-  currency_code: raw?.currency_Code ?? raw?.currency_code ?? "EUR",
-  country_code: raw?.country_Code ?? raw?.country_code ?? "PT",
-  language: raw?.language ?? "pt-PT",
-  theme: (raw?.theme ?? localStorage.getItem(THEME_KEY) ?? "dark") as ThemeMode,
-  date_format: raw?.date_Format ?? raw?.date_format ?? "dd/MM/yyyy",
-  accent_color: (raw?.accent_Color ?? raw?.accent_color ?? "purple") as AccentColor,
-  compact_mode: Boolean(raw?.compact_Mode ?? raw?.compact_mode ?? false),
-  interface_animations: raw?.interface_Animations ?? raw?.interface_animations ?? true,
-  notify_goal_80: raw?.notify_Goal_80 ?? raw?.notify_goal_80 ?? true,
-  notify_spending_increase: raw?.notify_Spending_Increase ?? raw?.notify_spending_increase ?? true,
-  notify_pending_lists: raw?.notify_Pending_Lists ?? raw?.notify_pending_lists ?? false,
-  profile_image_url: raw?.profile_Image_Url ?? raw?.profile_image_url ?? "",
-  bottom_nav_config: raw?.bottom_Nav_Config ?? raw?.bottom_nav_config ?? "",
-  created_at: raw?.created_At ?? raw?.created_at,
-  last_backup_at: raw?.last_Backup_At ?? raw?.last_backup_at ?? null,
-});
+type ApiError = { response?: { data?: { details?: string; error?: string; message?: string } }; message?: string };
+type UnknownRecord = Record<string, unknown>;
+
+const asRecord = (value: unknown): UnknownRecord =>
+  typeof value === "object" && value !== null ? value as UnknownRecord : {};
+
+const firstText = (source: UnknownRecord, keys: string[], fallback = "") =>
+  keys.map((key) => source[key]).find((value): value is string => typeof value === "string") ?? fallback;
+
+const firstBoolean = (source: UnknownRecord, keys: string[], fallback: boolean) =>
+  keys.map((key) => source[key]).find((value): value is boolean => typeof value === "boolean") ?? fallback;
+
+const getApiError = (error: unknown, fallback: string) => {
+  const apiError = error as ApiError;
+  return apiError.response?.data?.details ?? apiError.response?.data?.error ?? apiError.response?.data?.message ?? apiError.message ?? fallback;
+};
+
+const normalizeUser = (raw: unknown): UserSettings => {
+  const user = asRecord(raw);
+  const id = typeof user.id === "number" ? user.id : 0;
+
+  return {
+    id,
+    full_name: firstText(user, ["full_Name", "full_name", "fullName"], "Usuário"),
+    email: firstText(user, ["email"]),
+    currency_code: firstText(user, ["currency_Code", "currency_code"], "EUR"),
+    country_code: firstText(user, ["country_Code", "country_code"], "PT"),
+    language: firstText(user, ["language"], "pt-PT"),
+    theme: firstText(user, ["theme"], localStorage.getItem(THEME_KEY) ?? "dark") as ThemeMode,
+    date_format: firstText(user, ["date_Format", "date_format"], "dd/MM/yyyy"),
+    accent_color: firstText(user, ["accent_Color", "accent_color"], "purple") as AccentColor,
+    compact_mode: firstBoolean(user, ["compact_Mode", "compact_mode"], false),
+    interface_animations: firstBoolean(user, ["interface_Animations", "interface_animations"], true),
+    notify_goal_80: firstBoolean(user, ["notify_Goal_80", "notify_goal_80"], true),
+    notify_spending_increase: firstBoolean(user, ["notify_Spending_Increase", "notify_spending_increase"], true),
+    notify_pending_lists: firstBoolean(user, ["notify_Pending_Lists", "notify_pending_lists"], false),
+    profile_image_url: firstText(user, ["profile_Image_Url", "profile_image_url"]),
+    bottom_nav_config: firstText(user, ["bottom_Nav_Config", "bottom_nav_config"]),
+    created_at: firstText(user, ["created_At", "created_at"]) || undefined,
+    last_backup_at: firstText(user, ["last_Backup_At", "last_backup_at"]) || null,
+  };
+};
 
 const toSessionUser = (u: UserSettings) => ({
   ...u,
@@ -155,7 +178,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (value: boo
   );
 }
 
-function ActionRow({ icon: Icon, label, onClick, danger = false }: { icon: any; label: string; onClick: () => void; danger?: boolean }) {
+function ActionRow({ icon: Icon, label, onClick, danger = false }: { icon: LucideIcon; label: string; onClick: () => void; danger?: boolean }) {
   return (
     <button
       type="button"
@@ -183,6 +206,12 @@ export default function Settings() {
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
 
   const setField = <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => setForm((prev) => ({ ...prev, [key]: value }));
+  const persistSessionUser = (updated: UserSettings) => {
+    const storedUser = JSON.stringify(toSessionUser(updated));
+    sessionStorage.setItem("user", storedUser);
+    localStorage.setItem("user", storedUser);
+    window.dispatchEvent(new Event("moneytrack:user-updated"));
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -193,8 +222,8 @@ export default function Settings() {
         setForm(normalized);
         sessionStorage.setItem("user", JSON.stringify(toSessionUser(normalized)));
         applyTheme(normalized.theme);
-      } catch (err: any) {
-        setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || "Erro ao carregar configurações." });
+      } catch (error) {
+        setMessage({ type: "error", text: getApiError(error, "Erro ao carregar configurações.") });
       } finally {
         setLoading(false);
       }
@@ -231,11 +260,10 @@ export default function Settings() {
       const updated = normalizeUser(res.data ?? form);
       setUser(updated);
       setForm(updated);
-      sessionStorage.setItem("user", JSON.stringify(toSessionUser(updated)));
-      localStorage.setItem("user", JSON.stringify(toSessionUser(updated)));
+      persistSessionUser(updated);
       setMessage({ type: "success", text: "Configurações salvas com sucesso." });
-    } catch (err: any) {
-      setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || "Erro ao salvar configurações." });
+    } catch (error) {
+      setMessage({ type: "error", text: getApiError(error, "Erro ao salvar configurações.") });
     } finally {
       setSaving(false);
     }
@@ -251,13 +279,14 @@ export default function Settings() {
       formData.append("file", file);
       const res = await api.post("/users/me/upload-photo", formData, { headers: { "Content-Type": "multipart/form-data" } });
       const imageUrl = res.data?.url;
-      const base = api.defaults.baseURL?.replace(/\/api(?:\/v\d+)?$/, "") || "";
-      const fullUrl = imageUrl ? `${base}${imageUrl}?t=${Date.now()}` : "";
-      setForm((prev) => ({ ...prev, profile_image_url: fullUrl }));
-      setUser((prev) => ({ ...prev, profile_image_url: fullUrl }));
+      const fullUrl = imageUrl ? `${getApiAssetUrl(imageUrl)}?t=${Date.now()}` : "";
+      const updated = { ...form, profile_image_url: fullUrl };
+      setForm(updated);
+      setUser(updated);
+      persistSessionUser(updated);
       setMessage({ type: "success", text: "Foto atualizada com sucesso." });
-    } catch (err: any) {
-      setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || "Erro ao enviar foto." });
+    } catch (error) {
+      setMessage({ type: "error", text: getApiError(error, "Erro ao enviar foto.") });
     } finally {
       setUploading(false);
     }
@@ -266,11 +295,13 @@ export default function Settings() {
   const handleDeletePhoto = async () => {
     try {
       await api.delete("/users/me/profile-photo");
-      setForm((prev) => ({ ...prev, profile_image_url: "" }));
-      setUser((prev) => ({ ...prev, profile_image_url: "" }));
+      const updated = { ...form, profile_image_url: "" };
+      setForm(updated);
+      setUser(updated);
+      persistSessionUser(updated);
       setMessage({ type: "success", text: "Foto removida com sucesso." });
-    } catch (err: any) {
-      setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || "Erro ao remover foto." });
+    } catch (error) {
+      setMessage({ type: "error", text: getApiError(error, "Erro ao remover foto.") });
     }
   };
 
@@ -283,8 +314,8 @@ export default function Settings() {
       await api.put("/users/me/password", { currentPassword: passwords.currentPassword, newPassword: passwords.newPassword });
       setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
       setMessage({ type: "success", text: "Senha alterada com sucesso." });
-    } catch (err: any) {
-      setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || err?.message || "Erro ao alterar senha." });
+    } catch (error) {
+      setMessage({ type: "error", text: getApiError(error, "Erro ao alterar senha.") });
     }
   };
 
@@ -299,9 +330,13 @@ export default function Settings() {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      setMessage({ type: "success", text: "Dados exportados com sucesso." });
-    } catch (err: any) {
-      setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || "Erro ao exportar dados." });
+      const updated = { ...form, last_backup_at: new Date().toISOString() };
+      setForm(updated);
+      setUser(updated);
+      persistSessionUser(updated);
+      setMessage({ type: "success", text: "Backup completo criado com sucesso." });
+    } catch (error) {
+      setMessage({ type: "error", text: getApiError(error, "Erro ao exportar dados.") });
     }
   };
 
@@ -313,8 +348,8 @@ export default function Settings() {
       sessionStorage.removeItem("user");
       localStorage.removeItem("user");
       navigate("/login");
-    } catch (err: any) {
-      setMessage({ type: "error", text: err?.response?.data?.details || err?.response?.data?.error || "Erro ao apagar conta." });
+    } catch (error) {
+      setMessage({ type: "error", text: getApiError(error, "Erro ao apagar conta.") });
     }
   };
 
@@ -322,6 +357,7 @@ export default function Settings() {
   const selectedCountry = countries.find((item) => item.value === form.country_code)?.label ?? form.country_code;
   const selectedTheme = form.theme === "light" ? "Claro" : form.theme === "system" ? "Sistema" : "Escuro";
   const lastBackup = form.last_backup_at ? new Date(form.last_backup_at).toLocaleString("pt-PT") : "ainda não realizado";
+  const initials = form.full_name.split(" ").filter(Boolean).map((name) => name[0]).join("").slice(0, 2).toUpperCase() || "U";
 
   if (loading) {
     return <div className="grid min-h-[55vh] place-items-center text-slate-400">Carregando configurações...</div>;
@@ -375,7 +411,7 @@ export default function Settings() {
               <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                   <div className="grid h-16 w-16 shrink-0 sm:h-20 sm:w-20 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-violet-600 to-blue-600 text-2xl font-black shadow-xl shadow-violet-600/25">
-                    {form.profile_image_url ? <img src={form.profile_image_url} alt="Perfil" className="h-full w-full object-cover" /> : "SA"}
+                    {form.profile_image_url ? <img src={getApiAssetUrl(form.profile_image_url)} alt="Perfil" className="h-full w-full object-cover" /> : initials}
                   </div>
                   <div>
                     <h3 className="truncate text-lg font-black sm:text-xl">{form.full_name}</h3>
@@ -452,7 +488,7 @@ export default function Settings() {
                 <Field label="Confirmar nova senha"><div className="relative"><input className={`${inputClass} pr-10`} type="password" placeholder="Confirme a nova senha" value={passwords.confirmPassword} onChange={(e) => setPasswords((p) => ({ ...p, confirmPassword: e.target.value }))} /><Eye className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} /></div></Field>
               </div>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-slate-400"><Shield size={15} className="mr-1 inline" /> Último acesso: Hoje, 09:42 • Dispositivo atual: Windows</p>
+                <p className="text-sm text-slate-400"><Shield size={15} className="mr-1 inline" /> A senha é verificada antes de qualquer alteração de segurança.</p>
                 <button type="button" onClick={handleChangePassword} className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-violet-400/40 px-4 py-3 text-sm font-bold text-violet-200 hover:bg-violet-500/10 sm:w-auto"><Lock size={16} /> Alterar senha</button>
               </div>
             </Panel>
@@ -471,9 +507,8 @@ export default function Settings() {
           {activeTab === "data" && (
             <Panel title="Dados e backup">
               <div className="grid gap-3 sm:grid-cols-2">
-                <ActionRow icon={Download} label="Exportar dados" onClick={handleExport} />
-                <ActionRow icon={FileText} label="Baixar relatório PDF" onClick={() => setMessage({ type: "success", text: "Use a tela Relatórios para exportar PDF com filtros detalhados." })} />
-                <ActionRow icon={Cloud} label="Sincronizar com a nuvem" onClick={handleExport} />
+                <ActionRow icon={Download} label="Criar backup completo (.json)" onClick={handleExport} />
+                <ActionRow icon={FileText} label="Abrir gastos para exportar PDF" onClick={() => navigate("/expenses")} />
                 <ActionRow icon={Trash2} label="Apagar conta" onClick={handleDeleteAccount} danger />
               </div>
               <p className="mt-4 text-sm text-slate-400">Último backup: {lastBackup}</p>
@@ -484,7 +519,6 @@ export default function Settings() {
         <aside className="hidden space-y-5 xl:sticky xl:top-4 xl:block xl:h-fit">
           <Panel title="Resumo da conta">
             <div className="space-y-4 text-sm">
-              <div className="flex justify-between gap-4"><span className="text-slate-400">Plano atual:</span><strong className="text-violet-300">Gratuito</strong></div>
               <div className="flex justify-between gap-4"><span className="text-slate-400">País:</span><strong>{selectedCountry}</strong></div>
               <div className="flex justify-between gap-4"><span className="text-slate-400">Moeda padrão:</span><strong>{selectedCurrency}</strong></div>
               <div className="flex justify-between gap-4"><span className="text-slate-400">Tema atual:</span><strong className="flex items-center gap-2"><Moon size={15} /> {selectedTheme}</strong></div>
@@ -501,9 +535,8 @@ export default function Settings() {
 
           <Panel title="Dados e backup">
             <div className="space-y-3">
-              <ActionRow icon={Download} label="Exportar dados" onClick={handleExport} />
-              <ActionRow icon={FileText} label="Baixar relatório PDF" onClick={() => setMessage({ type: "success", text: "Use a tela Relatórios para exportar PDF com filtros detalhados." })} />
-              <ActionRow icon={Cloud} label="Sincronizar com a nuvem" onClick={handleExport} />
+              <ActionRow icon={Download} label="Criar backup completo (.json)" onClick={handleExport} />
+              <ActionRow icon={FileText} label="Abrir gastos para exportar PDF" onClick={() => navigate("/expenses")} />
               <p className="text-xs text-slate-400">Último backup: {lastBackup}</p>
               <ActionRow icon={Trash2} label="Apagar conta" onClick={handleDeleteAccount} danger />
             </div>

@@ -20,6 +20,9 @@ export default function Login() {
 
     try {
       const user = await loginUser({ email, password });
+      if (!user?.token) {
+        throw new Error("A resposta de login não contém uma sessão válida.");
+      }
       sessionStorage.setItem("user", JSON.stringify(normalizeUser(user)));
       navigate("/dashboard");
     } catch {

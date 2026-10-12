@@ -1,44 +1,47 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Calendar, ChevronDown, ChevronUp, CreditCard, Download, FileText, MapPin, ShoppingCart, TrendingUp, Wallet } from "lucide-react";
 import api from "../api/axios";
 import { getLoggedUser } from "../utils/auth";
 import { Button } from "../components/ui/Button";
 import ExpenseFilters, { type Filters } from "../components/ui/ExpenseFilters";
+import type { NamedOption } from "../types/purchases";
 
 type ExpenseItem = { id: number; quantity?: number; description: string; amount?: number; price?: number; unitPrice?: number; categoryName?: string };
 type Expense = { id: number; date: string; locationName?: string | null; paymentMethodName?: string; paymentMethod?: number; items: ExpenseItem[] };
+const emptyFilters: Filters = { fromDate: "", toDate: "", locationId: "", categoryId: "", noteId: "", description: "", minValue: "", maxValue: "" };
+const itemTotal = (item: ExpenseItem) => Number(item.amount ?? (Number(item.quantity ?? 1) * Number(item.price ?? item.unitPrice ?? 0)));
+const expenseTotal = (expense: Expense) => expense.items?.reduce((sum, item) => sum + itemTotal(item), 0) ?? 0;
 
 const Expenses: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [openFilters, setOpenFilters] = useState(false);
   const [openExport, setOpenExport] = useState(false);
+  const [exporting, setExporting] = useState<"excel" | "pdf" | null>(null);
+  const [exportError, setExportError] = useState("");
   const [expandedId, setExpandedId] = useState<number | null>(null);
-  const [locations, setLocations] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [locations, setLocations] = useState<NamedOption[]>([]);
+  const [categories, setCategories] = useState<NamedOption[]>([]);
   const user = getLoggedUser();
   const userId = user?.id;
   const currency = user?.currencySymbol || "€";
 
-  const [filters, setFilters] = useState<Filters>({ fromDate: "", toDate: "", locationId: "", categoryId: "", noteId: "", description: "", minValue: "", maxValue: "" });
-
-  const itemTotal = (item: ExpenseItem) => Number(item.amount ?? (Number(item.quantity ?? 1) * Number(item.price ?? item.unitPrice ?? 0)));
-  const expenseTotal = (e: Expense) => e.items?.reduce((sum, item) => sum + itemTotal(item), 0) ?? 0;
+  const [filters, setFilters] = useState<Filters>(emptyFilters);
   const money = (v: number) => `${currency} ${v.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  const fetchExpenses = async (customFilters: Filters = filters) => {
+  const fetchExpenses = useCallback(async (customFilters: Filters) => {
     try {
       const response = await api.get(`/expenses`, { params: { userId, from: customFilters.fromDate || undefined, to: customFilters.toDate || undefined, locationId: customFilters.locationId || undefined, categoryId: customFilters.categoryId || undefined, description: customFilters.description || undefined, min: customFilters.minValue || undefined, max: customFilters.maxValue || undefined } });
       setExpenses(response.data);
       if (response.data?.[0]?.id) setExpandedId(response.data[0].id);
     } catch (error) { console.error("Erro ao carregar despesas:", error); }
-  };
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
-    fetchExpenses();
-    api.get(`/locations/${userId}`).then((res) => setLocations(res.data)).catch(() => null);
-    api.get(`/categories/${userId}`).then((res) => setCategories(res.data)).catch(() => null);
-  }, [userId]);
+    void fetchExpenses(emptyFilters);
+    api.get<NamedOption[]>(`/locations/${userId}`).then((res) => setLocations(res.data)).catch(() => null);
+    api.get<NamedOption[]>(`/categories/${userId}`).then((res) => setCategories(res.data)).catch(() => null);
+  }, [fetchExpenses, userId]);
 
   const stats = useMemo(() => {
     const total = expenses.reduce((sum, e) => sum + expenseTotal(e), 0);
@@ -48,16 +51,27 @@ const Expenses: React.FC = () => {
   }, [expenses]);
 
   const exportFile = async (type: "excel" | "pdf") => {
-    const response = await api.get(`/expenses/export/${type}`, { params: { userId, from: filters.fromDate || undefined, to: filters.toDate || undefined, locationId: filters.locationId || undefined, categoryId: filters.categoryId || undefined, description: filters.description || undefined, min: filters.minValue || undefined, max: filters.maxValue || undefined }, responseType: "blob" });
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `gastos.${type === "excel" ? "xlsx" : "pdf"}`);
-    document.body.appendChild(link);
-    link.click();
+    try {
+      setExportError("");
+      setExporting(type);
+      const response = await api.get(`/expenses/export/${type}`, { params: { userId, from: filters.fromDate || undefined, to: filters.toDate || undefined, locationId: filters.locationId || undefined, categoryId: filters.categoryId || undefined, description: filters.description || undefined, min: filters.minValue || undefined, max: filters.maxValue || undefined }, responseType: "blob" });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `gastos.${type === "excel" ? "xlsx" : "pdf"}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      setOpenExport(false);
+    } catch {
+      setExportError("Não foi possível gerar o arquivo. Tente novamente.");
+    } finally {
+      setExporting(null);
+    }
   };
 
-  const clear = () => { const empty: Filters = { fromDate: "", toDate: "", locationId: "", categoryId: "", noteId: "", description: "", minValue: "", maxValue: "" }; setFilters(empty); fetchExpenses(empty); };
+  const clear = () => { setFilters(emptyFilters); void fetchExpenses(emptyFilters); };
 
   const payment = (e: Expense) => e.paymentMethodName ?? (["", "Dinheiro", "Cartão Crédito", "Cartão Débito", "PIX", "MB Way"][Number(e.paymentMethod)] ?? "Cartão Débito");
 
@@ -66,8 +80,8 @@ const Expenses: React.FC = () => {
       <div className="flex items-start justify-between gap-4">
         <div><h1 className="text-3xl font-bold tracking-tight">Meus Gastos</h1><p className="mt-1 text-slate-400">Histórico de despesas registradas</p></div>
         <div className="relative">
-          <Button label="Exportar" icon={Download} variant="secondary" onClick={() => setOpenExport(!openExport)} />
-          {openExport && <div className="absolute right-0 z-40 mt-2 w-44 overflow-hidden rounded-2xl border border-white/10 bg-[#081222] shadow-2xl"><button className="block w-full px-4 py-3 text-left hover:bg-white/5" onClick={() => exportFile("excel")}>Exportar Excel</button><button className="block w-full px-4 py-3 text-left hover:bg-white/5" onClick={() => exportFile("pdf")}>Exportar PDF</button></div>}
+          <Button label="Exportar" icon={Download} variant="secondary" onClick={() => { setExportError(""); setOpenExport(!openExport); }} />
+          {openExport && <div className="absolute right-0 z-40 mt-2 w-56 overflow-hidden rounded-2xl border border-white/10 bg-[#081222] shadow-2xl"><button disabled={Boolean(exporting)} className="block w-full px-4 py-3 text-left hover:bg-white/5 disabled:cursor-wait disabled:opacity-60" onClick={() => exportFile("excel")}>{exporting === "excel" ? "Gerando Excel…" : "Exportar Excel"}</button><button disabled={Boolean(exporting)} className="block w-full px-4 py-3 text-left hover:bg-white/5 disabled:cursor-wait disabled:opacity-60" onClick={() => exportFile("pdf")}>{exporting === "pdf" ? "Gerando PDF…" : "Exportar PDF"}</button>{exportError && <p className="border-t border-white/10 px-4 py-3 text-sm text-rose-300">{exportError}</p>}</div>}
         </div>
       </div>
 

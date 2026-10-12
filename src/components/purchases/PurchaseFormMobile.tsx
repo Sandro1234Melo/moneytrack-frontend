@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Calendar, ChevronDown, CreditCard, FileText, Plus, Save, Store, Trash2 } from "lucide-react";
 import { paymentMethods } from "../../utils/paymentMethods";
+import type { NamedOption, Purchase, PurchaseItem, PurchasePayload } from "../../types/purchases";
+
+type DraftItem = Pick<PurchaseItem, "description" | "categoryId"> & { quantity: number | string; price: number | string };
 
 export interface PurchaseFormMobileProps {
-  purchase?: any | null;
-  locations: any[];
-  categories: any[];
-  onSave: (data: any) => void;
+  purchase?: Purchase | null;
+  locations: NamedOption[];
+  categories: NamedOption[];
+  onSave: (data: PurchasePayload) => void;
   onCancel: () => void;
   onAddLocation: () => void;
   onAddCategory: () => void;
@@ -21,7 +24,7 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, locat
   const [date, setDate] = useState(purchase?.date?.substring(0, 10) ?? new Date().toISOString().substring(0, 10));
   const [locationId, setLocationId] = useState<number | "">(purchase?.locationId ?? "");
   const [paymentMethod, setPaymentMethod] = useState<number | "">(purchase?.paymentMethod ?? "");
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<DraftItem[]>([]);
   const [compact, setCompact] = useState(false);
 
   useEffect(() => {
@@ -29,7 +32,7 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, locat
       setDate(purchase.date?.substring(0, 10));
       setLocationId(purchase.locationId ?? "");
       setPaymentMethod(purchase.paymentMethod ?? "");
-      setItems(purchase.items?.map((item: any) => ({ description: item.description ?? "", categoryId: String(item.categoryId ?? ""), quantity: item.quantity ?? 1, price: item.price ?? item.unitPrice ?? item.amount ?? 0 })) ?? []);
+      setItems(purchase.items.map((item) => ({ description: item.description ?? "", categoryId: String(item.categoryId ?? ""), quantity: item.quantity ?? 1, price: item.price ?? item.unitPrice ?? item.amount ?? 0 })));
     } else {
       setItems([{ description: "", categoryId: "", quantity: 1, price: 0 }]);
       setPaymentMethod("");
@@ -43,7 +46,7 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, locat
   const money = (v: number) => `€ ${v.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const addItem = () => setItems([...items, { description: "", categoryId: "", quantity: 1, price: 0 }]);
-  const updateItem = (index: number, patch: any) => setItems(items.map((item, i) => i === index ? { ...item, ...patch } : item));
+  const updateItem = (index: number, patch: Partial<DraftItem>) => setItems(items.map((item, i) => i === index ? { ...item, ...patch } : item));
 
   const handleSave = () => {
     if (!locationId) return alert("Selecione o local");
@@ -60,7 +63,7 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, locat
 
       <div className="space-y-4">
         <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><Store/></div><label className="flex-1"><span className="text-xs text-slate-400">Local</span><select value={locationId} onChange={e => setLocationId(e.target.value ? Number(e.target.value) : "")} className="mt-1 w-full bg-transparent text-lg font-bold outline-none"><option className="bg-slate-900" value="">Selecione</option>{locations.map(l => <option className="bg-slate-900" key={l.id} value={l.id}>{l.name}</option>)}</select></label><button onClick={onAddLocation} className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-600"><Plus/></button></div></div>
-        <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><CreditCard/></div><label className="flex-1"><span className="text-xs text-slate-400">Forma de pagamento</span><select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value ? Number(e.target.value) : "")} className="mt-1 w-full bg-transparent text-lg font-bold outline-none"><option className="bg-slate-900" value="">Selecione</option>{paymentMethods.map((p: any) => <option className="bg-slate-900" key={p.value} value={p.value}>{p.label}</option>)}</select></label><ChevronDown/></div></div>
+        <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><CreditCard/></div><label className="flex-1"><span className="text-xs text-slate-400">Forma de pagamento</span><select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value ? Number(e.target.value) : "")} className="mt-1 w-full bg-transparent text-lg font-bold outline-none"><option className="bg-slate-900" value="">Selecione</option>{paymentMethods.map((p) => <option className="bg-slate-900" key={p.value} value={p.value}>{p.label}</option>)}</select></label><ChevronDown/></div></div>
         <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><Calendar/></div><label className="flex-1"><span className="text-xs text-slate-400">Data da compra</span><input type="date" value={date} onChange={e => setDate(e.target.value)} className="mt-1 w-full bg-transparent text-lg font-bold outline-none" /></label></div></div>
       </div>
 
@@ -69,7 +72,7 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, locat
       <div className="space-y-4">
         {items.map((item, index) => (
           <div key={index} className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4">
-            <div className="mb-4 flex items-center gap-4"><span className="grid h-9 w-9 place-items-center rounded-full bg-violet-600 font-bold">{index + 1}</span><input placeholder="Nome do produto" value={item.description} onChange={e => updateItem(index, { description: e.target.value })} className="min-w-0 flex-1 bg-transparent text-lg font-bold outline-none"/><button onClick={() => setItems(items.filter((_, i) => i !== index))} className="text-red-400"><Trash2/></button></div>
+            <div className="mb-4 flex items-center gap-4"><span className="grid h-9 w-9 place-items-center rounded-full bg-violet-600 font-bold">{index + 1}</span><input aria-label="Descrição do item" placeholder="Descrição do item" value={item.description} onChange={e => updateItem(index, { description: e.target.value })} className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-base text-white outline-none transition focus:border-violet-500/70 focus:ring-2 focus:ring-violet-500/20"/><button onClick={() => setItems(items.filter((_, i) => i !== index))} className="text-red-400"><Trash2/></button></div>
             {!compact && (
               <div className="grid gap-4">
                 <div className="grid gap-2">
@@ -134,7 +137,7 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, locat
       </div>
 
       <button onClick={addItem} className="mt-5 w-full rounded-3xl border border-dashed border-violet-500/70 py-5 text-lg font-bold text-violet-300">+ Novo produto</button>
-      <div className="fixed bottom-0 left-0 right-0 z-40 rounded-t-3xl border-t border-white/10 bg-[#0a1425]/95 p-5 backdrop-blur-xl"><p className="text-sm text-slate-400">TOTAL DA COMPRA</p><p className="mb-4 mt-1 text-3xl font-bold text-violet-400">{money(total)}</p><button onClick={handleSave} className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-600 py-4 text-lg font-bold"><Save/> Salvar compra</button></div>
+      <div className="fixed bottom-24 left-0 right-0 z-40 rounded-t-3xl border-t border-white/10 bg-[#0a1425]/95 p-5 backdrop-blur-xl"><p className="text-sm text-slate-400">TOTAL DA COMPRA</p><p className="mb-4 mt-1 text-3xl font-bold text-violet-400">{money(total)}</p><button onClick={handleSave} className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-600 py-4 text-lg font-bold"><Save/> Salvar compra</button></div>
     </div>
   );
 };

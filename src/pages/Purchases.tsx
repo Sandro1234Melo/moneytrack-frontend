@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Edit2, Filter, Plus, ShoppingCart, Trash2, Wallet } from "lucide-react";
 import api from "../api/axios";
 import { getLoggedUser } from "../utils/auth";
@@ -8,12 +9,14 @@ import QuickCreateModal from "../components/ui/QuickCreateModal";
 import ExpenseFilters, { type Filters } from "../components/ui/ExpenseFilters";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import { paymentMethods } from "../utils/paymentMethods";
+import type { NamedOption, Purchase, PurchasePayload } from "../types/purchases";
+import { getApiErrorMessage } from "../utils/apiError";
 
 const Purchases = () => {
-  const [purchases, setPurchases] = useState<any[]>([]);
-  const [editingPurchase, setEditingPurchase] = useState<any | null>(null);
-  const [locations, setLocations] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
+  const [locations, setLocations] = useState<NamedOption[]>([]);
+  const [categories, setCategories] = useState<NamedOption[]>([]);
   const [formKey, setFormKey] = useState(0);
   const [openFilters, setOpenFilters] = useState(false);
   const [openLocationModal, setOpenLocationModal] = useState(false);
@@ -22,26 +25,28 @@ const Purchases = () => {
   const [createdLocationId, setCreatedLocationId] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [period, setPeriod] = useState("Tudo");
-  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Purchase | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [searchParams] = useSearchParams();
   const user = getLoggedUser();
   const userId = user?.id;
   const currency = user?.currencySymbol || "€";
+  const searchTerm = searchParams.get("search")?.trim() ?? "";
 
   const [filters, setFilters] = useState<Filters>({ fromDate: "", toDate: "", locationId: "", categoryId: "", noteId: "", description: "", minValue: "", maxValue: "" });
 
-  const total = (purchase: any) => purchase.items?.reduce((s: number, item: any) => s + Number(item.amount ?? (Number(item.quantity ?? 1) * Number(item.price ?? item.unitPrice ?? 0))), 0) ?? 0;
+  const total = (purchase: Purchase) => purchase.items.reduce((sum, item) => sum + Number(item.amount ?? (Number(item.quantity ?? 1) * Number(item.price ?? item.unitPrice ?? 0))), 0);
   const money = (v: number) => `${currency} ${v.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  const paymentLabel = (purchase: any) =>
+  const paymentLabel = (purchase: Purchase) =>
     purchase.paymentMethodName ??
     paymentMethods.find((method) => Number(method.value) === Number(purchase.paymentMethod))?.label ??
     "Forma de pagamento";
 
-  const loadPurchases = async (customFilters: Filters = filters) => {
+  const loadPurchases = useCallback(async (customFilters: Filters) => {
     if (!userId) return;
 
     try {
-      const response = await api.get(`/expenses`, {
+      const response = await api.get<Purchase[]>(`/expenses`, {
         params: {
           userId,
           from: customFilters.fromDate || undefined,
@@ -55,24 +60,32 @@ const Purchases = () => {
         }
       });
       setPurchases(response.data);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Erro ao carregar compras", error);
-      alert(error?.response?.data?.details || error?.response?.data?.error || "Erro ao carregar compras");
+      alert(getApiErrorMessage(error, "Erro ao carregar compras"));
     }
-  };
+  }, [userId]);
 
-  const loadCategories = async () => { const response = await api.get(`/categories/${userId}`); setCategories(response.data); };
-  const loadLocations = async () => { const response = await api.get(`/locations/${userId}`); setLocations(response.data); };
+  const loadCategories = useCallback(async () => { if (!userId) return; const response = await api.get<NamedOption[]>(`/categories/${userId}`); setCategories(response.data); }, [userId]);
+  const loadLocations = useCallback(async () => { if (!userId) return; const response = await api.get<NamedOption[]>(`/locations/${userId}`); setLocations(response.data); }, [userId]);
 
-  useEffect(() => { if (!userId) return; loadPurchases(); loadCategories(); loadLocations(); }, [userId]);
+  useEffect(() => {
+    if (!userId) return;
+    const initialFilters: Filters = { fromDate: "", toDate: "", locationId: "", categoryId: "", noteId: "", description: searchTerm, minValue: "", maxValue: "" };
+    setFilters(initialFilters);
+    setPeriod("Tudo");
+    loadPurchases(initialFilters);
+    loadCategories();
+    loadLocations();
+  }, [loadCategories, loadLocations, loadPurchases, searchTerm, userId]);
 
-  const handleSave = async (data: any) => {
+  const handleSave = async (data: PurchasePayload) => {
     try {
       if (editingPurchase) await api.put(`/expenses/${editingPurchase.id}`, data);
       else await api.post("/expenses", { ...data, userId });
       setEditingPurchase(null); setIsEditing(false); setFormKey((prev) => prev + 1); loadPurchases(filters);
-    } catch (error: any) {
-      alert(error?.response?.data?.details || error?.response?.data?.error || "Erro ao salvar a compra");
+    } catch (error) {
+      alert(getApiErrorMessage(error, "Erro ao salvar a compra"));
     }
   };
 
@@ -84,8 +97,8 @@ const Purchases = () => {
       await api.delete(`/expenses/${deleteTarget.id}`);
       setDeleteTarget(null);
       await loadPurchases(filters);
-    } catch (error: any) {
-      alert(error?.response?.data?.details || error?.response?.data?.error || "Erro ao excluir a compra");
+    } catch (error) {
+      alert(getApiErrorMessage(error, "Erro ao excluir a compra"));
     } finally {
       setDeleting(false);
     }

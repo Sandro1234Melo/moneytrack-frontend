@@ -1,33 +1,36 @@
 import { useEffect, useState } from "react";
 
 import api from "../../api/axios";
-import type { ReportFiltersType } from "../../pages/Reports";
+import type { CategoryDistribution, ReportFilters } from "../../types/reports";
 import HeatMap from "../ui/2.0/heat-map";
 
 type Props = {
-  user_Id: number;
-  filters: ReportFiltersType;
+  userId: number;
+  filters: ReportFilters;
 };
 
 
-const CategoryDistributionChart: React.FC<Props> = ({ user_Id, filters }) => {
-  const [data, setData] = useState<any[]>([]);
+const CategoryDistributionChart: React.FC<Props> = ({ userId, filters }) => {
+  const [data, setData] = useState<CategoryDistribution[]>([]);
 
   useEffect(() => {
-    if (!user_Id) return;
+    if (!userId) return;
     if (!filters.from || !filters.to) return;
 
     api
       .get("/reports/category-distribution", {
         params: {
-          userId: user_Id,
+          userId,
           from: filters.from,
-          to: filters.to
+          to: filters.to,
+          categoryId: filters.categoryId || undefined,
+          locationId: filters.locationId || undefined,
+          paymentMethod: filters.paymentMethod || undefined,
         }
       })
       .then(res => setData(res.data))
       .catch(console.error);
-  }, [user_Id, filters]);
+  }, [userId, filters]);
 
 
   return (

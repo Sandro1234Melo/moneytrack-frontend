@@ -140,7 +140,7 @@ export function BowPieChart({
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current)
     }
-  }, [data, colors, size, thickness, animate, totalAngle])
+  }, [data, colors, size, thickness, animate, totalAngle, animationDuration, drawChart])
 
   /**
    * Redraw on selection change (NO animation)
@@ -149,7 +149,7 @@ export function BowPieChart({
     if (animatedOnceRef.current) {
       drawChart(1)
     }
-  }, [selectedId])
+  }, [selectedId, drawChart])
 
   /**
    * Hit testing

@@ -1,8 +1,9 @@
 import { Pencil, Trash2 } from "lucide-react";
 import { getLoggedUser } from "../../utils/auth";
+import type { Purchase } from "../../types/purchases";
 
 type Props = {
-  purchase: any;
+  purchase: Purchase;
   onEdit: () => void;
   onDelete: () => void;
 };

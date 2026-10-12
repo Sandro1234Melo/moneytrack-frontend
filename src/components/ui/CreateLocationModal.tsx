@@ -8,12 +8,14 @@ type Field = {
   placeholder?: string;
 };
 
+type QuickCreateValues = Record<string, string | number>;
+
 type Props = {
   open: boolean;
   title: string;
   fields: Field[];
   onClose: () => void;
-  onSubmit: (data: any) => Promise<void> | void;
+  onSubmit: (data: QuickCreateValues) => Promise<void> | void;
 };
 
 const QuickCreateModal: React.FC<Props> = ({
@@ -23,11 +25,11 @@ const QuickCreateModal: React.FC<Props> = ({
   onClose,
   onSubmit
 }) => {
-  const [form, setForm] = useState<any>({});
+  const [form, setForm] = useState<QuickCreateValues>({});
 
   useEffect(() => {
     if (open) {
-      const initial: any = {};
+      const initial: QuickCreateValues = {};
       fields.forEach(f => (initial[f.name] = ""));
       setForm(initial);
     }
@@ -35,8 +37,8 @@ const QuickCreateModal: React.FC<Props> = ({
 
   if (!open) return null;
 
-  const handleChange = (name: string, value: any) => {
-    setForm((prev: any) => ({ ...prev, [name]: value }));
+  const handleChange = (name: string, value: string | number) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {

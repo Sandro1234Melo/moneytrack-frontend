@@ -1,43 +1,72 @@
 import { getCurrencySymbol } from "./currency";
 
-export function normalizeUser(raw: any) {
-  if (!raw) return null;
+export type SessionUser = {
+  id?: number;
+  token?: string;
+  email?: string;
+  fullName?: string;
+  full_Name?: string;
+  full_name?: string;
+  name?: string;
+  countryCode?: string;
+  country_Code?: string;
+  country_code?: string;
+  currencyCode?: string;
+  currency_Code?: string;
+  currency_code?: string;
+  currencySymbol?: string;
+  profileImageUrl?: string;
+  profile_Image_Url?: string;
+  profile_image_url?: string;
+  theme?: string;
+  accent_Color?: string;
+  accent_color?: string;
+  compact_Mode?: boolean;
+  compact_mode?: boolean;
+  interface_Animations?: boolean;
+  interface_animations?: boolean;
+  [key: string]: unknown;
+};
+
+export function normalizeUser(raw: unknown): SessionUser | null {
+  if (!raw || typeof raw !== "object") return null;
+  const user = raw as SessionUser;
 
   const currencyCode =
-    raw.currencyCode ??
-    raw.currency_Code ??
-    raw.currency_code ??
+    user.currencyCode ??
+    user.currency_Code ??
+    user.currency_code ??
     "EUR";
 
   const countryCode =
-    raw.countryCode ??
-    raw.country_Code ??
-    raw.country_code ??
+    user.countryCode ??
+    user.country_Code ??
+    user.country_code ??
     "PT";
 
   const fullName =
-    raw.fullName ??
-    raw.full_Name ??
-    raw.full_name ??
-    raw.name ??
+    user.fullName ??
+    user.full_Name ??
+    user.full_name ??
+    user.name ??
     "Usuário";
 
   return {
-    ...raw,
+    ...user,
     fullName,
-    full_Name: raw.full_Name ?? fullName,
-    full_name: raw.full_name ?? fullName,
+    full_Name: user.full_Name ?? fullName,
+    full_name: user.full_name ?? fullName,
     countryCode,
-    country_Code: raw.country_Code ?? countryCode,
-    country_code: raw.country_code ?? countryCode,
+    country_Code: user.country_Code ?? countryCode,
+    country_code: user.country_code ?? countryCode,
     currencyCode,
-    currency_Code: raw.currency_Code ?? currencyCode,
-    currency_code: raw.currency_code ?? currencyCode,
+    currency_Code: user.currency_Code ?? currencyCode,
+    currency_code: user.currency_code ?? currencyCode,
     currencySymbol: getCurrencySymbol(currencyCode)
   };
 }
 
-export function getLoggedUser() {
+export function getLoggedUser(): SessionUser | null {
   const user = sessionStorage.getItem("user");
   if (!user) return null;
 

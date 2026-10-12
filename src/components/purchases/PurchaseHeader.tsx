@@ -4,6 +4,7 @@ import { SelectWithAction } from "../molecules/select-with-action";
 
 import DateField from "../atoms/date-field";
 import SelectField from "../molecules/select-field";
+import type { NamedOption } from "../../types/purchases";
 
 
 type Props = {
@@ -11,7 +12,7 @@ type Props = {
   setDate: (v: string) => void;
   locationId: number | "";
   setLocationId: (v: number | "") => void;
-  locations: any[];
+  locations: NamedOption[];
   paymentMethod: number | "";
   setPaymentMethod: (v: number | "") => void;
   onAddLocation: () => void;

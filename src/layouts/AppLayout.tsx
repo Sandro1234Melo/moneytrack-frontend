@@ -1,14 +1,37 @@
 import { Outlet, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import MobileBottomNav from "../components/ui/MobileBottomNav";
 import MobileHeader from "../components/ui/MobileHeader";
 import MobileDrawer from "../components/ui/MobileDrawer";
 import Topbar from "../layouts/Topbar";
+import { getLoggedUser } from "../utils/auth";
 
 export default function AppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const applyPreferences = () => {
+      const user = getLoggedUser();
+      const root = document.documentElement;
+      const theme = user?.theme === "light" || user?.theme === "system" ? user.theme : "dark";
+      const resolvedTheme = theme === "system"
+        ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+        : theme;
+
+      root.dataset.theme = resolvedTheme;
+      root.dataset.accent = user?.accent_Color ?? user?.accent_color ?? "purple";
+      root.classList.toggle("theme-light", resolvedTheme === "light");
+      root.classList.toggle("theme-dark", resolvedTheme === "dark");
+      root.classList.toggle("compact-mode", Boolean(user?.compact_Mode ?? user?.compact_mode));
+      root.classList.toggle("reduce-interface-motion", user?.interface_Animations === false || user?.interface_animations === false);
+    };
+
+    applyPreferences();
+    window.addEventListener("moneytrack:user-updated", applyPreferences);
+    return () => window.removeEventListener("moneytrack:user-updated", applyPreferences);
+  }, []);
 
   const pageTitleMap: Record<string, string> = {
     "/dashboard": "Dashboard",
@@ -19,7 +42,9 @@ export default function AppLayout() {
     "/locations": "Locais",
     "/reports": "Análises",
     "/settings": "Configurações",
-    "/goals": "Metas"
+    "/goals": "Metas",
+    "/friends": "Pessoas",
+    "/splits": "Dividir conta"
   };
 
   return (

@@ -1,6 +1,9 @@
 import { Calendar, MapPin, Trash2, CheckCircle } from "lucide-react";
+import type { ShoppingList } from "../../services/shoppingListService";
 
-export default function ShoppingListCard({ list, onDelete }: any) {
+type Props = { list: ShoppingList; onDelete: () => void };
+
+export default function ShoppingListCard({ list, onDelete }: Props) {
   const totalItems = list.items?.length ?? 0;
 
   return (

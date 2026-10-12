@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { cn } from "../../../lib/utils"
 
 export type HeatTreemapNode = {
@@ -34,6 +34,8 @@ type Rect = {
   h: number
   node: HeatTreemapNode
 }
+
+type AreaNode = HeatTreemapNode & { area: number }
 
 /* ---------- Color utils ---------- */
 const hexToRgb = (hex: string) => {
@@ -91,11 +93,11 @@ export default function HeatTreemap({
   }, [width])
 
   /* ---------- Formatter ---------- */
-  const formatter = new Intl.NumberFormat(locale, {
+  const formatter = useMemo(() => new Intl.NumberFormat(locale, {
     style: format === 'currency' ? 'currency' : 'decimal',
     currency,
     maximumFractionDigits: 0,
-  })
+  }), [currency, format, locale])
 
   useEffect(() => {
     if (!measuredWidth || !canvasRef.current) return
@@ -138,8 +140,7 @@ export default function HeatTreemap({
     /* ---------- Squarified treemap ---------- */
     const rects: Rect[] = []
 
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    const worst = (row: any[], w: number) => {
+    const worst = (row: AreaNode[], w: number) => {
       const areas = row.map(r => r.area)
       const sum = areas.reduce((a, b) => a + b, 0)
       const maxA = Math.max(...areas)
@@ -151,8 +152,7 @@ export default function HeatTreemap({
     }
 
     const layoutRow = (
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      row: any[],
+      row: AreaNode[],
       x: number,
       y: number,
       w: number,
@@ -179,15 +179,13 @@ export default function HeatTreemap({
     }
 
     const squarify = (
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      nodes: any[],
+      nodes: AreaNode[],
       x: number,
       y: number,
       w: number,
       h: number
     ) => {
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      let row: any[] = []
+      let row: AreaNode[] = []
       const rest = [...nodes]
       let side = Math.min(w, h)
       let cx = x
@@ -271,6 +269,7 @@ export default function HeatTreemap({
     currency,
     locale,
     animate,
+    formatter,
   ])
 
   /* ---------- Tooltip ---------- */

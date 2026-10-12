@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { cn } from "../../../lib/utils"
 
 export type HeatMapNode = {
@@ -32,6 +32,8 @@ type Cell = {
   h: number
   node: HeatMapNode
 }
+
+type AreaNode = HeatMapNode & { area: number }
 
 /* ---------- Color utils ---------- */
 const hexToRgb = (hex: string) => {
@@ -89,11 +91,11 @@ export default function HeatMap({
   }, [width])
 
   /* ---------- Formatter ---------- */
-  const formatter = new Intl.NumberFormat(locale, {
+  const formatter = useMemo(() => new Intl.NumberFormat(locale, {
     style: format === 'currency' ? 'currency' : 'decimal',
     currency,
     maximumFractionDigits: 0,
-  })
+  }), [currency, format, locale])
 
   useEffect(() => {
     if (!measuredWidth || !canvasRef.current) return
@@ -137,8 +139,7 @@ export default function HeatMap({
     const cells: Cell[] = []
 
     let y = 0
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    let row: any[] = []
+    let row: AreaNode[] = []
     let rowArea = 0
 
     const targetRowHeight = Math.sqrt((measuredWidth * height) / nodes.length)
@@ -233,6 +234,7 @@ export default function HeatMap({
     format,
     currency,
     locale,
+    formatter,
   ])
 
   /* ---------- Tooltip ---------- */

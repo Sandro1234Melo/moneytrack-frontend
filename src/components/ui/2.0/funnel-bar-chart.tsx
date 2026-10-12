@@ -201,12 +201,12 @@ export function FunnelBarChart({
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current)
     }
-  }, [data, width, animate])
+  }, [data, width, animate, animationDuration, draw])
 
   /* ---------------- Redraw on selection ---------------- */
   useEffect(() => {
     if (animatedOnceRef.current) draw(1)
-  }, [selectedId])
+  }, [selectedId, draw])
 
   /* ---------------- Hit testing ---------------- */
   function getBarFromEvent(e: React.MouseEvent<HTMLCanvasElement>) {

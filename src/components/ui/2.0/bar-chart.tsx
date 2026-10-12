@@ -305,14 +305,16 @@ export function BarChart({
 
     animationRef.current = requestAnimationFrame(animateBars)
     return () => {
-      animationRef.current && cancelAnimationFrame(animationRef.current)
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
     }
-  }, [width, datasets, animate])
+  }, [width, datasets, animate, animationDuration, draw])
 
   /* ---------------- Selection redraw ---------------- */
   useEffect(() => {
     if (animatedOnceRef.current) draw(1)
-  }, [selectedBar])
+  }, [selectedBar, draw])
 
   /* ---------------- Hit test ---------------- */
   function getBar(e: React.MouseEvent<HTMLCanvasElement>) {
