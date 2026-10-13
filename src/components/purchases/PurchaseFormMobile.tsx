@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Calendar, ChevronDown, CreditCard, FileText, Plus, Save, Store, Trash2 } from "lucide-react";
 import { paymentMethods } from "../../utils/paymentMethods";
 import type { NamedOption, Purchase, PurchaseItem, PurchasePayload } from "../../types/purchases";
+import type { ReceiptScanResult } from "../../types/purchases";
+import ReceiptScanner from "./ReceiptScanner";
 
 type DraftItem = Pick<PurchaseItem, "description" | "categoryId"> & { quantity: number | string; price: number | string };
 
@@ -57,13 +59,20 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, initi
     for (const item of items) if (!item.description || !item.categoryId) return alert("Preencha produto e categoria em todos os itens");
     onSave({ date, locationId: Number(locationId), paymentMethod: Number(paymentMethod), items: items.map(item => ({ description: item.description, categoryId: Number(item.categoryId), quantity: Number(item.quantity), price: Number(item.price) })) });
   };
+  const applyScan = (result: ReceiptScanResult) => {
+    if (result.date) setDate(result.date);
+    const matchingLocation = locations.find(location => location.name.trim().toLocaleLowerCase() === result.merchant.trim().toLocaleLowerCase());
+    if (matchingLocation) setLocationId(matchingLocation.id);
+    setItems(result.items.map(item => ({ description: item.description, quantity: item.quantity || 1, price: item.price, categoryId: String(categories.find(category => category.name.trim().toLocaleLowerCase() === item.suggestedCategory.trim().toLocaleLowerCase())?.id ?? "") })));
+    alert("Nota preenchida. Revise local, categorias e valores antes de salvar.");
+  };
 
   return (
     <div className="-mx-4 -mt-20 min-h-screen bg-[#020513] px-5 pb-32 pt-20 sm:-mx-6 sm:px-6">
       <div className="mb-8 flex items-center justify-between"><button onClick={onCancel} className="text-slate-200">←</button><h1 className="text-2xl font-bold">Nova compra</h1><div className="grid h-11 w-11 place-items-center rounded-full bg-white/[0.06]"><FileText size={20}/></div></div>
       <div className="mb-8 flex items-center gap-3"><div className="h-1.5 flex-1 rounded-full bg-violet-600"/><div className="h-1.5 flex-1 rounded-full bg-violet-600"/><div className="h-1.5 flex-1 rounded-full bg-white/10"/><span className="rounded-full bg-white/[0.06] px-3 py-1 text-sm">1 de 3</span></div>
 
-      <div className="space-y-4">
+      <div className="mb-4"><ReceiptScanner onResult={applyScan}/></div><div className="space-y-4">
         <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><Store/></div><label className="flex-1"><span className="text-xs text-slate-400">Local</span><select value={locationId} onChange={e => setLocationId(e.target.value ? Number(e.target.value) : "")} className="mt-1 w-full bg-transparent text-lg font-bold outline-none"><option className="bg-slate-900" value="">Selecione</option>{locations.map(l => <option className="bg-slate-900" key={l.id} value={l.id}>{l.name}</option>)}</select></label><button onClick={onAddLocation} className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-600"><Plus/></button></div></div>
         <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><CreditCard/></div><label className="flex-1"><span className="text-xs text-slate-400">Forma de pagamento</span><select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value ? Number(e.target.value) : "")} className="mt-1 w-full bg-transparent text-lg font-bold outline-none"><option className="bg-slate-900" value="">Selecione</option>{paymentMethods.map((p) => <option className="bg-slate-900" key={p.value} value={p.value}>{p.label}</option>)}</select></label><ChevronDown/></div></div>
         <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><Calendar/></div><label className="flex-1"><span className="text-xs text-slate-400">Data da compra</span><input type="date" value={date} onChange={e => setDate(e.target.value)} className="mt-1 w-full bg-transparent text-lg font-bold outline-none" /></label></div></div>

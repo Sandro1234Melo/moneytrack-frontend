@@ -36,3 +36,9 @@ export type PurchasePayload = {
     price: number;
   }>;
 };
+
+export type ReceiptScanResult = {
+  date: string;
+  merchant: string;
+  items: Array<{ description: string; quantity: number; price: number; suggestedCategory: string }>;
+};
