@@ -73,8 +73,8 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, initi
       <div className="mb-8 flex items-center gap-3"><div className="h-1.5 flex-1 rounded-full bg-violet-600"/><div className="h-1.5 flex-1 rounded-full bg-violet-600"/><div className="h-1.5 flex-1 rounded-full bg-white/10"/><span className="rounded-full bg-white/[0.06] px-3 py-1 text-sm">1 de 3</span></div>
 
       <div className="mb-4"><ReceiptScanner onResult={applyScan}/></div><div className="space-y-4">
-        <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><Store/></div><label className="flex-1"><span className="text-xs text-slate-400">Local</span><select value={locationId} onChange={e => setLocationId(e.target.value ? Number(e.target.value) : "")} className="mt-1 w-full bg-transparent text-lg font-bold outline-none"><option className="bg-slate-900" value="">Selecione</option>{locations.map(l => <option className="bg-slate-900" key={l.id} value={l.id}>{l.name}</option>)}</select></label><button onClick={onAddLocation} className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-600"><Plus/></button></div></div>
-        <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><CreditCard/></div><label className="flex-1"><span className="text-xs text-slate-400">Forma de pagamento</span><select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value ? Number(e.target.value) : "")} className="mt-1 w-full bg-transparent text-lg font-bold outline-none"><option className="bg-slate-900" value="">Selecione</option>{paymentMethods.map((p) => <option className="bg-slate-900" key={p.value} value={p.value}>{p.label}</option>)}</select></label><ChevronDown/></div></div>
+        <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><Store/></div><label className="relative flex-1"><span className="text-xs text-slate-400">Local</span><span className="mt-1 block"><select value={locationId} onChange={e => setLocationId(e.target.value ? Number(e.target.value) : "")} className="w-full appearance-none bg-transparent pr-8 text-lg font-bold outline-none"><option className="bg-slate-900" value="">Selecione</option>{locations.map(l => <option className="bg-slate-900" key={l.id} value={l.id}>{l.name}</option>)}</select></span><ChevronDown className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2"/></label><button onClick={onAddLocation} className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-600"><Plus/></button></div></div>
+        <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><CreditCard/></div><label className="relative flex-1"><span className="text-xs text-slate-400">Forma de pagamento</span><span className="mt-1 block"><select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value ? Number(e.target.value) : "")} className="w-full appearance-none bg-transparent pr-8 text-lg font-bold outline-none"><option className="bg-slate-900" value="">Selecione</option>{paymentMethods.map((p) => <option className="bg-slate-900" key={p.value} value={p.value}>{p.label}</option>)}</select></span><ChevronDown className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2"/></label></div></div>
         <div className="rounded-3xl border border-white/10 bg-[#0a1425]/80 p-4"><div className="flex items-center gap-4"><div className={iconBox}><Calendar/></div><label className="flex-1"><span className="text-xs text-slate-400">Data da compra</span><input type="date" value={date} onChange={e => setDate(e.target.value)} className="mt-1 w-full bg-transparent text-lg font-bold outline-none" /></label></div></div>
       </div>
 
@@ -89,14 +89,17 @@ const PurchaseFormMobile: React.FC<PurchaseFormMobileProps> = ({ purchase, initi
                 <div className="grid gap-2">
                   <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Categoria</span>
                   <div className="grid grid-cols-[1fr_auto] gap-3">
-                    <select
-                      value={item.categoryId ?? ""}
-                      onChange={e => updateItem(index, { categoryId: e.target.value })}
-                      className={fieldClass}
-                    >
-                      <option className="bg-slate-900" value="">Selecione a categoria</option>
-                      {categories.map(c => <option className="bg-slate-900" key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={item.categoryId ?? ""}
+                        onChange={e => updateItem(index, { categoryId: e.target.value })}
+                        className={`${fieldClass} appearance-none pr-12`}
+                      >
+                        <option className="bg-slate-900" value="">Selecione a categoria</option>
+                        {categories.map(c => <option className="bg-slate-900" key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2"/>
+                    </div>
                     <button
                       type="button"
                       onClick={onAddCategory}
